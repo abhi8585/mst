@@ -1,0 +1,585 @@
+{% extends "layouts/base.html"%}
+
+{% block title %} Forms General Package {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- Select2 -->
+<link rel="stylesheet" href="/static/assets/plugins/select2/css/select2.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+<!-- summernote -->
+<link rel="stylesheet" href="/static/assets/plugins/summernote/summernote-bs4.min.css">
+<!-- Font awesome older version for summernote gallery plugin -->
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style type="text/css">
+
+ 
+  .col-md-3 span:hover i {
+    transform: scale(1.25);
+    }
+
+ 
+
+
+  .img-item  {
+    width: auto !important;
+    max-width: initial;
+  }
+
+  .img-item .thumbnail {
+    display: block;
+    width: auto;
+    padding: 4px;
+    margin-bottom: 20px;
+    line-height: 1.42857143;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    -webkit-transition: border .2s ease-in-out;
+    -o-transition: border .2s ease-in-out;
+    transition: border .2s ease-in-out;
+  }
+  
+    .box {
+      position: relative;
+      background: #ffffff;
+      width: 100%;
+    }
+    
+    .box-header {
+      color: #444;
+      display: block;
+      padding: 10px;
+      position: relative;
+      border-bottom: 1px solid #f4f4f4;
+      margin-bottom: 10px;
+    }
+    
+    .box-tools {
+      position: absolute;
+      right: 10px;
+      top: 5px;
+    }
+    
+    .dropzone-wrapper {
+      border: 2px dashed #91b0b3;
+      color: #92b0b3;
+      position: relative;
+      height: 150px;
+    }
+    
+    .dropzone-desc {
+      position: absolute;
+      margin: 0 auto;
+      left: 0;
+      right: 0;
+      text-align: center;
+      width: 40%;
+      top: 50px;
+      font-size: 16px;
+    }
+    
+    .dropzone,
+    .dropzone:focus {
+      position: absolute;
+      outline: none !important;
+      width: 100%;
+      height: 150px;
+      cursor: pointer;
+      opacity: 0;
+    }
+    
+    .dropzone-wrapper:hover,
+    .dropzone-wrapper.dragover {
+      background: #ecf0f5;
+    }
+    
+    .preview-zone {
+      text-align: center;
+    }
+    
+    .preview-zone .box {
+      box-shadow: none;
+      border-radius: 0;
+      margin-bottom: 0;
+    }
+</style>
+{% endblock stylesheets %}
+
+
+
+
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Docs</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <input type="hidden" id="file_exporter" />
+      <div class="modal-body" id='docs_list_container'>
+        <div class="row">
+        <!--listing here -->
+        </div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" onclick="get_file_url()" class="btn btn-primary">Save</button>
+        <button type="button" id="load_more_btn" class="btn btn-primary">Load more</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Send Quote</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active">Quote</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <!-- left column -->
+        <div class="col-md-12">
+          <!-- general form elements -->
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">
+                <strong> STATUS :
+              {% if quotes %}
+              {% if quotes.status == 'Draft' %}
+              <span style="color:red">{{quotes.status}}</span>
+              {% else %}
+              <span style="color:green">{{quotes.status}}</span>
+              {% endif %}
+              {% else %}
+              <span style="color:yellow"><b>New</b></span>
+              {% endif %}
+              </strong>
+              </h3>
+            </div>
+            <!-- /.card-header -->
+            <!-- form start -->
+            <form id="quote-form" enctype="multipart/form-data" method="POST">
+            <div class="card-body">            
+                <div class="form-group">
+                  <label for="title">Title</label>
+                  <input type="text" class="form-control" id="title" placeholder="Enter title"
+                    value="{{quotes.title if quotes else '' }}">
+                </div>    
+                <div class="form-group">
+                  <label for="title">Email</label>
+                  <input type="email" class="form-control" id="email" placeholder="Enter title"
+                    value="{{quotes.email if quotes else '' or user_mail if user_mail else ''}}">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputFile">Attachment</label>
+                    <div class="input-group">
+                      <div class="custom-file">
+                        <input type="text" class="custom-file-input" id="attachmentfile" >
+                        <label class="custom-file-label" for="exampleInputFile" id="file_url_lable">
+                        {% if quotes %}
+                        {{quotes.attachment}}
+                        {% else %}
+                        Choose File
+                        {% endif %}
+                        </label>
+                      </div>
+                      <div class="input-group-append">
+                        <span class="input-group-text" style="cursor:pointer;"><a data-toggle="modal" data-target="#exampleModal">Upload</a></span>
+                      </div>
+                    </div>
+                  </div>
+                <div class="form-group">
+                  <label for="description">Message</label>
+                  <textarea class="textarea" id="message" placeholder="Enter package description">
+                   {{quotes.message if quotes else '' }}
+                    </textarea>
+                </div>
+
+               <!-- <div class="form-group">
+                    <label class="control-label">Thumbnail Image</label>
+                    <div class="preview-zone hidden" id="preview_box">
+                      <div class="box box-solid">
+                        <div class="box-body"></div>
+                      </div>
+                      
+                    </div>
+                     <div class="dropzone-wrapper">
+                      <div class="dropzone-desc">
+                        <i class="glyphicon glyphicon-download-alt"></i>
+                        <p>Choose an image file or drag it here.</p>
+                      </div>
+                      <input type="file" name="img_logo" id="thumbnail_image" accept="image/*" class="dropzone">
+                    </div>
+                    {% if package_detail and package_detail.thumbnail_image %}
+                    <img src="{{package_detail.thumbnail_image}}" height="300" width="100%"  />
+                    {% endif %}
+                  </div> 
+                <div class="form-group">
+                  <label for="terms_and_conditions">Terms and Conditions</label>
+                  <textarea class="textarea" id="terms_and_conditions"
+                    placeholder="Enter package terms and conditions">
+                                {{package_detail.terms_and_conditions if package_detail else ''}}
+                  </textarea>
+                </div>-->
+                <div class="form-group">
+                  <label for="reviews">Review</label>
+                  <textarea class="textarea" id="review" placeholder="Let us know">
+                    {{quotes.review if quotes else '' }}
+                    </textarea>
+                </div>
+                </div>
+              <!-- /.card-body -->
+
+              <div class="card-footer text-right">
+                <button type="button" id='delete_btn' class="btn btn-danger text-right">Delete</button>
+                <!--delete button-->
+                <button type="submit" class="btn btn-primary" id="submit_btn">Save</button>
+                <button  type="button" class="btn btn-primary" id="send_btn">Send</button>
+              </div>
+            </form>
+          </div>
+          <!-- /.card -->
+        </div>
+        <!--/.col (left) -->
+      </div>
+      <!-- /.row -->
+    </div><!-- /.container-fluid -->
+  </section>
+  <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- Select2 -->
+<script src="/static/assets/plugins/select2/js/select2.full.min.js"></script>
+<!-- bs-custom-file-input -->
+<script src="/static/assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+<!-- Summernote -->
+<!-- <script src="/static/assets/plugins/summernote/summernote-bs4.min.js"></script> -->
+<!-- Summernote gallery plugin -->
+<!-- <script src="/static/assets/plugins/summernote/plugin/gallery/summernote-gallery.min.js" type="text/javascript"></script> -->
+<!-- Tinymce Editor -->
+<script src="/static/assets/plugins/tinymce/tinymce.min.js"></script>
+
+
+
+
+
+<script>
+{% if quotes %}
+$('#attachmentfile').val="{{quotes.attachment}}"
+{% endif %}
+  function readFile(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+ 
+    reader.onload = function(e) {
+      var img_box=document.getElementById('prev_img');
+
+      if(document.getElementById('preview_box').contains(img_box))
+        img_box.setAttribute("src",e.target.result)
+      else{
+          var img_box='<img src="'+e.target.result+'" id="prev_img" height="300" width="100%"  />';
+          $('#preview_box').append(img_box);
+      }
+       
+    };
+ 
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+ 
+function reset(e) {
+  e.wrap('<form>').closest('form').get(0).reset();
+  e.unwrap();
+}
+ 
+$(".dropzone").change(function() {
+  readFile(this);
+});
+ 
+$('.dropzone-wrapper').on('dragover', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  $(this).addClass('dragover');
+});
+ 
+$('.dropzone-wrapper').on('dragleave', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  $(this).removeClass('dragover');
+});
+ 
+$('.remove-preview').on('click', function() {
+  var boxZone = $(this).parents('.preview-zone').find('.box-body');
+  var previewZone = $(this).parents('.preview-zone');
+  var dropzone = $(this).parents('.form-group').find('.dropzone');
+  boxZone.empty();
+  previewZone.addClass('hidden');
+  reset(dropzone);
+});
+
+$(document).on('click', '#delete_btn', function () {
+    $.ajax({
+      type: "GET",
+      url: '/quote/delete/' + "{{quotes.id if quotes else ''}}",
+      contentType: 'application/json;  charset=utf-8',
+      success: function(){
+          alert('DELETED QUOTE');
+        }
+    })
+  });
+
+  $(function () {
+
+    bsCustomFileInput.init();
+
+    tinymce.init({
+      selector: '.textarea',
+      file_browser_callback: 'myCustomFileBrowser',
+      autoresize_bottom_margin: 20,
+      plugins: "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste imagetools wordcount autoresize hr",
+      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+      autoresize_bottom_margin: 50,
+      max_height: 500,
+      min_height: 350,
+      file_picker_types: 'media image file',
+      image_caption: true,
+      /* and here's our custom image picker*/
+      file_picker_callback: function (cb, value, meta) {
+        console.log(cb, value, meta);
+        window.image_cb = cb;
+        tinyMCE.activeEditor.windowManager.openUrl({
+          url: '/image-gallery',
+          title: 'File Browser',
+          width: 900,  // Your dimensions may differ - toy around with them!
+          height: 600,
+          resizable: "yes",
+          editor_selector: "description",
+          inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+          close_previous: "no"
+        });
+      }
+    });
+
+    $(document).on('submit','#quote-form',function(e){
+
+      e.preventDefault();
+      var data=new FormData();
+      let title = $('#title').val();
+      let email = $('#email').val();
+      let attachment = $('#attachmentfile').val();
+      let description = $('#description').val();
+      let message = $('#message').val();
+      let review = $('#review').val();
+      data.append('title',title);
+      data.append('email',email);
+      data.append('attachment',attachment);
+      data.append('message',message);
+      data.append('review',review);
+      {% if quotes %}
+      data.append('id',{{quotes.id}});
+      data.append('status',"{{quotes.status}}");
+      {% endif %}
+      $.ajax({
+        url: '/quote/save',
+        type: 'POST',
+        data: data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+          if(response.status=="success"){
+            alert(response.message);
+          }
+          else{
+            alert(response.message);
+          }
+        }
+      });
+
+    });
+
+    
+      //let thumbnail_image = $("#thumbnail_image")[0].files[0];
+      //let publish = $("#publish").is(":checked") ? 1 : 0;
+
+  
+  //Initialize Select2 Elements
+  
+  });
+  window.onload=function () {
+    $.ajax({
+	    	type:"GET",
+	    	url : "/api/docs/"+0,
+	    	success: function(response){
+	    		response = JSON.parse(response);
+				console.log("data"+" "+response.data)
+    			if(response.message == "success"){
+    				if(response.data.length >0){
+    					 var imageList = response.data;
+
+    					 for (i=0;i<imageList.length;i++){
+    					 	console.log(imageList[i]);
+                 var name=imageList[i].split('/')[imageList[i].split('/').length-1];
+							 $("#docs_list_container").find(".row").eq(0).append(`
+               <div class="col-md-3" style="cursor:pointer;  word-wrap: break-word;">
+           <span class='docs' onclick="select_file(this)" > <i class="fa fa-file-pdf-o" style="font-size:48px;color:red;margin-bottom:5px"></i></span>
+            <a href="${imageList[i]}" target="_blank">
+            <h6>${name.slice(0,25)}</h6>
+            </a>
+          </div> 
+               `);
+    					 }
+    				}
+    			}
+	    	},
+	    	error: function(xhr,textStatus){
+				alert("NO More Docs to load");
+	    	},
+	    	
+	    });
+   
+    };
+   $('#load_more_btn').click(function () {
+     var page_id=1;
+         $.ajax({
+	    	type:"GET",
+	    	url : "/api/docs/"+(page_id++),
+	    	success: function(response){
+	    		response = JSON.parse(response);
+				console.log("data"+" "+response.data)
+    			if(response.message == "success"){
+    				if(response.data.length >0){
+    					 var imageList = response.data;
+
+    					 for (i=0;i<imageList.length;i++){
+    					 	console.log(imageList[i]);
+                 var name=imageList[i].split('/')[imageList[i].split('/').length-1];
+							 $("#docs_list_container").find(".row").eq(0).append(`
+               <div class="col-md-3" style="cursor:pointer;  word-wrap: break-word;">
+               <span onclick="select_file(this)" class='docs'>
+            <i class="fa fa-file-pdf-o" style="font-size:48px;color:red;margin-bottom:5px"></i></span>
+            <a href="${imageList[i]}" target="_blank">
+            <h6>${name.slice(0,25)}</h6>
+            </a>
+          </div>
+               `);
+    					 }
+    				}
+    			}
+	    	},
+	    	error: function(xhr,textStatus){
+				alert("NO More docs to load");
+	    	},
+	    	
+	    });
+   });
+  
+function select_file(obj){
+  var all_span=document.getElementsByClassName("docs");
+  for(var i=0;i<all_span.length;i++){
+    all_span[i].childNodes[1].style.transform="scale(1)";
+  }
+  var child=obj.childNodes;
+  if (child[1].style.transform=="scale(1.25)")
+    child[1].style.transform="scale(1)";
+  else
+    child[1].style.transform="scale(1.25)";
+  var image_url=obj.parentNode.childNodes[3].href;
+  var image_name=image_url.split('/')[image_url.split('/').length-1];
+  $('#file_exporter').val(image_url);
+}
+
+function get_file_url(){
+  var file_url=$('#file_exporter').val();
+  var file_name=file_url.split('/')[file_url.split('/').length-1];
+  $('#file_url_lable').html(file_name);
+  $('#attachmentfile').val(file_url);
+  $('.modal').modal('hide');
+}
+
+$('#send_btn').click(function () {
+      var data=new FormData();
+      let title = $('#title').val();
+      let email = $('#email').val();
+      let attachment = $('#attachmentfile').val();
+      let description = $('#description').val();
+      let message = $('#message').val();
+      let review = $('#review').val();
+
+      data.append('title',title);
+      data.append('email',email);
+      data.append('attachment',attachment);
+      data.append('message',message);
+      data.append('review',review);
+      {% if quotes %}
+      data.append('id',{{quotes.id}});
+      data.append('status',"{{quotes.status}}");
+      {% endif %}
+      $.ajax({
+        url: '/quote/send',
+        type: 'POST',
+        data: data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(response){
+          if(response.status == "success"){
+            alert(response.message);
+          }
+        },
+        error: function(){
+          alert("error");
+        }
+      }); 
+    });
+</script>
+
+
+
+
+{% endblock javascripts %}

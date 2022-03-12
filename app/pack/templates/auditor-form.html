@@ -1,0 +1,534 @@
+{% extends "layouts/base.html"%}
+
+{% block title %} Add/Update package {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- Select2 -->
+<link rel="stylesheet" href="/static/assets/plugins/select2/css/select2.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+<!-- summernote -->
+<link rel="stylesheet" href="/static/assets/plugins/summernote/summernote-bs4.min.css">
+<!-- Font awesome older version for summernote gallery plugin -->
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<style type="text/css">
+  .img-item .col-md-12 {
+    width: auto !important;
+    max-width: initial;
+  }
+
+  .img-item .thumbnail {
+    display: block;
+    width: auto;
+    padding: 4px;
+    margin-bottom: 20px;
+    line-height: 1.42857143;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    -webkit-transition: border .2s ease-in-out;
+    -o-transition: border .2s ease-in-out;
+    transition: border .2s ease-in-out;
+  }
+  
+    .box {
+      position: relative;
+      background: #ffffff;
+      width: 100%;
+    }
+    
+    .box-header {
+      color: #444;
+      display: block;
+      padding: 10px;
+      position: relative;
+      border-bottom: 1px solid #f4f4f4;
+      margin-bottom: 10px;
+    }
+    
+    .box-tools {
+      position: absolute;
+      right: 10px;
+      top: 5px;
+    }
+    
+    .dropzone-wrapper {
+      border: 2px dashed #91b0b3;
+      color: #92b0b3;
+      position: relative;
+      height: 150px;
+    }
+    
+    .dropzone-desc {
+      position: absolute;
+      margin: 0 auto;
+      left: 0;
+      right: 0;
+      text-align: center;
+      width: 40%;
+      top: 50px;
+      font-size: 16px;
+    }
+    
+    .dropzone,
+    .dropzone:focus {
+      position: absolute;
+      outline: none !important;
+      width: 100%;
+      height: 150px;
+      cursor: pointer;
+      opacity: 0;
+    }
+    
+    .dropzone-wrapper:hover,
+    .dropzone-wrapper.dragover {
+      background: #ecf0f5;
+    }
+    
+    .preview-zone {
+      text-align: center;
+    }
+    
+    .preview-zone .box {
+      box-shadow: none;
+      border-radius: 0;
+      margin-bottom: 0;
+    }
+</style>
+{% endblock stylesheets %}
+
+
+
+
+{% block content %}
+
+
+
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Create Auditor</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active">Create Depo/Edit</li>
+          </ol>
+        </div>
+      </div>
+    </div><!-- /.container-fluid -->
+  </section>
+<script>
+  function showInput() {
+        document.getElementById('pdf-title').innerHTML = 
+                    document.getElementById("title").value;
+                    console.log(document.getElementById("title").value);
+    }
+</script>
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <!-- left column -->
+        <div class="col-md-12">
+          <!-- general form elements -->
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Register new Auditor</h3>
+            </div>
+            <!-- /.card-header -->
+            <!-- form start -->
+            <form id="package-form" enctype="multipart/form-data" method="POST">
+              <div class="card-body">
+                <div class="form-group">
+                  <label for="title">Vendor code</label>
+                  <input type="text" class="form-control" id="vendor_code" placeholder="Enter vendor code"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">Address</label>
+                  <input type="text" class="form-control" id="vendor_address" placeholder="Enter Address"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">Address</label>
+                  <input type="text" class="form-control" id="vendor_address" placeholder="Enter Address"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">City</label>
+                  <input type="text" class="form-control" id="vendor_city" placeholder="Enter city"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">Pin Code</label>
+                  <input type="text" class="form-control" id="vendor_pin_code" placeholder="Enter Pin Code"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">State</label>
+                  <input type="text" class="form-control" id="vendor_state" placeholder="Enter state"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">Latitude</label>
+                  <input type="text" class="form-control" id="vendor_latitude" placeholder="Enter Latitude"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">Longnitude</label>
+                  <input type="text" class="form-control" id="vendor_lognitude" placeholder="Enter Lognitude"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">Contact Number</label>
+                  <input type="text" class="form-control" id="vendor_contract_number" placeholder="Enter Contact Number"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">Contact person</label>
+                  <input type="text" class="form-control" id="vendor_contract_person" placeholder="Enter Contract Person"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">EmailId</label>
+                  <input type="text" class="form-control" id="vendor_email_id" placeholder="Enter Email"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <div class="form-group">
+                  <label for="title">Remarks</label>
+                  <input type="text" class="form-control" id="vendor_remark" placeholder="Enter Remarks"
+                    value="{{package_detail.title if package_detail else ''}}">
+                </div>
+                <!-- <div class="form-group">
+                  <label for="title">Category</label>
+                  <select class="form-control select2" id="category" value="{{package_detail.category if package_detail else ''}}">
+                  <option selected="selected">Category</option>
+                  </select>
+                </div> -->
+                <!-- <div class="form-group">
+                  <label for="description">Description</label>
+                  <textarea class="textarea" id="description" placeholder="Enter package description">
+                      {{package_detail.description if package_detail else ''}}
+                    </textarea>
+                </div> -->
+                <!-- <div class="form-group">
+                  <label for="location">Location</label>
+                  <input type="text" class="form-control" id="location" placeholder="Enter Location"
+                    value="{{package_detail.location if package_detail else ''}}">
+                </div> -->
+                <!-- <div class="form-group">
+                  <label for="cost">Cost</label>
+                  <input type="number" class="form-control" id="cost" placeholder="Enter cost"
+                    value="{{package_detail.cost if package_detail else ''}}">
+                </div> -->
+                <!-- <div class="form-group">
+                  <label for="time_slots">Time Slot</label>
+                  <input type="time" class="form-control" id="time_slots"
+                    value="{{package_detail.time_slots if package_detail else ''}}">
+                </div> -->
+                <!-- <div class="form-group">
+                  <div class="myeditablediv">
+                    <label for="description">Inclusions</label>
+                    <textarea class="textarea" id="inclusions" placeholder="Enter package inclusions">
+                              {{package_detail.inclusions if package_detail else ''}}
+                            </textarea>
+                  </div>
+                </div> -->
+                <!-- <div class="form-group">
+                  <label for="description">Exclusions</label>
+                  <textarea class="textarea" id="exclusions" placeholder="Enter package exclusions">
+                              {{package_detail.exclusions if package_detail else ''}}
+                            </textarea>
+                </div> -->
+                <!-- <div class="form-group">
+                    <label class="control-label">Thumbnail Image</label>
+                    <div class="preview-zone hidden" id="preview_box">
+                      <div class="box box-solid">
+                        <div class="box-body"></div>
+                      </div>
+                      
+                    </div>
+                    <div class="dropzone-wrapper">
+                      <div class="dropzone-desc">
+                        <i class="glyphicon glyphicon-download-alt"></i>
+                        <p>Choose an image file or drag it here.</p>
+                      </div>
+                      <input type="file" name="img_logo" id="thumbnail_image" accept="image/*" class="dropzone">
+                    </div>
+                    {% if package_detail and package_detail.thumbnail_image %}
+                    <img src="{{package_detail.thumbnail_image}}" height="300" width="100%" id="prev_img" />
+                    {% endif %}
+                  </div> -->
+                <!-- <div class="form-group">
+                  <label for="terms_and_conditions">Terms and Conditions</label>
+                  <textarea class="textarea" id="terms_and_conditions"
+                    placeholder="Enter package terms and conditions">
+                                {{package_detail.terms_and_conditions if package_detail else ''}}
+                  </textarea>
+                </div> -->
+                <!-- <div class="form-group">
+                  <label for="cancellation_policy">Cancellation Policy
+                  </label>
+                  <textarea class="textarea" id="cancellation_policy" placeholder="Enter package cancellation policy">
+                                {{package_detail.cancellation_policy if package_detail else ''}}
+                              </textarea>
+                </div> -->
+                <!-- <div class="form-group">
+                  <label for="reviews">Reviews</label>
+                  <textarea class="textarea" id="reviews" placeholder="Let us know">
+                                {{package_detail.reviews if package_detail else ''}}
+                              </textarea>
+                </div> -->
+              </div>
+
+              <!-- /.card-body -->
+
+              <div class="card-footer text-right">
+                <!-- <button type="button" id='delete_btn' class="btn btn-danger text-right">Delete</button> -->
+                <!--delete button-->
+                <!-- <a href="{{url_for('pack_blueprint.pdf',package_id=package_detail.id if package_detail else 0)}}"><button type="button" class="btn btn-primary" id="download_btn" >Download</button></a> -->
+                <button type="submit" class="btn btn-primary" id="submit_btn">Submit</button>
+              </div>
+              
+            </form>
+          </div>
+          <!-- /.card -->
+        </div>
+        <!--/.col (left) -->
+      </div>
+      <!-- /.row -->
+    </div><!-- /.container-fluid -->
+  </section>
+  <!-- /.content -->
+</div>
+
+  
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- Select2 -->
+<script src="/static/assets/plugins/select2/js/select2.full.min.js"></script>
+<!-- bs-custom-file-input -->
+<script src="/static/assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+<!-- Summernote -->
+<!-- <script src="/static/assets/plugins/summernote/summernote-bs4.min.js"></script> -->
+<!-- Summernote gallery plugin -->
+<!-- <script src="/static/assets/plugins/summernote/plugin/gallery/summernote-gallery.min.js" type="text/javascript"></script> -->
+<!-- Tinymce Editor -->
+<script src="/static/assets/plugins/tinymce/tinymce.min.js"></script>
+
+
+
+<script>
+  function readFile(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+ 
+    reader.onload = function(e) {
+      var img_box=document.getElementById('prev_img');
+
+      if(document.getElementById('preview_box').contains(img_box))
+        img_box.setAttribute("src",e.target.result)
+      else{
+          var img_box='<img src="'+e.target.result+'" id="prev_img" height="300" width="100%"  />';
+          $('#preview_box').append(img_box);
+      }
+       
+    };
+ 
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+ 
+function reset(e) {
+  e.wrap('<form>').closest('form').get(0).reset();
+  e.unwrap();
+}
+ 
+$(".dropzone").change(function() {
+  readFile(this);
+});
+ 
+$('.dropzone-wrapper').on('dragover', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  $(this).addClass('dragover');
+});
+ 
+$('.dropzone-wrapper').on('dragleave', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  $(this).removeClass('dragover');
+});
+ 
+$('.remove-preview').on('click', function() {
+  var boxZone = $(this).parents('.preview-zone').find('.box-body');
+  var previewZone = $(this).parents('.preview-zone');
+  var dropzone = $(this).parents('.form-group').find('.dropzone');
+  boxZone.empty();
+  previewZone.addClass('hidden');
+  reset(dropzone);
+});
+  $(document).on('click', '#delete_btn', function () {
+    $.ajax({
+      type: "GET",
+      url: '/pack/delete/package?package_id=' + "{{package_detail.id if package_detail else ''}}",
+      contentType: 'application/json;  charset=utf-8',
+      success: function (response) {
+        response = JSON.parse(response);
+        alert(response.message);
+
+      },
+      complete: function () {
+        $("#delete_btn").prop("disabled", false); 
+      }
+
+
+    })
+  });
+
+  $(function () {
+
+    bsCustomFileInput.init();
+
+    tinymce.init({
+      selector: '.textarea',
+      file_browser_callback: 'myCustomFileBrowser',
+      autoresize_bottom_margin: 20,
+      plugins: "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste imagetools wordcount autoresize hr",
+      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+      autoresize_bottom_margin: 50,
+      max_height: 500,
+      min_height: 350,
+      file_picker_types: 'media image file',
+      image_caption: true,
+      /* and here's our custom image picker*/
+      file_picker_callback: function (cb, value, meta) {
+        console.log(cb, value, meta);
+        window.image_cb = cb;
+        tinyMCE.activeEditor.windowManager.openUrl({
+          url: '/image-gallery',
+          title: 'File Browser',
+          width: 900,  // Your dimensions may differ - toy around with them!
+          height: 600,
+          resizable: "yes",
+          editor_selector: "description",
+          inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+          close_previous: "no"
+        });
+      }
+    });
+
+    $(document).ready(function(){
+      console.log('ready');
+    $.ajax({
+      'url': '/pack/get/blogcategory',
+      'method': 'GET',
+      'success': function(res){
+        res = JSON.parse(res);
+        console.log(res);
+        res.categories.map((category, index) => {
+          $("#category").append(`<option value='${category['id']}'>${category['name']}</option>`);
+        })
+
+        {% if enquiry_detail and enquiry_detail.category %}
+          $("#category").select2().val({{enquiry_detail.category}}).trigger("change");
+        {% endif %}
+      }
+    })});
+
+    $(document).on('submit', '#package-form', function (e) {
+      e.preventDefault();
+      var form = $('#package-form');
+      var data = new FormData();
+
+      let title = $("#title").val();
+      let description = $("#description").val();
+      let location = $("#location").val();
+      let cost = $("#cost").val();
+      let category = $("#category").val();
+      let time_slots = $("#time_slots").val();
+      let terms_and_conditions = $("#terms_and_conditions").val();
+      let inclusions = $("#inclusions").val();
+      let exclusions = $("#exclusions").val();
+      let thumbnail_image = $("#thumbnail_image")[0].files[0];
+      let cancellation_policy = $("#cancellation_policy").val();
+      let reviews = $("#reviews").val();
+
+      //let thumbnail_image = $("#thumbnail_image")[0].files[0];
+      //let publish = $("#publish").is(":checked") ? 1 : 0;
+
+    {% if package_detail %}
+    data.append('package_id', {{ package_detail.id }});
+    {% endif %}
+    data.append('title', title);
+    data.append('description', description);
+    data.append('location', location);
+    data.append('category', category);
+    data.append('cost', cost);
+    data.append('time_slots', time_slots);
+    data.append('inclusions', inclusions);
+    data.append('exclusions', exclusions);
+    data.append('terms_and_conditions', terms_and_conditions);
+    data.append('thumbnail_image', thumbnail_image);
+    data.append('cancellation_policy', cancellation_policy);
+    data.append('reviews', reviews);
+
+    data.append('thumbnail_image', thumbnail_image);
+    //data.append('publish', publish);
+
+    // disabled the submit button
+    $("#submit_btn").prop("disabled", true);
+    console.log(data, "data")
+    $.ajax({
+      type: "POST",
+      enctype: "multipart/form-data",
+      processData: false,
+      contentType: false,
+      cache: false,
+      data: data,
+      url: '/pack/insert/package',
+      success: function (response) {
+        response = JSON.parse(response);
+        console.log(typeof (response))
+        alert(response.message);
+      },
+      complete: function (response) {
+        console.log(response);
+        $("#submit_btn").prop("disabled", false);
+      }
+    })
+  })
+});
+
+</script>
+
+
+
+
+{% endblock javascripts %}

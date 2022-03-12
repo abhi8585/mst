@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Theme style -->
+    <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+	<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.7.0/css/font-awesome.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Slab:100,100i,300,300i,400,400i,600,600i,700,700i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.7/css/fileinput.css" media="all" rel="stylesheet" type="text/css"/>
+	
+    <style type="text/css">
+    	
+    	/*body {
+    		padding:0;
+    		margin:0;
+    	}*/
+    	.custom-tabs{
+    		display: block;
+    		box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+    		-webkit-box-shadow:0 2px 0 rgba(0, 0, 0, 0.1);
+    		background:#fff;
+    		border-bottom: 1px solid #f8f8f8;
+    		padding: 0px;
+    		margin-right: -20px;
+    	}
+
+    	ul.custom-tabs li{
+    		display: inline-block;
+    		width: 49%;
+    		margin: 0px;
+    		text-align: center;
+    		font-weight:500;
+    		padding:15px;
+    		cursor: pointer;
+    		
+
+    	}
+    	ul.custom-tabs li:first-child {
+    		border-right: 1px solid #ccc;
+
+    	}
+
+    	ul.custom-tabs li.active {
+    		background-color: #0275d8;
+    	}
+
+    	ul.custom-tabs li.active a {
+    		color:#fff;
+    	}
+    	ul.custom-tabs li a{
+    		text-decoration: none;
+    	}
+
+    	.thumbnail img {
+    		height: 160px;
+    		width: 100%;
+			margin-top:20px;
+    	}
+
+    	.thumbnail img.active {
+    		border:2px solid red;
+    	}
+
+		.gallery-view{
+			margin:0 50px 50px 50px;
+			overflow:auto;
+		}
+		.images{
+			margin:0 20px 80px 20px;
+		}
+		.select-button{
+			position: fixed;
+			bottom: 0;
+			background: #fff;
+			width: 100%;
+			left: 0;
+			right: 0;
+			padding: 15px;
+			margin:0;
+		}
+		#upload{
+			margin-top:10px;
+		}
+		.pull-left{
+			background-color:#32A067;
+			color:white;
+			border-radius:5px;
+			padding:7px;
+			position:absolute;
+			right:15px;
+		}
+		.box {
+      position: relative;
+      background: #ffffff;
+      width: 100%;
+    }
+    
+    .box-header {
+      color: #444;
+      display: block;
+      padding: 10px;
+      position: relative;
+      border-bottom: 1px solid #f4f4f4;
+      margin-bottom: 10px;
+    }
+    
+    .box-tools {
+      position: absolute;
+      right: 10px;
+      top: 5px;
+    }
+    
+    .dropzone-wrapper {
+      border: 2px dashed #91b0b3;
+      color: #92b0b3;
+      position: relative;
+      height: 150px;
+    }
+    
+    .dropzone-desc {
+      position: absolute;
+      margin: 0 auto;
+      left: 0;
+      right: 0;
+      text-align: center;
+      width: 40%;
+      top: 50px;
+      font-size: 16px;
+    }
+    
+    .dropzone,
+    .dropzone:focus {
+      position: absolute;
+      outline: none !important;
+      width: 100%;
+      height: 150px;
+      cursor: pointer;
+      opacity: 0;
+    }
+    
+    .dropzone-wrapper:hover,
+    .dropzone-wrapper.dragover {
+      background: #ecf0f5;
+    }
+    
+    .preview-zone {
+      text-align: center;
+    }
+    
+    .preview-zone .box {
+      box-shadow: none;
+      border-radius: 0;
+      margin-bottom: 0;
+    }
+    </style>
+</head>
+<body>
+	<ul class="custom-tabs">
+	    <li><a href="#upload">Upload</a></li>
+	    <li class="active"><a href="#gallery">Gallery</a></li>
+    </ul>
+
+    <div id="upload">
+	 <form id="my-form" action="/blog/upload/image" method="post" enctype="multipart/form-data">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <label class="control-label">Thumbnail Image</label>
+            <div class="preview-zone hidden">
+              <div class="box box-solid">
+                <div class="box-header with-border">
+                  
+                </div>
+                <div class="box-body"></div>
+              </div>
+            </div>
+            <div class="dropzone-wrapper">
+              <div class="dropzone-desc">
+                <i class="glyphicon glyphicon-download-alt"></i>
+                <p>Choose an image file or drag it here.</p>
+              </div>
+              <input type="file"  name="file" id="File1" class=" inputfile dropzone">
+            </div>
+          </div>
+        </div>
+      </div>
+	  <div class="row">
+        <div class="col-md-12">
+          <button type="submit" class="btn btn-primary pull-right" >Upload</button>
+        </div>
+      </div>
+    </div>
+	</form>
+		<!-- <div class="percent">66</div>
+		<div id="status"></div> -->
+    </div>
+    <div id="gallery">
+    	<div class="row images">
+			{% for image in imageList %}
+		    	<div class="col-md-3">
+		    		<div class="thumbnail">
+		    			<img src="{{ url_for('static', filename='thumb_blog.jpg') }}" class="img img-responsive galleryitem" height="200" width="200">
+		    		</div>
+		    	</div>
+			{% endfor %}	
+    	</div>
+    	<div class="row select-button">
+    		<input type="button" class="btn btn-primary pull-right" name="selectgallery" value="Select">
+			<input type="button" class="btn pull-left" name="selectgallery" onclick="LoadMore()" value="Load More">
+    	</div>
+    	
+    </div>
+	<!-- jQuery -->
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="/static/assets/plugins/jquery-form/jquery.form.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.7/js/fileinput.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.7/themes/fa/theme.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" type="text/javascript"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" type="text/javascript"></script>
+	
+	<script type="text/javascript">
+	function readFile(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+ 
+    reader.onload = function(e) {
+      var htmlPreview =
+        '<img width="200" src="' + e.target.result + '" />' +
+        '<p>' + input.files[0].name + '</p>';
+      var wrapperZone = $(input).parent();
+      var previewZone = $(input).parent().parent().find('.preview-zone');
+      var boxZone = $(input).parent().parent().find('.preview-zone').find('.box').find('.box-body');
+ 
+      wrapperZone.removeClass('dragover');
+      previewZone.removeClass('hidden');
+      boxZone.empty();
+      boxZone.append(htmlPreview);
+    };
+ 
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+ 
+function reset(e) {
+  e.wrap('<form>').closest('form').get(0).reset();
+  e.unwrap();
+}
+ 
+$(".dropzone").change(function() {
+  readFile(this);
+});
+ 
+$('.dropzone-wrapper').on('dragover', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  $(this).addClass('dragover');
+});
+ 
+$('.dropzone-wrapper').on('dragleave', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  $(this).removeClass('dragover');
+});
+ 
+$('.remove-preview').on('click', function() {
+  var boxZone = $(this).parents('.preview-zone').find('.box-body');
+  var previewZone = $(this).parents('.preview-zone');
+  var dropzone = $(this).parents('.form-group').find('.dropzone');
+  boxZone.empty();
+  previewZone.addClass('hidden');
+  reset(dropzone);
+});
+	var Page_id=0;
+	LoadMore=function(){
+		Page_id++;
+		$.ajax({
+	    	type:"GET",
+	    	url : "/api/images/"+Page_id,
+	    	success: function(response){
+	    		response = JSON.parse(response);
+				console.log("data"+" "+response.data)
+    			if(response.message == "success"){
+    				if(response.data.length >0){
+    					 var imageList = response.data;
+
+    					 for (i=0;i<imageList.length;i++){
+    					 	console.log(imageList[i])
+							 $("#gallery").find(".row").eq(0).append(`<div class="col-md-3">
+		    														<div class="thumbnail">
+		    															<img src="${imageList[i]}" class="img img-responsive galleryitem" height="200" width="200">
+		    														</div>
+		    													</div>`
+															);
+    					 }
+    				}
+    			}
+	    	},
+	    	error: function(xhr,textStatus){
+				alert("NO More Images to load");
+	    	},
+	    	
+	    });
+	}
+    $(document).on("click",".galleryitem",function(){
+    	$(".galleryitem").removeClass("active");
+    	$(this).addClass("active");
+    })
+	$(document).on("click","input[name=selectgallery]",function(e){
+		e.preventDefault();
+		var imgSrc = $(".galleryitem.active").attr("src");
+		if (imgSrc != undefined) {
+			top.image_cb(imgSrc, {alt: 'file'});
+		 	top.tinymce.activeEditor.windowManager.close();
+         	top.window.focus();	
+		} else {
+			alert("Please Choose one image from gallery");
+		}
+		 
+	})
+    $.fn.custom_tab = function(){
+    	var main = $(this);
+    	$(this).find("li").each(function(){
+    		if($(this).hasClass("active")) {
+    			$($(this).find("a").attr("href")).show();
+			} else {
+				$($(this).find("a").attr("href")).hide()
+			}
+    		
+    	});
+
+    	$(this).find("li").click(function(e){
+    		if( $(e.target).is("li")) {
+				currentId = $(this).closest(".custom-tabs").find("li.active").find('a').attr('href');
+				$(this).closest(".custom-tabs").find("li.active").removeClass("active");
+				$(currentId).hide();
+				$(this).addClass("active");
+				id = $(this).find("a").attr('href');
+				$(id).show();
+			}
+    	})
+    }
+
+    $(".custom-tabs").custom_tab();
+
+
+
+
+	$(function() {
+	    var bar = $('.progress-bar');
+	    var percent = $('.percent');
+	    var status = $('#status');
+	    $('form').ajaxForm({
+	        beforeSend: function(xhr) {
+	        	if (jQuery('#File1').val()) {
+	        	 	status.empty();
+		            var percentVal = '0%';
+		            bar.css({'width':percentVal});
+	        	} else{
+	        		alert("Please Choose image !")
+	        		xhr.abort();
+	        		return false;
+	        	}
+	            
+	        },
+	        uploadProgress: function(event, position, total, percentComplete) {
+	            var percentVal = percentComplete + '%';
+	            bar.css({'width': percentVal});
+	        },
+	        complete: function(xhr) {
+	            // status.html(xhr.responseText);
+				let response = JSON.parse(xhr.responseText);
+	            // win.opener.document.getElementById(TAG_NAME).value=xhr.responseText;
+	            top.image_cb(response.url, {'alt': response.url})
+				top.tinymce.activeEditor.windowManager.close();
+				top.window.focus();
+	            // win.document.getElementById(field_name).value = xhr.responseText;
+	        }
+	    });
+
+
+	    $.ajax({
+	    	type:"GET",
+	    	url : "/api/images/0",
+	    	success: function(response){
+	    		response = JSON.parse(response);
+	    		console.log(response);
+				console.log("data"+" "+response.data)
+    			if(response.message == "success"){
+
+    				if(response.data.length >0){
+    					 var imageList = response.data;
+
+    					 for (i=0;i<imageList.length;i++){
+    					 	console.log(imageList[i])
+							 $("#gallery").find(".row").eq(0).append(`<div class="col-md-3">
+		    														<div class="thumbnail">
+		    															<img src="${imageList[i]}" class="img img-responsive galleryitem" height="200" width="200">
+		    														</div>
+		    													</div>`
+															);
+    					 }
+    				}
+    			}
+	    	},
+	    	error: function(xhr,textStatus){
+
+	    	},
+	    	complete: function(){
+
+	    	}
+	    });
+	}); 
+	</script>
+</body>
+</html>

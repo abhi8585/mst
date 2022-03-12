@@ -1,0 +1,636 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Add/Update enquiry {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- Select2 -->
+  <link rel="stylesheet" href="/static/assets/plugins/select2/css/select2.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+  <!-- summernote -->
+  <link rel="stylesheet" href="/static/assets/plugins/summernote/summernote-bs4.min.css">
+  <!-- Font awesome older version for summernote gallery plugin -->
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" >
+  <style type="text/css">
+    .img-item .col-md-12 {
+      width: auto !important;
+      max-width: initial;
+    }
+    .img-item .thumbnail{
+      display: block;
+      width:auto;
+      padding: 4px;
+      margin-bottom: 20px;
+      line-height: 1.42857143;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      -webkit-transition: border .2s ease-in-out;
+      -o-transition: border .2s ease-in-out;
+      transition: border .2s ease-in-out;
+    }
+    #status{
+      width:100%;
+    }
+    #add-inclusions{
+      border:0;
+      border-radius:50%;
+      background-color:#32a067;
+      color:white;
+      margin-left:10px;
+    }
+    #add-installments{
+      border:0;
+      border-radius:50%;
+      background-color:#32a067;
+      color:white;
+      margin-left:10px;
+    }
+    #installments, #invoice{
+      padding:12px;
+      width:100%;
+      border:1px solid black;
+      text-align:center;
+    }
+    #installments tr, #invoice tr{
+      border-top:1px solid black;
+      border-bottom:1px solid black;
+    }
+    #invoice-form label{
+      width:50%;
+    }
+    #incl{
+      width:50%;
+    }
+  </style>
+{% endblock stylesheets %}
+
+{% block content %}    
+
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Add Role</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">enquiry Add/Edit</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- left column -->
+          <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Add Role</h3>
+              </div>
+              <!-- /.card-header -->
+              <!-- form start -->
+              <form id="blog-form" enctype="multipart/form-data" method="POST">
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter name" value="{{enquiry_detail.name if enquiry_detail else ''}}">
+                  </div>
+                  <!-- <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter email" value="{{enquiry_detail.email if enquiry_detail else ''}}">
+                  </div>
+                  <div class="form-group">
+                    <label for="phone">Mobile Number</label>
+                    <input type="text" maxlength="10" pattern="^[6789]\d{9}$"  required  value="{{enquiry_detail.phone_number if enquiry_detail else ''}}" title="Only 10 numbers digits starting from 6, 7, 8 or 9 are accepted" id="phone" class="register-input-val form-control input-lg" placeholder=" Mobile Number" >
+                  </div>
+                  <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input placeholder="Select a date" class="form-control has-danger" value="{{enquiry_detail.created_at if enquiry_detail else ''}}" type="text" onfocus="(this.type='date')" id="date" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="location">Location:</label>
+                    <input type="text" class="form-control has-danger" id="location" placeholder="Enter location" name="location" value="{{enquiry_detail.location if enquiry_detail else ''}}" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="budget">Budget:</label>
+                    <input type="number" class="form-control has-danger" id="budget" placeholder="Enter budget" name="budget" value="{{enquiry_detail.budget if enquiry_detail else ''}}" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="package-id">Package ID:</label>
+                    <input type="number" class="form-control" id="package-id" value="{{enquiry_detail.package_id if enquiry_detail else ''}}" placeholder="Enter package ID (If any)" name="package_ID">
+                  </div>
+                  <div class="form-group">
+                    <label for="blog-id">Blog ID:</label>
+                    <input type="number" class="form-control" id="blog-id" placeholder="Enter blog ID (If any)" value="{{enquiry_detail.blog_id if enquiry_detail else ''}}" name="blog_ID">
+                  </div> -->
+                  <!-- <input type="hidden" id="any" value="{{enquiry_detail.status if enquiry_detail else ''}}">
+                  <div class="form-group statuses">
+                    <label for="lead status">Lead status:</label>
+                    <select id="status" class="form-control" >
+                      <option value="Backlog">Backlog</option>
+                      <option value="In progress">In progress</option>
+                      <option value="Hot">Hot</option>
+                      <option value="Quote sent">Quote sent</option>
+                      <option value="Closed">Closed</option>
+                      <option value="Converted">Converted</option>
+                    </select>
+                  </div> -->
+                    <!-- <label for="lead status">Installments paid:</label>
+                    <table id="installments">
+                      <tr>
+                        <th>S. No.</th>
+                        <th>Date of payment</th>
+                        <th>Mode of payment</th>
+                        <th>Amount paid</th>
+                        <th>Amount left</th>
+                        <th>Payment Status</th>
+                        <th>Edit</th>
+                      </tr><button id="add-installments" type="button"><i class="fas fa-plus-circle" data-toggle="modal" data-target="#installmentModal"></i></button>
+                      
+                      {% for installments in installment %}
+                        <tr>
+                          <td>{{installments.installment_number}}</td>
+                          <td>{{installments.date.strftime("%d %B, %Y")}}</td>
+                          <td>{{installments.mode if installments.mode else ''}}</td>
+                          <td>{{installments.paid}}</td>
+                          <td>{{installments.pending}}</td>
+                          <td>{{installments.status}}</td>
+                          <form>
+                          <input type="hidden" id="inst-number{{loop.index}}" value="{{installments.installment_number}}">
+                          <input type="hidden" id="inst-date{{loop.index}}" value="{{installments.date}}">
+                          <input type="hidden" id="inst-mode{{loop.index}}" value="{{installments.mode if installments.mode else ''}}">
+                          <input type="hidden" id="inst-amount-paid{{loop.index}}" value="{{installments.paid}}">
+                          <input type="hidden" id="inst-amount-pending{{loop.index}}" value="{{installments.pending}}">
+                          <input type="hidden" id="inst-status{{loop.index}}" value="{{installments.status}}">
+                          <td><a href="javascript:editinstallment({{loop.index}})"><button type="button" id="edit-installment{{loop.index}}" style="background-color:white; border:none;"><i class="fas fa-pen"></i></button></a></td>
+                          </form>
+                        </tr>
+                      {% endfor %}
+                    </table><br>
+                    <label for="lead status">Active invoice:</label>
+                    <table id="invoice">
+                      <tr>
+                        <th>Invoice ID</th>
+                        <th>Date</th>
+                        <th>Customer name</th>
+                        <th>Cost</th>
+                        <th>Link</th>
+                        <th>Version</th>
+                      </tr>
+                      <tr>
+                      <td>{{invoice.id if invoice else ''}}</td>
+                      <td>{{invoice.date if invoice else ''}}</td>
+                      <td>{{invoice.customer_name if invoice else ''}}</td>
+                      <td>{{invoice.cost if invoice else ''}}</td>
+                      <td>{{invoice.link if invoice else ''}}</td>
+                      <td>{{invoice.version if invoice else ''}}</td>
+                      </tr>
+                      </table>
+                </div> -->
+                <!-- /.card-body -->
+                
+                <div class="card-footer text-right">
+                  <!-- <button type="button" class="btn btn-danger text-right" id="delete-btn">Delete</button>
+                  <button type="button" class="btn btn-primary" id="add-installment" data-toggle="modal" data-target="#installmentModal">Add Installment</button>
+                  <button type="button" class="btn btn-primary" id="download-invoice"  data-toggle="modal" data-target="#downloadModal">Download Invoice</button> 
+                  <a class="btn btn-primary" style="color:white;" href="{{url_for('quote_blueprint.create',usr_mail=enquiry_detail.email if enquiry_detail else '')}}" >Send Quote</a> -->
+                  <button type="submit" class="btn btn-primary"  id="submit-btn">Submit</button>
+                </div>
+                <!-- <div class="modal fade" id="installmenteditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Installments</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body edit">
+                      
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" id="edit-installment-btn" class="btn btn-primary">Edit installment</button>
+                      </div>
+                      </form>
+                    </div>
+                  </div>
+                </div> -->
+                <!-- <div class="modal fade" id="installmentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add Installments</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                      <form id="installment-form">
+                        <label style="width:40%;">Installment number: </label>
+                        <input style="width:50%;" type="number" id="installment-number" class="inst" placeholder="Enter installment number" value='{{installments.installment_number if installments else ""}}' required> <br>
+                        <label style="width:40%;">Date of payment: </label>
+                        <input style="width:50%;" type="date" id="installment-date" class="inst" placeholder="Enter date of payment" required><br>
+                        <label style="width:40%;">Mode of payment: </label>
+                        <input style="width:50%;" type="text" id="payment-mode" class="inst" placeholder="Enter mode of payment"><br>
+                        <label style="width:40%;">Amount paid: </label>
+                        <input style="width:50%;" type="number" id="installment-amount" class="inst" placeholder="Enter amount paid" required><br>
+                        <label style="width:40%;">Payment Status</label> 
+                        <select style="width:50%;" id="installment-status">
+                        <option value="Paid">Paid</option>
+                        <option value="Unpaid">Unpaid</option>
+                        </select>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" id="installment-btn" class="btn btn-primary">Add installment</button>
+                      </div>
+                      </form>
+                    </div>
+                  </div>
+                </div> -->
+                <!-- <div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Generate Invoice <button id="add-inclusions" type="button"><i class="fas fa-plus-circle"></i></button></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form id="invoice-form">
+                        <div class="invoice-inner">
+                          <label style="width:50%;">Extra inclusions: </label><input style="width:50%;" type="name" id="incl1-name" class="incl" placeholder="Extra inclusions(If any)"> 
+                          <label style="width:50%;">Inclusion&#8217;s quantity: </label><input style="width:50%;" type="number" id="incl1-qty" class="incl" placeholder="enter quantity of inclusion"> 
+                          <label style="width:50%;">Inclusion&#8217;s Amount:</label><input style="width:50%;" type="number" id="incl1-amount" class="incl" placeholder="Amount of inclusion">
+                        </div>
+                      </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" id="invoice-btn" class="btn btn-primary">Generate Invoice</button>
+                          </div>
+                        </form>
+                    </div>
+                  </div>
+                </div> -->
+              </div>
+              </form>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!--/.col (left) -->
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- Select2 -->
+  <script src="/static/assets/plugins/select2/js/select2.full.min.js"></script>
+  <!-- bs-custom-file-input -->
+  <script src="/static/assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+  <!-- Summernote -->
+  <!-- <script src="/static/assets/plugins/summernote/summernote-bs4.min.js"></script> -->
+  <!-- Summernote gallery plugin -->
+  <!-- <script src="/static/assets/plugins/summernote/plugin/gallery/summernote-gallery.min.js" type="text/javascript"></script> -->
+  <!-- Tinymce Editor -->
+  <script src="/static/assets/plugins/tinymce/tinymce.min.js"></script>
+  <script>
+  function editinstallment(n){
+      $("#installmenteditModal").modal('show');
+      let instnumber=$("#inst-number"+n+"").val();
+      let instdate=$("#inst-date"+n+"").val();
+      let instmode=$("#inst-mode"+n+"").val();
+      let instpaid=$("#inst-amount-paid"+n+"").val();
+      let instpending=$("#inst-amount-pending"+n+"").val();
+      let inststatus=$("#inst-status"+n+"").val();
+      console.log(instnumber,instdate,instmode,instpaid,instpending,inststatus);
+      $(".edit").html('<form id="edit-installment-form">'+
+                        '<label style="width:40%;">Installment number: </label>'+
+                        '<input style="width:50%;" type="number" id="instnumber" class="inst" placeholder="Enter installment number" value="'+instnumber+'" required> <br>'+
+                        '<label style="width:40%;">Date of payment: </label>'+
+                        '<input style="width:50%;" type="date" id="instdate" class="inst" placeholder="Enter date of payment" value="'+instdate.split(" ")[0]+'" required><br>'+
+                        '<label style="width:40%;">Mode of payment: </label>'+
+                        '<input style="width:50%;" type="text" id="paymentmode" class="inst" placeholder="Enter mode of payment" value="'+instmode+'"><br>'+
+                        '<label style="width:40%;">Amount paid: </label>'+
+                        '<input style="width:50%;" type="number" id="instamount" class="inst" placeholder="Enter amount paid" value="'+instpaid+'" required><br>'+
+                        '<label style="width:40%;">Payment Status</label> '+
+                        '<select style="width:50%;" id="inststatus">'+
+                        '<option value="Paid">Paid</option>'+
+                        '<option value="Unpaid">Unpaid</option>'+
+                        '</select>');
+      $("div.edit select").val(inststatus).change();
+    }
+  var valu=$('#any').val();
+  console.log(valu);
+  $("div.statuses select").val(valu).change();
+  $(function () {
+    bsCustomFileInput.init();
+
+  	tinymce.init({
+  	 selector:'#description',
+  	 file_browser_callback : 'myCustomFileBrowser',
+	   autoresize_bottom_margin: 20,
+  	 plugins: "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste imagetools wordcount autoresize hr",
+     toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+      autoresize_bottom_margin: 50,
+      max_height: 500,
+      min_height: 350,
+      file_picker_types: 'media image file',
+      image_caption: true,
+      /* and here's our custom image picker*/
+      file_picker_callback: function (cb, value, meta) {
+        console.log(cb , value, meta);
+        window.image_cb = cb;
+        tinyMCE.activeEditor.windowManager.openUrl({
+              url : '/image-gallery',
+          title : 'File Browser',
+          width : 900,  // Your dimensions may differ - toy around with them!
+          height : 600,
+          resizable : "yes",
+          editor_selector : "description",
+          inline : "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+          close_previous : "no"
+      });
+  }
+  	});
+
+    $(document).on('click', '#delete-btn', function(){
+      $.ajax({
+        type: "GET",
+        url: '/enquiry/delete/enquiry?enquiry_id='+"{{enquiry_detail.id if enquiry_detail else ''}}",
+        contentType: 'application/json; charset=utf-8',
+        success: function(response){
+          response = JSON.parse(response);
+          alert(response.message);
+        },
+        complete: function(){
+          $("#delete-btn").prop("disabled", false);
+        }
+      })
+    });
+    
+    let i=1;
+    $(document).on('click', '#add-inclusions', function(){
+      i=i+1;
+      var input= '<hr><label style="width:50%">Extra inclusions: </label><input type="name" style="width:50%" id="incl'+i+'-name" class="incl" placeholder="Extra inclusions(If any)">  <label style="width:50%">Inclusion&#8217;s quantity: </label><input type="number" style="width:50%" id="incl'+i+'-qty" class="incl" placeholder="enter quantity of inclusion">  <label style="width:50%">Inclusion&#8217;s Amount:</label><input type="number" style="width:50%" id="incl'+i+'-amount" class="incl" placeholder="Amount of inclusion">'
+      $('.invoice-inner').append(input);
+    });
+    $(document).on('click', '#invoice-btn', function(e){
+      e.preventDefault();
+      
+      var form = $('#invoice-form');
+      var data= new FormData;
+      var k=0;
+      for(j=1;j<=i;j++){
+        let inclusionname = $("#incl"+j+"-name").val();
+        let inclusionqty = $("#incl"+j+"-qty").val();
+        let inclusionamount = $("#incl"+j+"-amount").val();
+        if(inclusionname!=''){
+        data.append('incl'+j+'_name', inclusionname);
+        data.append('incl'+j+'_qty', inclusionqty);
+        data.append('incl'+j+'_amount', inclusionamount);
+        k=k+1;
+        }
+      }
+      data.append('inclusions',k)
+      $("#invoice-btn").prop("disabled", true);
+      console.log(data, "data")
+      $.ajax({
+        type: "POST",
+        enctype: "multipart/form-data",
+        processData: false,
+        contentType: false,
+        cache: false,
+        data: data,
+        url: '/enquiry/invoice/'+'{{enquiry_detail.id if enquiry_detail else ""}}',
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(data){
+          var a = document.createElement('a');
+            var url = window.URL.createObjectURL(data);
+            a.href = url;
+            //window.location.replace(a);
+            a.download = 'invoice.pdf';
+            document.body.append(a);
+            a.click();
+            a.remove();
+           // window.URL.revokeObjectURL(url);
+           const myFile = new File([data], "invoice.pdf", {
+                   type: data.type,
+                    lastModified: new Date(),});
+          const myform = new FormData();
+          myform.append('file', myFile);
+          myform.append('invoice_id','{{invoice.id if invoice else ''}}');
+            $.ajax({
+              type: "POST",
+              url: '/enquiry/upload_to_s3',
+              data: myform,
+              cache: false,
+              contentType: false,
+              processData: false,
+            })
+            
+        },
+        complete: function(){
+          $("#invoice-btn").prop("disabled", false);
+        }
+      })
+    });
+    
+    $(document).on('click', '#edit-installment-btn', function(e){
+      e.preventDefault();
+
+      var form = $('#edit-installment-form');
+      var data= new FormData;
+      let instnumber=$("#instnumber").val();
+      let instdate=$("#instdate").val();
+      let instmode=$("#paymentmode").val();
+      let instpaid=$("#instamount").val();
+      let inststatus=$("#inststatus").val();
+      data.append("installment-number",instnumber);
+      data.append("installment-date",instdate);
+      if(paymentmode!=''){
+        data.append("installment-mode",instmode);
+      }
+      data.append("installment-amount",instpaid);
+      data.append("installment-status",inststatus);
+      $("#edit-installment-btn").prop("disabled", true);
+      console.log(data, "data")
+      $.ajax({
+        type: "POST",
+        enctype: "multipart/form-data",
+        processData: false,
+        contentType: false,
+        cache: false,
+        data: data,
+        url: '/enquiry/edit-installment/'+'{{enquiry_detail.id if enquiry_detail else ""}}',
+        success: function(data){
+          alert(data);
+        },
+        complete: function(){
+          $("#edit-installment-btn").prop("disabled", false);
+        }
+      })
+    });
+    $(document).on('click', '#installment-btn', function(e){
+      e.preventDefault();
+      var form = $('#installment-form');
+      var data= new FormData;
+
+      let installmentnumber = $("#installment-number").val();
+      let installmentdate= $("#installment-date").val();
+      let paymentmode= $("#payment-mode").val();
+      let installmentamount= $("#installment-amount").val();
+      let installmentstatus= $("#installment-status").val();
+
+      data.append('installment_number',installmentnumber);
+      data.append('installment_date',installmentdate);
+      if(paymentmode!=''){
+        data.append('payment_mode',paymentmode);
+      }
+      data.append('installment_amount',installmentamount);
+      data.append('installment_status',installmentstatus);
+
+      $("#installment-btn").prop("disabled", true);
+      console.log(data, "data")
+      $.ajax({
+        type: "POST",
+        enctype: "multipart/form-data",
+        processData: false,
+        contentType: false,
+        cache: false,
+        data: data,
+        url: '/enquiry/installment/'+'{{enquiry_detail.id if enquiry_detail else ""}}',
+        success: function(data){
+          alert(data);
+        },
+        complete: function(){
+          $("#installment-btn").prop("disabled", false);
+        }
+      })
+    });
+    $(document).on('submit', '#blog-form', function(e){
+      e.preventDefault();
+      var form = $('#blog-form');
+      var data = new FormData();
+
+      let name = $("#name").val();
+      let email = $("#email").val();
+      let phone = $("#phone").val();
+      let location = $("#location").val();
+      let budget = $("#budget").val();
+      let date = $("#date").val();
+      let package_id = $("#package-id").val();
+      let blog_id = $("#blog-id").val();
+      let status= $("#status").val();
+      //let thumbnail_image = $("#thumbnail_image")[0].files[0];
+      //let publish = $("#publish").is(":checked") ? 1 : 0;
+      
+      {% if enquiry_detail %}
+      data.append('enquiry_id', {{enquiry_detail.id}});
+      {% endif %}
+      data.append('name', name);
+      data.append('email', email);
+      data.append('phone', phone);
+      data.append('budget', budget);
+      data.append('location', location);
+      data.append('date', date);
+      data.append('blog_id', blog_id);
+      data.append('package_id', package_id);
+      data.append('status' , status);
+
+
+
+      // submitting role
+
+      $("#submit-btn").click(function(){
+        var role_name = $("#name").val();
+        var data= new FormData;
+        data.append('role_name', role_name)
+        $.ajax({
+          type: "POST",
+          enctype: "multipart/form-data",
+          processData: false,
+          contentType: false,
+          cache: false,
+          data: data,
+          url: '/enquiry/insert/role',
+          success: function(response){
+            response = JSON.parse(response);
+            console.log(typeof(response))
+            alert(response.message);
+          },
+          complete: function(){
+            $("#submit-btn").prop("disabled", false);
+          }
+            });
+      })
+      
+
+      //data.append('thumbnail_image', thumbnail_image);
+      //data.append('publish', publish);
+
+      // disabled the submit button
+      // $("#submit-btn").prop("disabled", true);
+      // console.log(data, "data")
+      // $.ajax({
+      //   type: "POST",
+      //   enctype: "multipart/form-data",
+      //   processData: false,
+      //   contentType: false,
+      //   cache: false,
+      //   data: data,
+      //   url: '/enquiry/insert/enquiry',
+      //   success: function(response){
+      //     response = JSON.parse(response);
+      //     console.log(typeof(response))
+      //     alert(response.message);
+      //   },
+      //   complete: function(){
+      //     $("#submit-btn").prop("disabled", false);
+      //   }
+      // })
+    })
+    //Initialize Select2 Elements
+   
+    
+  
+  });
+  </script>
+
+{% endblock javascripts %}

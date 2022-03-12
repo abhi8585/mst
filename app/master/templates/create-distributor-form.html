@@ -1,0 +1,502 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Add/Update Blogs {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- Select2 -->
+  <link rel="stylesheet" href="/static/assets/plugins/select2/css/select2.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+  <!-- summernote -->
+  <link rel="stylesheet" href="/static/assets/plugins/summernote/summernote-bs4.min.css">
+  <!-- Font awesome older version for summernote gallery plugin -->
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" >
+  <style type="text/css">
+    .img-item .col-md-12 {
+      width: auto !important;
+      max-width: initial;
+    }
+    .img-item .thumbnail{
+      display: block;
+      width:auto;
+      padding: 4px;
+      margin-bottom: 20px;
+      line-height: 1.42857143;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      -webkit-transition: border .2s ease-in-out;
+      -o-transition: border .2s ease-in-out;
+      transition: border .2s ease-in-out;
+    }
+    .box {
+      position: relative;
+      background: #ffffff;
+      width: 100%;
+    }
+    
+    .box-header {
+      color: #444;
+      display: block;
+      padding: 10px;
+      position: relative;
+      border-bottom: 1px solid #f4f4f4;
+      margin-bottom: 10px;
+    }
+    
+    .box-tools {
+      position: absolute;
+      right: 10px;
+      top: 5px;
+    }
+    
+    .dropzone-wrapper {
+      border: 2px dashed #91b0b3;
+      color: #92b0b3;
+      position: relative;
+      height: 150px;
+    }
+    
+    .dropzone-desc {
+      position: absolute;
+      margin: 0 auto;
+      left: 0;
+      right: 0;
+      text-align: center;
+      width: 40%;
+      top: 50px;
+      font-size: 16px;
+    }
+    
+    .dropzone,
+    .dropzone:focus {
+      position: absolute;
+      outline: none !important;
+      width: 100%;
+      height: 150px;
+      cursor: pointer;
+      opacity: 0;
+    }
+    
+    .dropzone-wrapper:hover,
+    .dropzone-wrapper.dragover {
+      background: #ecf0f5;
+    }
+    
+    .preview-zone {
+      text-align: center;
+    }
+    
+    .preview-zone .box {
+      box-shadow: none;
+      border-radius: 0;
+      margin-bottom: 0;
+    }
+    
+  </style>
+{% endblock stylesheets %}
+
+{% block content %}    
+
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Map Auditors</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Map Auditors/Edit</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- left column -->
+          <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Map Auditors</h3>
+              </div>
+              <!-- /.card-header -->
+              <!-- form start -->
+              <form id="blog-form" enctype="multipart/form-data" method="POST">
+                <div class="card-body">
+                  <!-- <div class="form-group">
+                    <label for="title">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter name" value="">
+                  </div>
+                  <div class="form-group">
+                    <label for="title">Email</label>
+                    <input type="text" class="form-control" id="email" placeholder="Enter Email" value="">
+                  </div> -->
+                  <!-- <div class="form-group">
+                    <label for="title">Password</label>
+                    <input type="text" class="form-control" id="password" placeholder="Enter Password" value="">
+                  </div> -->
+                  <div class="form-group">
+                    <label>Select Vendor</label>
+                    <select class="form-control select2" id="vendor_name" style="width: 100%;" value="">
+                      
+                      {% for vendor in vendors %}
+                      
+                      <option selected="selected">{{vendor.vendor_name}}</option>
+                    {% endfor %}
+                      <!-- <option selected="selected">Choose Role</option> -->
+                    </select>
+                    <label>Select Auditor</label>
+                    <select class="form-control select2" id="user_name" style="width: 100%;" value="">
+                      
+                      {% for name in user_names%}
+                      
+                      <option selected="selected">{{name}}</option>
+                    {% endfor %}
+                    <!-- <option selected="selected">Select user</option> -->
+                      <!-- <option selected="selected">Choose Role</option> -->
+                    </select>
+                  </div>
+                  <!-- <div class="form-group">
+                    <label>Category</label>
+                    <select class="form-control select2" id="category" style="width: 100%;">
+                      <option selected="selected">Choose Category</option>
+                    </select>
+                  </div> -->
+                  <!-- <div class="form-group">
+                    <label for="claps">Claps</label>
+                    <input type="number" min="0" class="form-control" id="claps" placeholder="E.g 12" value="{{blog_detail.claps if blog_detail else ''}}">
+                  </div> -->
+                  <!-- <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea class="textarea" id="description" placeholder="Enter blog description">
+                      {{blog_detail.description if blog_detail else ''}}
+                    </textarea>
+
+                  </div> -->
+                  <!-- <div class="form-group">
+                    <label>Tags</label>
+                    <div class="select2-purple">
+                      <select class="select2" tags="true" multiple="multiple" id="tags" data-placeholder="Select all tags" style="width: 100%;" value="{{blog_detail.tags if blog_detail else ''}}">
+                        <option>Choose tags</option>
+                      </select>
+                    </div>
+                  </div> -->
+                  <!-- <div class="form-group">
+                    <label class="control-label">Thumbnail Image</label>
+                    <div class="preview-zone hidden" id="preview_box">
+                      <div class="box box-solid">
+                        <div class="box-body"></div>
+                      </div>
+                     
+                    </div> -->
+                    <!-- <div class="dropzone-wrapper">
+                      <div class="dropzone-desc">
+                        <i class="glyphicon glyphicon-download-alt"></i>
+                        <p>Choose an image file or drag it here.</p>
+                      </div>
+                      <input type="file" name="img_logo" id="thumbnail_image" accept="image/*" class="dropzone">
+                    </div> -->
+                    <!-- {% if blog_detail and blog_detail.thumbnail_image %} -->
+                    <!-- <img src="{{blog_detail.thumbnail_image}}" height="300" width="100%"  /> -->
+                    <!-- {% endif %} -->
+                  <!-- </div> -->
+                  <!-- <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="publish" {{"checked='checked'" | safe if blog_detail and blog_detail.published}}>
+                    <label class="form-check-label" for="publish">Publish</label>
+                  </div> -->
+                </div>
+                <!-- /.card-body -->
+
+                <div class="card-footer text-right">
+                  <!-- <button type="button" id='delete-btn' class="btn btn-danger text-right">Delete</button> -->
+                  <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
+                </div>
+              </form>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!--/.col (left) -->
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- Select2 -->
+  <script src="/static/assets/plugins/select2/js/select2.full.min.js"></script>
+  <!-- bs-custom-file-input -->
+  <script src="/static/assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.7/js/fileinput.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.7/themes/fa/theme.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" type="text/javascript"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" type="text/javascript"></script>
+  
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.7/css/fileinput.css" media="all" rel="stylesheet" type="text/css"/>
+  <!-- Summernote -->
+  <!-- <script src="/static/assets/plugins/summernote/summernote-bs4.min.js"></script> -->
+  <!-- Summernote gallery plugin -->
+  <!-- <script src="/static/assets/plugins/summernote/plugin/gallery/summernote-gallery.min.js" type="text/javascript"></script> -->
+  <!-- Tinymce Editor -->
+  <script src="/static/assets/plugins/tinymce/tinymce.min.js"></script>
+  <script>
+  //  $(document).on('click', '#delete-btn', function(){
+  //     $.ajax({
+  //       type: "GET",
+  //       url: '/blog/delete/blog?blog_id='+"{{blog_detail.id if blog_detail else ''}}",
+  //       contentType: 'application/json; charset=utf-8',
+  //       success: function(response){
+  //         response = JSON.parse(response);
+  //         alert(response.message);
+  //       },
+  //       complete: function(){
+  //         $("#delete-btn").prop("disabled", false);
+  //       }
+  //     })
+  //   });
+
+//   function readFile(input) {
+//   if (input.files && input.files[0]) {
+//     var reader = new FileReader();
+ 
+//     reader.onload = function(e) {
+//       var img_box=document.getElementById('prev_img');
+
+//       if(document.getElementById('preview_box').contains(img_box))
+//         img_box.setAttribute("src",e.target.result)
+//       else{
+//           var img_box='<img src="'+e.target.result+'" id="prev_img" height="300" width="100%"  />';
+//           $('#preview_box').append(img_box);
+//       }
+       
+//     };
+ 
+//     reader.readAsDataURL(input.files[0]);
+//   }
+// }
+ 
+// function reset(e) {
+//   e.wrap('<form>').closest('form').get(0).reset();
+//   e.unwrap();
+// }
+ 
+// $(".dropzone").change(function() {
+//   readFile(this);
+// });
+ 
+// $('.dropzone-wrapper').on('dragover', function(e) {
+//   e.preventDefault();
+//   e.stopPropagation();
+//   $(this).addClass('dragover');
+// });
+ 
+// $('.dropzone-wrapper').on('dragleave', function(e) {
+//   e.preventDefault();
+//   e.stopPropagation();
+//   $(this).removeClass('dragover');
+// });
+ 
+// $('.remove-preview').on('click', function() {
+//   var boxZone = $(this).parents('.preview-zone').find('.box-body');
+//   var previewZone = $(this).parents('.preview-zone');
+//   var dropzone = $(this).parents('.form-group').find('.dropzone');
+//   boxZone.empty();
+//   previewZone.addClass('hidden');
+//   reset(dropzone);
+// });
+//   $(function () {
+//     bsCustomFileInput.init();
+
+//   	tinymce.init({
+//   	 selector:'#description',
+//   	 file_browser_callback : 'myCustomFileBrowser',
+// 	   autoresize_bottom_margin: 20,
+//   	 plugins: "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste imagetools wordcount autoresize hr",
+//      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+//       autoresize_bottom_margin: 50,
+//       max_height: 500,
+//       min_height: 350,
+//       file_picker_types: 'media image file',
+//       image_caption: true,
+//       /* and here's our custom image picker*/
+//       file_picker_callback: function (cb, value, meta) {
+//         console.log(cb , value, meta);
+//         window.image_cb = cb;
+//         tinyMCE.activeEditor.windowManager.openUrl({
+//               url : '/image-gallery',
+//           title : 'File Browser',
+//           width : 900,  // Your dimensions may differ - toy around with them!
+//           height : 600,
+//           resizable : "yes",
+//           editor_selector : "description",
+//           inline : "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+//           close_previous : "no"
+//       });
+//   }
+//   	});
+
+//     // Fetch blog category 
+//     $(document).ready(function(){
+//       $.ajax({
+//         'url': '/blog/get/blogcategory',
+//         'method': 'GET',
+//         'success': function(res){
+//           res = JSON.parse(res);
+          
+//           res.categories.map((category, index) => {
+//             $("#category").append(`<option value='${category['id']}'>${category['name']}</option>`);
+//           })
+
+          // {% if blog_detail and blog_detail.category_id %}
+          //   $("#category").select2().val({{blog_detail.category_id}}).trigger("change");
+          // {% endif %}
+//         }
+//       })
+    
+//       $.ajax({
+//         'url': '/blog/get/author',
+//         'method': 'GET',
+//         'success': function(res){
+//           res = JSON.parse(res);
+//           res.authors.map((author, index) => {
+//             $("#author").append(`<option value='${author['id']}'>${author['name']}</option>`);
+//           })
+//           {% if blog_detail and blog_detail.author_id %}
+//             $("#author").select2().val({{blog_detail.author_id}}).trigger("change");
+//           {% endif %}
+//         }
+//       })
+//     });
+
+
+    $("#submit-btn").click(function(){
+      // alert(true);
+      // return
+        event.preventDefault();
+        var user_name = document.getElementById("user_name");
+        var vendor_name = document.getElementById("vendor_name");
+        var data= new FormData;
+        data.append('user_name', user_name.value)
+        data.append('vendor_name', vendor_name.value)
+        // data.append('user_password', user_password)
+       
+        $.ajax({
+          type: "POST",
+          enctype: "multipart/form-data",
+          processData: false,
+          contentType: false,
+          cache: false,
+          data: data,
+          url: '/master/map/distributor',
+          success: function(response){
+            response = JSON.parse(response);
+            console.log(typeof(response))
+            alert(response.message);
+          },
+          complete: function(){
+            $("#submit-btn").prop("disabled", false);
+          }
+            });
+      })
+
+    // $(document).on('submit', '#blog-form', function(e){
+    //   e.preventDefault();
+    //   var form = $('#blog-form');
+    //   var data = new FormData();
+
+    //   let title = $("#title").val();
+    //   let author_id = $("#author").val();
+    //   let category_id = $("#category").val();
+    //   let claps = $("#claps").val();
+    //   let description = $("#description").val();
+    //   let thumbnail_image = $("#thumbnail_image")[0].files[0];
+    //   let tags = $("#tags").val();
+    //   let publish = $("#publish").is(":checked") ? 1 : 0;
+      
+    //   // data.append("title", title);
+    //   // data.append
+    //   {% if blog_detail %}
+    //   data.append('blog_id', {{blog_detail.id}});
+    //   {% endif %}
+    //   data.append('title', title);
+    //   data.append('author_id', author_id);
+    //   data.append('category_id', category_id);
+    //   data.append('claps', claps);
+    //   data.append('description', description);
+    //   data.append('thumbnail_image', thumbnail_image);
+    //   data.append('tags', tags);
+    //   data.append('publish', publish);
+
+
+
+      // disabled the submit button
+      // $("#submit-btn").prop("disabled", true);
+      // console.log(data, "data")
+      // $.ajax({
+      //   type: "POST",
+      //   enctype: "multipart/form-data",
+      //   processData: false,
+      //   contentType: false,
+      //   cache: false,
+      //   data: data,
+      //   url: '/blog/insert/blog',
+      //   success: function(response){
+      //     response = JSON.parse(response);
+      //     console.log(typeof(response))
+      //     alert(response.message);
+      //   },
+      //   complete: function(){
+      //     $("#submit-btn").prop("disabled", false);
+      //   }
+      // })
+    // })
+    //Initialize Select2 Elements
+  //   $('.select2').select2();
+  //   $("#tags").select2({
+  //     tags: true,
+  //     tokenSeparators: [',', ' ']
+  //   })
+    
+  //   {% if blog_detail %}
+  //     $("#tags").select2({
+  //     tags: true,
+  //     tokenSeparators: [',', ' '],
+  //     data: {{blog_detail.tags | safe}}
+  //   }).val({{blog_detail.tags | safe }}).trigger('change')
+  //   {% endif %}
+
+  
+  // });
+  </script>
+
+{% endblock javascripts %}

@@ -1,0 +1,161 @@
+<html>
+<head>
+<script src="https://kit.fontawesome.com/99fe66f91e.js" crossorigin="anonymous"></script>
+    <style>
+        h1{
+            text-align:center;
+        }
+        .company-info{
+            display:inline-block;
+            padding:50px 5px 10px 5px;
+        }
+        #header img{
+            float:left;
+            height:180px;
+        }
+        #header h1{
+            float:right;
+            margin-top:15%;
+        }
+        table{
+            width:100%;
+            border:1px solid black;
+        }
+        tr{
+            padding-top:60px;
+            padding-bottom:60px;
+            border-bottom:1px solid black;
+        }
+        td,th{
+            width:33%;
+            text-align:center;
+        }
+        th{
+            border-bottom:1px solid black;
+        }
+         .border{
+             border-left:1px solid black;
+         }
+         #footer{
+             text-align:center;
+         }
+         svg{
+        height:15px;
+        width:15px;
+        display:inline-block;
+      }
+      #outer{
+          margin:35px;
+          border:1px solid black;
+          padding:20px;
+      }
+      .section2{
+          padding:10px;
+          width:45%;
+          border-right:1px solid black;
+      }
+      #main2{
+          border-bottom:1px solid black;
+          border-top:1px solid black;
+      }
+      tr:nth-child(1){
+          background-color:#F5F5F5;
+      }
+      .one{
+          width:10% !important;
+      }
+      .two{
+          width:30% !important;
+      }
+      .three{
+          width:25% !important;
+      }
+      .subfinal:nth-child(1){
+          display:inline-block;
+          width:64%;
+          border-right:1px solid black;
+      }
+      .subfinal:nth-child(2){
+          float:right;
+          width:30%;
+          vertical-align:top;
+          padding-left:50px;
+          padding-bottom:20px;
+         
+      }
+      .left{
+          width:60%;
+      }
+    </style>
+</head>
+<body>
+<div id="outer">
+ <div id="header">
+    <img src="{{url_for('static',filename='img/date_planner_logo.png',_external=True)}}" >
+    <div class="company-info"><b style="font-size:25px">Date Planner</b><br>21, Lodhi Estate,<br> New Delhi,<br> Delhi - 110003<br>
+India
+</div>
+<h1>TAX INVOICE</h1>
+ </div><br>
+ <div id="main2">
+ <div class="section2">
+ # : <b>Invoice-00{{invoice.id}}</b><br>
+ Invoice date : <b>{{time}}</b><br>
+ Terms : <b>Due on Receipt</b><br>
+ Due date : <b>{{time}}</b><br>
+ </div>
+ </div>
+ <div style="background-color:#F5F5F5; border-bottom:1px solid black; border-top:1px solid black; font-size:15px;"><b >Bill to:</b></div>
+ <span style="text-transform:capitalize;"><b>{{enquiry_detail.name}}</b></span>
+ <table>
+    <tr>
+    <th class="one">#</th>
+    <th class="border two">Item and Description</th>
+    <th class="border one">Qty</th>
+    <th class="border three">Rate</th>
+    <th class="border three">Amount</th>
+    </tr>
+    <tr>
+        <td class="one">1.</td>
+        <td class="border two">{{package_detail.title}}</td>
+        <td class="border one">1</td>
+        <td class="border three">{{package_detail.cost}}</td>
+        <td class="border three">{{package_detail.cost}}</td>
+    </tr>
+    {% for key, value in inclusions.items() %}
+    <tr>
+        {% set n=loop.index %}
+        {% set n=n+1 %}
+        <td class="one">{{n}}.</td>
+        <td class="border two">{{key}}</td>
+        <td class="border one">{{value[1]}}</td>
+        <td class="border three">{{value[0]}}</td>
+        <td class="border three">{{value[0]}}</td>
+    </tr>
+    {% endfor %}
+ </table><br>
+ <div id="final">
+ <div class="subfinal">
+ Amount(In words) : <b>Rupees {{word}}</b><br><br>
+
+ <span style="font-size:15px;">Terms and Conditions :<br>
+ 5 days or more before an experience: Cancellation with 97% Refund<br>
+24 hours to 3 days before an experience: Cancellation with 50% Refund<br>
+Less than 24 hours before an experience: Cancellation with no refund<br></span>
+ </div>
+ <div class="subfinal">
+        <span class="left">Sub Total :</span> Rs. {{sub_total}}.0<br>
+        <span class="left">CGST(9%) :</span> Rs. {{cgst}}<br>
+        <span class="left">SGST(9%) :</span>Rs. {{sgst}}<br>
+        <span class="left">Total :</span> <b>Rs. {{total}}/-</b><br>
+        <span class="left">Balance Due :</span> <b>Rs. {{total}}/-</b><br>
+
+ </div>
+ </div>
+ <br><hr>
+ <div id="footer">For any queries write us to : <b>info@dateplanner.in</b><br><br>
+ <b>Thank you for shopping with us!<i class="fas fa-smile"></i></b>
+ </div>
+ </div>
+</body>
+</html>
