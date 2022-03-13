@@ -29,7 +29,7 @@ class Config(object):
     # MAIL_PASSWORD = config('MAIL_PASSWORD', default='Pratyush@123')
     # MAIL_DEFAULT_SENDER = config('MAIL_DEFAULT_SENDER', default= os.environ.get('MAIL_DEFAULT_SENDER','admin@dateplanner.in') )
     # This will create a file in <app> FOLDER
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:''@localhost/mts'
+    SQLALCHEMY_DATABASE_URI = 'mysql://admin:Romil123@mondelez.c3uhktkf90fd.ap-south-1.rds.amazonaws.com:3306/mts'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
 
@@ -50,7 +50,7 @@ class ProductionConfig(Config):
   
     
     # PostgreSQL database
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:''@localhost/mts'
+    SQLALCHEMY_DATABASE_URI = 'mysql://admin:Romil123@mondelez.c3uhktkf90fd.ap-south-1.rds.amazonaws.com:3306/mts'
 
 class DebugConfig(Config):
     DEBUG = True
