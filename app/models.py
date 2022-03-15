@@ -266,7 +266,15 @@ class transtovendor(db.Model):
     updated_at = db.Column(db.DateTime())
 
 
+class deviatedbag(db.Model):
+    __tablename__ = 'deviated_bag'
 
+    id = db.Column(db.Integer, primary_key=True)
+    bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
+    weight = db.Column(db.String(10), nullable=False)
+    remarks = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
 
 
 

@@ -31,6 +31,19 @@ def get_auditor_dist(id):
         vendor_data.append(temp)
     return vendor_data
 
+@blueprint.route('/get_distributor', methods=['POST'])
+def get_distributor():
+    data = request.get_json(force=True)
+    user_id = data["user_id"]
+    auditor_data = get_auditor_dist(user_id)
+    if auditor_data:
+        temp = {
+            "distributors" : auditor_data
+        }
+        return jsonify(status=200,distributors=auditor_data)
+    return jsonify(status=500,distributors=[])
+
+
 
 @blueprint.route('/app_login', methods=['GET', 'POST'])
 def app_login():
@@ -43,12 +56,12 @@ def app_login():
         assigned_role_id = usertorole.query.filter_by(user_id=user.id).first()
         if assigned_role_id:
             role_name = role.query.filter_by(id=assigned_role_id.role_id).first()
-        if role_name.name == "auditor":
-            auditor_dist = get_auditor_dist(user.id)
-            auditor_data = {
-                "distributors" : auditor_dist
-            }
-        return jsonify(status=200,message="user authenticated successfully", user_id=user.id,user_role=role_name.name,auditor_data=auditor_data)
+        # if role_name.name == "auditor":
+        #     auditor_dist = get_auditor_dist(user.id)
+        #     auditor_data = {
+        #         "distributors" : auditor_dist
+        #     }
+        return jsonify(status=200,message="user authenticated successfully", user_id=user.id,user_role=role_name.name)
     return jsonify(status=500,message="user authenticated unsuccessfully")
     
 

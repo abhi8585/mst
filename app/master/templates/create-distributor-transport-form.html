@@ -118,7 +118,7 @@
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">App Auditors/Edit</li>
+              <li class="breadcrumb-item active">Map Transporters/Edit</li>
             </ol>
           </div>
         </div>
@@ -134,7 +134,7 @@
             <!-- general form elements -->
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Register User</h3>
+                <h3 class="card-title">Map Transporters</h3>
               </div>
               <!-- /.card-header -->
               <!-- form start -->
@@ -158,11 +158,11 @@
                       
                       {% for vendor in vendors %}
                       
-                      <option selected="selected" value={{vendor.id}}>{{vendor.vendor_name}}</option>
+                      <option selected="selected">{{vendor.vendor_name}}</option>
                     {% endfor %}
                       <!-- <option selected="selected">Choose Role</option> -->
                     </select>
-                    <label>Select User</label>
+                    <label>Select Auditor</label>
                     <select class="form-control select2" id="user_name" style="width: 100%;" value="">
                       
                       {% for name in user_names%}
@@ -404,10 +404,10 @@
       // return
         event.preventDefault();
         var user_name = document.getElementById("user_name");
-        var vendor_name = $( "#vendor_name option:selected" ).val();
+        var vendor_name = document.getElementById("vendor_name");
         var data= new FormData;
         data.append('user_name', user_name.value)
-        data.append('vendor_name', vendor_name)
+        data.append('vendor_name', vendor_name.value)
         // data.append('user_password', user_password)
        
         $.ajax({
@@ -417,7 +417,7 @@
           contentType: false,
           cache: false,
           data: data,
-          url: '/master/map/transporter',
+          url: '/master/map/distributor',
           success: function(response){
             response = JSON.parse(response);
             console.log(typeof(response))

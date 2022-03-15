@@ -23,11 +23,11 @@ def index():
                     # {"name":"Dashboard","icon":"nav-icon fas fa-tachometer-alt","href":"url_for('home_blueprint.index')"}
                     ]
         }
-    user_id = userinfo.query.filter_by(email=current_user.email).first()
-    role_id = usertorole.query.filter_by(user_id=user_id.id).first()
-    role_name = role.query.filter_by(id=role_id.role_id).first()
-    role_permissions = role_mapping[role_name.name]
-    return render_template('index3.html', role_permissions = role_permissions)
+    # user_id = userinfo.query.filter_by(email=current_user.email).first()
+    # role_id = usertorole.query.filter_by(user_id=user_id.id).first()
+    # role_name = role.query.filter_by(id=role_id.role_id).first()
+    # role_permissions = role_mapping[role_name.name]
+    return render_template('index3.html')
 
 @blueprint.route('/<template>')
 @login_required

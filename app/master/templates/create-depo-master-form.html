@@ -113,12 +113,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Map Transporters</h1>
+            <h1>Map Depo Master</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">App Auditors/Edit</li>
+              <li class="breadcrumb-item active">Map Depo/Edit</li>
             </ol>
           </div>
         </div>
@@ -134,7 +134,7 @@
             <!-- general form elements -->
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Register User</h3>
+                <h3 class="card-title">Register Depo Master</h3>
               </div>
               <!-- /.card-header -->
               <!-- form start -->
@@ -402,6 +402,7 @@
     $("#submit-btn").click(function(){
       // alert(true);
       // return
+      
         event.preventDefault();
         var user_name = document.getElementById("user_name");
         var vendor_name = $( "#vendor_name option:selected" ).val();
@@ -417,7 +418,7 @@
           contentType: false,
           cache: false,
           data: data,
-          url: '/master/map/transporter',
+          url: '/master/map/mapdepomaster',
           success: function(response){
             response = JSON.parse(response);
             console.log(typeof(response))
