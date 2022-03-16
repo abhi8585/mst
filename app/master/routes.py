@@ -407,7 +407,8 @@ def maptransporter():
 
 @blueprint.route('/list/depovendor')
 def listdepovendor():
-    return render_template("list-depo-vendor-form.html")
+    vendors = depovendor.query.all()
+    return render_template("list-depo-vendor-form.html",vendors=vendors)
 
 @blueprint.route('/create/depovendor')
 def createdepovendor():
@@ -438,3 +439,44 @@ def insertdepovendor():
     db.session.add(new_dist_vendor)
     db.session.commit()
     return jsonify(status=200,message="Vendor registered successfully!")
+
+    
+@blueprint.route('/create/depomaster')
+def createdepomaster():
+    vendors = depovendor.query.all()
+    role_obj = role.query.filter_by(name="depo master").first()
+    user_role_obj = usertorole.query.filter_by(role_id=role_obj.id).all()
+    user_names = []
+    for user in user_role_obj:
+        temp = {}
+        user_obj = userinfo.query.filter_by(id=user.user_id).first()
+        temp["name"] = user_obj.name
+        temp["id"] = user_obj.id
+        user_names.append(temp)
+
+    return render_template("create-depo-master-form.html",vendors=vendors,user_names=user_names)
+
+@blueprint.route('/list/depomaster')
+def listdepomaster():
+    depo_masters = depotomaster.query.all()
+    auditor_data = []
+    for master in depo_masters:
+        temp = {}
+        vendor_obj = depovendor.query.filter_by(id=master.vendor_id).first()
+        temp["vendor_name"] = vendor_obj.vendor_name
+        user_obj = userinfo.query.filter_by(id=master.user_id).first()
+        temp["user_name"] = user_obj.name
+        auditor_data.append(temp)
+    return render_template("list-depo-master-form.html",auditor_data=auditor_data)
+
+
+@blueprint.route('/map/mapdepomaster',methods=["POST"])
+def mapdepomaster():
+    user_name = request.form['user_name']
+    vendor_name = request.form['vendor_name']
+    # user_id = userinfo.query.filter_by(name=user_name).first()
+    # vendor_id = transportvendor.query.filter_by(id=vendor_name).first()
+    dist_vendor_id = depotomaster(user_id=user_name, vendor_id=vendor_name, created_at=datetime.now())
+    db.session.add(dist_vendor_id)
+    db.session.commit()
+    return jsonify(status=200, message="distributor mapped successfully")

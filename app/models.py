@@ -308,3 +308,27 @@ class depotomaster(db.Model):
     updated_at = db.Column(db.DateTime())
 
 
+class depoinventory(db.Model):
+    __tablename__ = 'depo_inventory'
+
+    id = db.Column(db.Integer, primary_key=True)
+    submitted_by = db.Column(db.ForeignKey('user_info.id'), nullable=False)
+    depo_id = db.Column(db.ForeignKey('depo_vendor.id'), nullable=False)
+    bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
+    status = db.Column(db.String(25))
+    latitude = db.Column(db.String(50))
+    longnitude = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+
+
+class deviateddepobag(db.Model):
+    __tablename__ = 'deviated_depo_bag'
+
+    id = db.Column(db.Integer, primary_key=True)
+    bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
+    weight = db.Column(db.String(10), nullable=False)
+    remarks = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())

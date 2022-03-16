@@ -131,7 +131,7 @@ def get_bag_data():
             sku_obj = sku.query.filter_by(id=audit_sku_id.sku_id).first()
             if sku_obj is not None:
                 temp_sku = dict(audit_sku_id=audit_sku_id.id,sku_id=sku_obj.id,sku_weight=audit_sku_id.weight
-                    ,sku_asn_code=audit_sku_id.asn_code)
+                    ,sku_asn_code=audit_sku_id.asn_code,name=sku_obj.name,description=sku_obj.description)
                 temp["sku_data"].append(temp_sku)
         return jsonify(status=200,bag_data=temp)
     else:
@@ -187,6 +187,8 @@ def create_pickup():
                                     status=bag_id["status"],created_at=datetime.datetime.now())
                 db.session.add(pick_bag_obj)
                 db.session.add(deviate_bag)
+                temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
+                temp_bag_obj.status = "picked"
                 db.session.commit()
             else:
                 # temp_bag = bag_id
@@ -210,35 +212,35 @@ def create_pickup():
 
 
 pickup_object = {
-    "transporter_id" : "8",
+    "transporter_id" : "11",
     "truck_number" : "12345",
     "latitude" : "23.32",
     "longnitude" : "23.78",
     "dist_id" : "3",
     "bag_data" : [
         {
-            "bag_id" : "177",
+            "bag_id" : "1",
             "bag_weight" : "25",
             "status": "correct",
             "deviated_data" : "",
 
         },
         {
-            "bag_id" : "178",
+            "bag_id" : "2",
             "bag_weight" : "25",
             "status": "correct",
             "deviated_data" : "",
 
         },
         {
-            "bag_id" : "179",
+            "bag_id" : "3",
             "bag_weight" : "25",
             "status": "correct",
             "deviated_data" : "",
 
         },
         {
-            "bag_id" : "180",
+            "bag_id" : "4",
             "bag_weight" : "25",
             "status": "incorrect",
             "deviated_data" : {
