@@ -16,7 +16,7 @@ import os
 from app.base.util import hash_pass
 from app.base.models import User
 # from flask_restful import Resource, Api
-# from app.models import depo, depotovendor
+from app.models import depovendor, depotomaster
 
 
 @blueprint.route('/create/role')
@@ -428,10 +428,10 @@ def insertdepovendor():
     vendor_contact_person = request.form['vendor_contract_person']
     vendor_email_id =  request.form['vendor_email_id']
     vendor_remark = request.form['vendor_remark']
-    user_exist = depo.query.filter_by(id=vendor_email_id).first()
+    user_exist = depovendor.query.filter_by(email=vendor_email_id).first()
     if user_exist is not None:
         return jsonify(status=500,message="vendor exist")
-    new_dist_vendor = transportvendor(vendor_code=vendor_code,vendor_name=vendor_name,address=vendor_address,city=vendor_city,
+    new_dist_vendor = depovendor(vendor_code=vendor_code,vendor_name=vendor_name,address=vendor_address,city=vendor_city,
                                     pin_code=vendor_pin_code,state=vendor_state,latitude=vendor_latitude,longnitude=vendor_longnitude,
                                     contact_number=vendor_contact_number, contact_person=vendor_contact_person,email=vendor_email_id,
                                     created_at=datetime.datetime.now())

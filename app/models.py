@@ -278,5 +278,33 @@ class deviatedbag(db.Model):
 
 
 
+# depo vendor tables
+
+class depovendor(db.Model):
+    __tablename__ = 'depo_vendor'
+    id = db.Column(db.Integer, primary_key=True)
+    vendor_code = db.Column(db.String(50), nullable=False)
+    vendor_name = db.Column(db.String(250), nullable=False)
+    address = db.Column(db.String(500), nullable=False)
+    city = db.Column(db.String(50), nullable=False)
+    pin_code = db.Column(db.String(25), nullable=False)
+    state = db.Column(db.String(50), nullable=False)
+    latitude = db.Column(db.String(50), nullable=False)
+    longnitude = db.Column(db.String(50), nullable=False)
+    contact_person = db.Column(db.String(50), nullable=False)
+    contact_number = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(250), nullable=False)
+    # password = db.Column(db.String(250), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+class depotomaster(db.Model):
+    __tablename__ = 'depo_to_master'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.ForeignKey('user_info.id'), nullable=False)
+    vendor_id = db.Column(db.ForeignKey('depo_vendor.id'), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
 
 
