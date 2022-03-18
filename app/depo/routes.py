@@ -167,4 +167,5 @@ def get_depo():
         return jsonify(status=200,depo_data=depo_data,message="depo data delieverd!")
 
     else:
+
         return jsonify(status=500,message="empty depo data")

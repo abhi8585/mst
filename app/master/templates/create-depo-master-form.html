@@ -167,7 +167,7 @@
                       
                       {% for name in user_names%}
                       
-                      <option selected="selected">{{name}}</option>
+                      <option selected="selected" value={{name.id}}>{{name["name"]}}</option>
                     {% endfor %}
                     <!-- <option selected="selected">Select user</option> -->
                       <!-- <option selected="selected">Choose Role</option> -->
@@ -404,10 +404,11 @@
       // return
       
         event.preventDefault();
-        var user_name = document.getElementById("user_name");
+        // var user_name = document.getElementById("user_name");
+        var user_name = $( "#user_name option:selected" ).val();
         var vendor_name = $( "#vendor_name option:selected" ).val();
         var data= new FormData;
-        data.append('user_name', user_name.value)
+        data.append('user_name', user_name)
         data.append('vendor_name', vendor_name)
         // data.append('user_password', user_password)
        
