@@ -308,6 +308,16 @@ class depotomaster(db.Model):
     updated_at = db.Column(db.DateTime())
 
 
+class depotopicker(db.Model):
+    __tablename__ = 'depo_to_picker'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.ForeignKey('user_info.id'), nullable=False)
+    vendor_id = db.Column(db.ForeignKey('depo_vendor.id'), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+
 class depoinventory(db.Model):
     __tablename__ = 'depo_inventory'
 
@@ -325,6 +335,41 @@ class depoinventory(db.Model):
 
 class deviateddepobag(db.Model):
     __tablename__ = 'deviated_depo_bag'
+
+    id = db.Column(db.Integer, primary_key=True)
+    bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
+    weight = db.Column(db.String(10), nullable=False)
+    remarks = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+
+class depopickup(db.Model):
+    __tablename__ = 'depo_pickup'
+    id = db.Column(db.Integer, primary_key=True)
+    picker_id = db.Column(db.ForeignKey('user_info.id'), nullable=False)
+    truck_number= db.Column(db.String(25), nullable=False)
+    latitude = db.Column(db.String(50), nullable=False)
+    longnitude = db.Column(db.String(50), nullable=False)
+    depo_id = db.Column(db.ForeignKey('depo_vendor.id'), nullable=False)
+    status = db.Column(db.String(25))
+    asn_number = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+
+class depopicktobag(db.Model):
+    __tablename__ = 'depo_pick_to_bag'
+    id = db.Column(db.Integer, primary_key=True)
+    bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
+    pick_id = db.Column(db.ForeignKey('depo_pickup.id'), nullable=False)
+    status = db.Column(db.String(25))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+
+class deviateddepopickbag(db.Model):
+    __tablename__ = 'deviated_depo_pick_bag'
 
     id = db.Column(db.Integer, primary_key=True)
     bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)

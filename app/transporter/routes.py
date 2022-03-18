@@ -189,6 +189,8 @@ def create_pickup():
                 db.session.add(deviate_bag)
                 temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
                 temp_bag_obj.status = "picked"
+                temp_dist_bag = disttobag.query.filter_by(bag_id=bag_id["bag_id"]).first()
+                temp_dist_bag.status = "picked"
                 db.session.commit()
             else:
                 # temp_bag = bag_id
@@ -198,6 +200,8 @@ def create_pickup():
                                     status=bag_id["status"],created_at=datetime.datetime.now())
                     db.session.add(pick_bag_obj)
                     temp_bag_obj.status = "picked"
+                    temp_dist_bag = disttobag.query.filter_by(bag_id=bag_id["bag_id"]).first()
+                    temp_dist_bag.status = "picked"
                     db.session.commit()
         return jsonify(status=200,pickup_number = pickup_number,message="pickup saved successfully!")
     else:

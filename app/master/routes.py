@@ -16,7 +16,7 @@ import os
 from app.base.util import hash_pass
 from app.base.models import User
 # from flask_restful import Resource, Api
-from app.models import depovendor, depotomaster
+from app.models import depovendor, depotomaster, depotopicker
 
 
 @blueprint.route('/create/role')
@@ -480,3 +480,49 @@ def mapdepomaster():
     db.session.add(dist_vendor_id)
     db.session.commit()
     return jsonify(status=200, message="distributor mapped successfully")
+
+
+
+# depo picker
+
+@blueprint.route('/create/depopicker')
+def createdepopicker():
+    vendors = depovendor.query.all()
+    role_obj = role.query.filter_by(name="depo picker").first()
+    user_role_obj = usertorole.query.filter_by(role_id=role_obj.id).all()
+    user_names = []
+    for user in user_role_obj:
+        temp = {}
+        user_obj = userinfo.query.filter_by(id=user.user_id).first()
+        temp["name"] = user_obj.name
+        temp["id"] = user_obj.id
+        user_names.append(temp)
+
+    return render_template("create-depo-picker-form.html",vendors=vendors,user_names=user_names)
+
+
+@blueprint.route('/list/depopicker')
+def listdepopicker():
+    depo_masters = depotopicker.query.all()
+    auditor_data = []
+    for master in depo_masters:
+        temp = {}
+        vendor_obj = depovendor.query.filter_by(id=master.vendor_id).first()
+        temp["vendor_name"] = vendor_obj.vendor_name
+        user_obj = userinfo.query.filter_by(id=master.user_id).first()
+        temp["user_name"] = user_obj.name
+        auditor_data.append(temp)
+    return render_template("list-depo-picker-form.html",auditor_data=auditor_data)
+
+
+@blueprint.route('/map/mapdepopicker',methods=["POST"])
+def mapdepopicker():
+    user_name = request.form['user_name']
+    vendor_name = request.form['vendor_name']
+    user_id = userinfo.query.filter_by(name=user_name).first()
+    vendor_id = depovendor.query.filter_by(id=vendor_name).first()
+    dist_vendor_id = depotopicker(user_id=user_name, vendor_id=vendor_name, created_at=datetime.now())
+    db.session.add(dist_vendor_id)
+    db.session.commit()
+    return jsonify(status=200, message="picker mapped successfully")
+

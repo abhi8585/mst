@@ -68,8 +68,8 @@ def get_pickup_order():
 
 depo_object = {
 
-    "pickup_number" : "10",
-    "depo_master_id" : "13",
+    "pickup_number" : "6",
+    "depo_master_id" : "14",
     "depo_id" : "1",
     "latitude" : "30.85",
     "longnitude" : "75.85",

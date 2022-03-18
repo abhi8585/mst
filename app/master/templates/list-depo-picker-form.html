@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Blogs {% endblock %} 
+{% block title %} Enquiries {% endblock %} 
 
 <!-- Element injected in the BODY element -->
 {% block body_class %} {% endblock body_class %} 
@@ -26,12 +26,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 >Register Depo</h1>
+            <h1>Depo Picker</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Register Depo Vendor</li>
+              <li class="breadcrumb-item active">Depo Picker</li>
             </ol>
           </div>
         </div>
@@ -45,9 +45,7 @@
           <div class="col-12">
             <div class="card">
               <div class="card-header">
-                <a class="btn btn-primary" href="{{url_for('master_blueprint.createdepovendor')}}">Create Vendor</a>
-                <a class="btn btn-primary" href="{{url_for('master_blueprint.listdepomaster')}}">Map Depo Master</a>
-                <a class="btn btn-primary" href="{{url_for('master_blueprint.listdepopicker')}}">Map Depo Picker</a>
+                <a class="btn btn-primary" href="{{url_for('master_blueprint.createdepopicker')}}">Add Depo Picker</a>
                 <div class="card-tools">
                   <div class="input-group input-group-sm" style="width: 150px;">
                     
@@ -66,23 +64,19 @@
                 <table class="table table-head-fixed text-nowrap">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Code</th>
-                      <th>Email</th>
-                      <!-- <th>Author</th> -->
+                      <th>Depo Picker</th>
+                      <th>Depo</th>
+                      <!-- <th>CREATED AT</th> -->
+                    
                       
                     </tr>
                   </thead>
                   <tbody>
-                    {% for vendor in vendors %}
+                    {% for auditor in auditor_data %}
                       <tr>
-                        <td>{{vendor.id}}</td>
-                        <td>{{vendor.vendor_name}}</a></td>
-                        <td>{{vendor.vendor_code}}</a></td>
-                        <td>{{vendor.email}}</td>
+                        <td><a href="">{{auditor.user_name}}</a></td>
+                        <td><a href="">{{auditor.vendor_name}}</a></td>
                         
-                       
                       </tr>
                     {% endfor %}
                     
