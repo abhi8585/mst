@@ -63,7 +63,9 @@ def get_pickup_order():
                     temp["bag_uid"] = bag_data.uid
                     temp["bag_sku_data"] = sku_data
                     temp_data.append(temp)
-    return jsonify(pickup_data=temp_data)
+        return jsonify(status=200,pickup_data=temp_data)
+    else:
+        return jsonify(status=500,pickup_data=temp_data)
 
 
 depo_object = {
@@ -167,21 +169,21 @@ depo_asn_object = {
     "longnitude" : "75.85",
     "bag_data" : [
         {
-            "bag_id" : "1",
+            "bag_id" : "177",
             "bag_weight" : "25",
             "status": "correct",
             "deviated_data" : ""
 
         },
         {
-            "bag_id" : "2",
+            "bag_id" : "179",
             "bag_weight" : "25",
             "status": "correct",
             "deviated_data" : ""
 
         },
         {
-            "bag_id" : "3",
+            "bag_id" : "180",
             "bag_weight" : "25",
             "status": "correct",
             "deviated_data" : ""
