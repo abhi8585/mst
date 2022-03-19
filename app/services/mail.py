@@ -8,7 +8,7 @@ from decouple import config
 class MailService():
     def __init__(self):
         try:
-            self.mail=Mail(app)
+            self.mail=Mail()
         except Exception as e:
             print(e)
             print("MailService: mail not configured")
@@ -16,8 +16,8 @@ class MailService():
     def send_mail(self,subject,recipient,body,attachment=None,html=None):
         try:
             msg=Message(subject,recipients=[recipient],body=body,
-                        sender=config('MAIL_USERNAME'),charset='utf-8',
-                        extra_headers={'Disposition-Notification-To':config('MAIL_DEFAULT_SENDER')}) # to send mail receipt to admin
+                        sender="abhi.sharma1114@gmail.com",charset='utf-8',
+                        extra_headers={'Disposition-Notification-To':'abhi.sharma1114@gmail.com'}) # to send mail receipt to admin
             # send the path of the attachment that is to be sent
             if attachment:
                 with app.open_resource(attachment) as fp:

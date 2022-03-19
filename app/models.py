@@ -377,3 +377,58 @@ class deviateddepopickbag(db.Model):
     remarks = db.Column(db.String(500))
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())
+
+
+class destructionvendor(db.Model):
+    __tablename__ = 'destruction_vendor'
+    id = db.Column(db.Integer, primary_key=True)
+    vendor_code = db.Column(db.String(50), nullable=False)
+    vendor_name = db.Column(db.String(250), nullable=False)
+    address = db.Column(db.String(500), nullable=False)
+    city = db.Column(db.String(50), nullable=False)
+    pin_code = db.Column(db.String(25), nullable=False)
+    state = db.Column(db.String(50), nullable=False)
+    latitude = db.Column(db.String(50), nullable=False)
+    longnitude = db.Column(db.String(50), nullable=False)
+    contact_person = db.Column(db.String(50), nullable=False)
+    contact_number = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(250), nullable=False)
+    # password = db.Column(db.String(250), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+class destructiontomaster(db.Model):
+    __tablename__ = 'destruction_to_master'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.ForeignKey('user_info.id'), nullable=False)
+    vendor_id = db.Column(db.ForeignKey('destruction_vendor.id'), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+
+class destructioninventory(db.Model):
+    __tablename__ = 'destruction_inventory'
+
+    id = db.Column(db.Integer, primary_key=True)
+    submitted_by = db.Column(db.ForeignKey('user_info.id'), nullable=False)
+    destruction_id = db.Column(db.ForeignKey('destruction_vendor.id'), nullable=False)
+    bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
+    status = db.Column(db.String(25))
+    latitude = db.Column(db.String(50))
+    longnitude = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+
+
+
+class deviateddestructionbag(db.Model):
+    __tablename__ = 'deviated_destruction_bag'
+
+    id = db.Column(db.Integer, primary_key=True)
+    bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
+    weight = db.Column(db.String(10), nullable=False)
+    remarks = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime())
+

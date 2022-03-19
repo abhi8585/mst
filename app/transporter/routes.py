@@ -1,4 +1,6 @@
 from email import message
+from operator import sub
+from re import M
 from app import transporter
 from app.transporter import blueprint
 from flask_restful import Resource, Api
@@ -9,6 +11,26 @@ from app.models import audit, bag, sku, auditsku, bagtosku, audittobag, disttoba
 from app.models import deviatedbag
 from app import db
 import datetime
+
+from app import mail
+
+from flask_mail import Message
+
+@blueprint.route("/send_email")
+def send_email():
+
+    msg = Message("Hello",
+                  sender="abhi.sharma1114@gmail.com",
+                  recipients=["sharma.abhi1114@gmail.com"])
+    # msg.recipients = [""]
+    # msg.add_recipient("sharma.abhi1114@gmail.com")
+    msg.body = "its fooking working!"
+    mail.send(msg)
+    return 'true'
+
+
+
+
 
 
 
@@ -312,3 +334,5 @@ def delete():
     audit.query.delete()
     db.session.commit()
     return "data deleted"
+
+

@@ -12,6 +12,8 @@ from decouple import config
 from config import config_dict
 from app import create_app, db
 
+
+
 # WARNING: Don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True)
 
@@ -28,6 +30,7 @@ except KeyError:
 
 app = create_app( app_config ) 
 migrate = Migrate(app, db)
+
 
 
 def has_no_empty_params(rule):

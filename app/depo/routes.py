@@ -9,7 +9,7 @@ import json
 from app.base.util import verify_pass
 from app.models import audit, bag, depotomaster, depovendor, sku, auditsku, bagtosku, audittobag, disttobag, pickup, picktobag, deviatedbag
 from app import db
-from app.models import depoinventory, deviateddepobag
+from app.models import depoinventory, deviateddepobag, depopickup
 import datetime
 
 
@@ -149,6 +149,112 @@ def submit_pickup():
         return jsonify(status=200,message="pickup saved successfully!")
     else:
         return jsonify(status=500,message="no data to save")
+
+
+
+# get asn number data will be as same as destruction centre
+
+
+# create pickup in depo with asn number
+
+
+depo_asn_object = {
+
+    "asn_number" : "ASN00MND00TNT12",
+    "depo_master_id" : "14",
+    "depo_id" : "2",
+    "latitude" : "30.85",
+    "longnitude" : "75.85",
+    "bag_data" : [
+        {
+            "bag_id" : "1",
+            "bag_weight" : "25",
+            "status": "correct",
+            "deviated_data" : ""
+
+        },
+        {
+            "bag_id" : "2",
+            "bag_weight" : "25",
+            "status": "correct",
+            "deviated_data" : ""
+
+        },
+        {
+            "bag_id" : "3",
+            "bag_weight" : "25",
+            "status": "correct",
+            "deviated_data" : ""
+
+        },
+        {
+            "bag_id" : "178",
+            "bag_weight" : "25",
+            "status": "incorrect",
+            "deviated_data" : {
+                "weight" : "15",
+                "remarks" : "weight is less"
+            }
+
+        }
+    
+    ]
+    
+
+}
+
+
+@blueprint.route('/submit_asn_pickup',methods=['GET','POST'])
+def submit_asn_pickup():
+    data = request.get_json(force=True)
+    asn_number = data["asn_number"]
+    depo_master_id = data["depo_master_id"]
+    depo_id = data["depo_id"]
+    latitude = data["latitude"]
+    longnitude = data["longnitude"]
+    bag_data = data["bag_data"]
+    if bag is not None and len(bag_data) !=0:
+        for temp_bag in bag_data:
+            if temp_bag["status"] == "incorrect":
+                prev_bag_obj = depoinventory.query.filter_by(bag_id=temp_bag["bag_id"]).first()
+                if prev_bag_obj is not None:
+                    if str(prev_bag_obj.depo_id) == depo_id:
+                        return jsonify(status=500, message="can not save")
+                    else:
+                        submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
+                                                    longnitude=longnitude,created_at=datetime.datetime.now(),
+                                                    submitted_by=depo_master_id)
+                        deviated_data = temp_bag["deviated_data"]
+                        deviated_bag_obj = deviateddepobag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
+                                                    remarks=deviated_data["remarks"], created_at=datetime.datetime.now())
+                        db.session.add(submit_obj)
+                        db.session.add(deviated_bag_obj)
+                        bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                        bag_obj.status = "collected"
+                        db.session.commit()
+            else:
+                prev_bag_obj = depoinventory.query.filter_by(bag_id=temp_bag["bag_id"]).first()
+                if prev_bag_obj is not None:
+                    if str(prev_bag_obj.depo_id) != depo_id:
+                        submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
+                                                    longnitude=longnitude,created_at=datetime.datetime.now(),
+                                                    submitted_by=depo_master_id)
+                        db.session.add(submit_obj)
+                        bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                        bag_obj.status = "collected"
+                        db.session.commit()
+                    else:
+                        return jsonify(status=500, message="can not save")
+
+        pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
+        pickup_obj.status = "collected"
+        db.session.commit()
+        return jsonify(status=200,message="pickup saved successfully!")
+    else:
+        return jsonify(status=500,message="no data to save")
+
+
+
 
 
 @blueprint.route('/get_depo',methods=['GET','POST'])
