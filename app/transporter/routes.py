@@ -225,6 +225,8 @@ def create_pickup():
                     temp_dist_bag = disttobag.query.filter_by(bag_id=bag_id["bag_id"]).first()
                     temp_dist_bag.status = "picked"
                     db.session.commit()
+                else:
+                    return jsonify(status=500,message="bag data mismatch!")
         return jsonify(status=200,pickup_number = pickup_number,message="pickup saved successfully!")
     else:
         return jsonify(status=500,message="no bag data to store!")
