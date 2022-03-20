@@ -140,12 +140,14 @@ def submit_pickup():
     try:
         depo_master_obj = userinfo.query.filter_by(id=depo_master_id).first()
         depo_master_name = depo_master_obj.name
-    except:
+    except Exception as e:
+        print(e)
         return jsonify(status=500,message="no depo master found")
     try:
         depo_obj = depovendor.query.filter_by(id=depo_id).first()
         depo_name = depo_obj.vendor_name
-    except:
+    except Exception as e:
+        print(e)
         return jsonify(status=500,message="no depo found")
     if bag is not None and len(bag_data) !=0:
         for temp_bag in bag_data:
@@ -173,7 +175,8 @@ def submit_pickup():
                     #         """.format(bag_obj.uid,actual_weight, new_weight, depo_master_name,depo_name)
                     # temp += content
                     # temp = '\n'.join([temp, content])
-                except:
+                except Exception as e:
+                    print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="no data to save")
@@ -190,7 +193,8 @@ def submit_pickup():
                                             submitted_by=depo_master_id)
                     db.session.add(submit_obj)
                     bag_obj.status = "collected"
-                except:
+                except Exception as e:
+                    print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="no data to save")
@@ -200,7 +204,8 @@ def submit_pickup():
             db.session.commit()
             send_email(tabulate(table_headings, tablefmt='html'))
             return jsonify(status=200,message="pickup saved successfully!")
-        except:
+        except Exception as e:
+            print(e)
             db.session.rollback()
             db.session.close()
             return jsonify(status=500,message="no data to save")

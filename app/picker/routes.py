@@ -103,7 +103,8 @@ def create_pickup():
                             depo_id=depo_id,asn_number=asn_number,status="picked",created_at=datetime.datetime.now())
         db.session.add(pickup_obj)
         db.session.commit()
-    except:
+    except Exception as e:
+        print(e)
         db.session.rollback()
         db.session.close()
         return jsonify(status=500, message="pickup can not be saved!")
@@ -122,7 +123,8 @@ def create_pickup():
                     temp_bag_obj.status = "dispatched"
                     temp_dist_bag = depoinventory.query.filter_by(bag_id=bag_id["bag_id"]).first()
                     temp_dist_bag.status = "dispatched"
-                except:
+                except Exception as e:
+                    print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="data can not save")
@@ -141,7 +143,8 @@ def create_pickup():
                         db.session.rollback()
                         db.session.close()
                         return jsonify(status=500,message="data can not save")
-                except:
+                except Exception as e:
+                    print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="data can not save")

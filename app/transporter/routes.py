@@ -199,7 +199,8 @@ def create_pickup():
     try:
         trans_obj = userinfo.query.filter_by(id=transporter_id).first()
         transporter_name = trans_obj.name
-    except:
+    except Exception as e:
+        print(e)
         return jsonify(status=500, message="no transporter found")
    
     # get distributor name
@@ -207,7 +208,8 @@ def create_pickup():
     try:
         dist_obj = distvendor.query.filter_by(id=dist_id).first()
         dist_name = dist_obj.vendor_name
-    except:
+    except Exception as e:
+        print(e)
         return jsonify(status=500, message="no distributor found")
 
     pickup_number = pickup.query.count() + 1
@@ -217,7 +219,8 @@ def create_pickup():
                             dist_id=dist_id,pickup_number=pickup_number,status="picked",created_at=datetime.datetime.now())
         db.session.add(pickup_obj)
         db.session.commit()
-    except:
+    except Exception as e:
+        print(e)
         db.session.rollback()
         db.session.close()
         return jsonify(status=500,message="pickup can not save")
@@ -241,7 +244,8 @@ def create_pickup():
                     table_headings.append([temp_bag_obj.uid,actual_weight,new_weight,transporter_name,dist_name])
                     
 
-                except:
+                except Exception as e:
+                    print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="bag data can not be saved")
@@ -262,7 +266,8 @@ def create_pickup():
                             db.session.rollback()
                             db.session.close()
                             return jsonify(status=500,message="bag data mismatch!")
-                except:
+                except Exception as e:
+                    print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="bag data can not be saved")

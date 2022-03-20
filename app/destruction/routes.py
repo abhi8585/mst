@@ -178,7 +178,8 @@ def submit_pickup():
                     bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
                     bag_obj.status = "received"
                     
-                except:
+                except Exception as e:
+                    print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="no data to save")
@@ -193,7 +194,8 @@ def submit_pickup():
                         bag_obj.status = "received"
                     else:
                         return jsonify(status=500,message="no data to save")
-                except:
+                except Exception as e:
+                    print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="no data to save")
@@ -202,7 +204,8 @@ def submit_pickup():
             pickup_obj.status = "collected"
             db.session.commit()
             return jsonify(status=200,message="pickup saved successfully!")
-        except:
+        except Exception as e:
+            print(e)
             db.session.rollback()
             db.session.close()
             return jsonify(status=500,message="no data to save")
