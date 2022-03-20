@@ -120,7 +120,6 @@ depo_object = {
 def send_email(html):
 
     msg = Message("Bag Marked deviated by Depo Master",
-                  sender="admin@mondeleztnt.in",
                   recipients=["sharma.abhi1114@gmail.com"])
     # msg.recipients = [""]
     # msg.add_recipient("sharma.abhi1114@gmail.com")

@@ -27,10 +27,10 @@ class Config(object):
     MAIL_SERVER = config('MAIL_SERVER', default='smtpout.secureserver.net')
     MAIL_PORT   = config('MAIL_PORT', default=465)
     MAIL_USE_SSL = config('MAIL_USE_SSL', default=True)
-    MAIL_USE_TLS = config('MAIL_USE_SSL', default=False)
+    MAIL_USE_TLS = config('MAIL_USE_TLS', default=False)
     MAIL_USERNAME = config('MAIL_USERNAME',default='admin@mondeleztnt.in')
     MAIL_PASSWORD = config('MAIL_PASSWORD', default='@admin123')
-    MAIL_DEFAULT_SENDER = config('MAIL_DEFAULT_SENDER', default= os.environ.get('MAIL_DEFAULT_SENDER','abhi.sharma1114@gmail.com') )
+    MAIL_DEFAULT_SENDER = config('MAIL_DEFAULT_SENDER', default= os.environ.get('MAIL_DEFAULT_SENDER','admin@mondeleztnt.in') )
     # This will create a file in <app> FOLDER
     # SQLALCHEMY_DATABASE_URI = 'mysql://root:''@localhost/mts'
     SQLALCHEMY_DATABASE_URI = 'mysql://admin:Romil123@mondelez.c3uhktkf90fd.ap-south-1.rds.amazonaws.com:3306/mts'
@@ -55,7 +55,7 @@ class ProductionConfig(Config):
     
     # PostgreSQL database
     # SQLALCHEMY_DATABASE_URI = 'mysql://root:''@localhost/mts'
-    SQLALCHEMY_DATABASE_URI = 'mysql://admin:Romil123@mondelez.c3uhktkf90fd.ap-south-1.rds.amazonaws.com:3306/mts'
+    SQLALCHEMY_DATABASE_URI = 'mysql://admin:Romil123@mondelez.c3uh/ktkf90fd.ap-south-1.rds.amazonaws.com:3306/mts'
 #
 class DebugConfig(Config):
     DEBUG = True
