@@ -89,8 +89,6 @@ pickup_object = {
 # create depo pickup object and map it to bag
 @blueprint.route('/create_pickup',methods=["GET","POST"])
 def create_pickup():
-    import string
-    import random
     data = request.get_json(force=True)
     picker_id = data["picker_id"]
     truck_number = data["truck_number"]
@@ -100,38 +98,58 @@ def create_pickup():
     bag_data = data["bag_data"]
     pickup_number = depopickup.query.count() + 1
     asn_number = "ASN00MND00TNT{0}".format(pickup_number)
-    pickup_obj = depopickup(picker_id=picker_id,truck_number=truck_number,latitude=latitude,longnitude=longnitude,
-                        depo_id=depo_id,asn_number=asn_number,status="picked",created_at=datetime.datetime.now())
-    db.session.add(pickup_obj)
-    db.session.commit()
+    try:
+        pickup_obj = depopickup(picker_id=picker_id,truck_number=truck_number,latitude=latitude,longnitude=longnitude,
+                            depo_id=depo_id,asn_number=asn_number,status="picked",created_at=datetime.datetime.now())
+        db.session.add(pickup_obj)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        db.session.close()
+        return jsonify(status=500, message="pickup can not be saved!")
     if len(bag_data) != 0:
         for bag_id in bag_data:
             if bag_id["deviated_data"] != "" and bag_id["status"] == "incorrect":
-                temp = bag_id["deviated_data"]
-                deviate_bag = deviateddepopickbag(bag_id=bag_id["bag_id"],weight=temp["weight"],
-                                        remarks=temp["remarks"],created_at=datetime.datetime.now())
-                pick_bag_obj = depopicktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
-                                    status=bag_id["status"],created_at=datetime.datetime.now())
-                db.session.add(pick_bag_obj)
-                db.session.add(deviate_bag)
-                temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
-                temp_bag_obj.status = "dispatched"
-                temp_dist_bag = depoinventory.query.filter_by(bag_id=bag_id["bag_id"]).first()
-                temp_dist_bag.status = "dispatched"
-                db.session.commit()
-            else:
-                # temp_bag = bag_id
-                temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
-                if temp_bag_obj.weight == bag_id["bag_weight"]:
+                try:
+                    temp = bag_id["deviated_data"]
+                    deviate_bag = deviateddepopickbag(bag_id=bag_id["bag_id"],weight=temp["weight"],
+                                            remarks=temp["remarks"],created_at=datetime.datetime.now())
                     pick_bag_obj = depopicktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
-                                    status=bag_id["status"],created_at=datetime.datetime.now())
+                                        status=bag_id["status"],created_at=datetime.datetime.now())
                     db.session.add(pick_bag_obj)
+                    db.session.add(deviate_bag)
+                    temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
                     temp_bag_obj.status = "dispatched"
                     temp_dist_bag = depoinventory.query.filter_by(bag_id=bag_id["bag_id"]).first()
                     temp_dist_bag.status = "dispatched"
-                    db.session.commit()
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    return jsonify(status=500,message="data can not save")
+            else:
+                # temp_bag = bag_id
+                try:
+                    temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
+                    if temp_bag_obj.weight == bag_id["bag_weight"]:
+                        pick_bag_obj = depopicktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
+                                        status=bag_id["status"],created_at=datetime.datetime.now())
+                        db.session.add(pick_bag_obj)
+                        temp_bag_obj.status = "dispatched"
+                        temp_dist_bag = depoinventory.query.filter_by(bag_id=bag_id["bag_id"]).first()
+                        temp_dist_bag.status = "dispatched"
+                    else:
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="data can not save")
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    return jsonify(status=500,message="data can not save")
+        db.session.commit()
         return jsonify(status=200,pickup_number = asn_number,message="depo pickup saved successfully!")
     else:
+        db.session.rollback()
+        db.session.close()
         return jsonify(status=500,message="no bag data to store!")
 
 
@@ -145,10 +163,11 @@ def get_depo_pickup():
         for pick in pickup_obj:
             temp = {}
             bag_count = depopicktobag.query.filter_by(pick_id=pick.id).count()
-            temp["total_bag"] = bag_count
-            temp["pickup_number"] = pick.asn_number
-            temp["date"] = pick.created_at
-            pickup_data.append(temp)
+            if bag_count > 0 :
+                temp["total_bag"] = bag_count
+                temp["pickup_number"] = pick.asn_number
+                temp["date"] = pick.created_at
+                pickup_data.append(temp)
     else:
         return jsonify(status=500,message="no pickups")
     if len(pickup_data) != 0:

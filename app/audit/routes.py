@@ -70,6 +70,7 @@ def create_audit():
     latitude, longnitude = data["latitude"], data["longnitude"]
     bags = data["bags"]
     # create new audit
+    
     audit_id = audit(dist_id=distributor_id,auditor_id=auditor_id,latitude=latitude,
                     longnitude=longnitude, created_at = datetime.datetime.now(), status = "incomplete")
     db.session.add(audit_id)

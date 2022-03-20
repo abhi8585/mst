@@ -66,7 +66,7 @@ def get_destruction():
 
     else:
 
-        return jsonify(status=500,message="empty depo data")
+        return jsonify(status=500,depo_data=depo_data,message="empty depo data")
 
 
 @blueprint.route('/get_asn_number_data',methods=['GET','POST'])
@@ -166,29 +166,46 @@ def submit_pickup():
     if bag is not None and len(bag_data) !=0:
         for temp_bag in bag_data:
             if temp_bag["status"] == "incorrect":
-                submit_obj = destructioninventory(destruction_id=destruction_id,bag_id=temp_bag["bag_id"],status="received",latitude=latitude,
+                try:
+                    submit_obj = destructioninventory(destruction_id=destruction_id,bag_id=temp_bag["bag_id"],status="received",latitude=latitude,
                                             longnitude=longnitude,created_at=datetime.datetime.now(),
                                             submitted_by=destruction_master_id)
-                deviated_data = temp_bag["deviated_data"]
-                deviated_bag_obj = deviateddestructionbag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
-                                               remarks=deviated_data["remarks"], created_at=datetime.datetime.now())
-                db.session.add(submit_obj)
-                db.session.add(deviated_bag_obj)
-                bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                bag_obj.status = "received"
-                db.session.commit()
+                    deviated_data = temp_bag["deviated_data"]
+                    deviated_bag_obj = deviateddestructionbag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
+                                                remarks=deviated_data["remarks"], created_at=datetime.datetime.now())
+                    db.session.add(submit_obj)
+                    db.session.add(deviated_bag_obj)
+                    bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                    bag_obj.status = "received"
+                    
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    return jsonify(status=500,message="no data to save")
             else:
-                submit_obj = destructioninventory(destruction_id=destruction_id,bag_id=temp_bag["bag_id"],status="received",latitude=latitude,
-                                            longnitude=longnitude,created_at=datetime.datetime.now(),
-                                            submitted_by=destruction_master_id)
-                db.session.add(submit_obj)
-                bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                bag_obj.status = "received"
-                db.session.commit()
-        pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
-        pickup_obj.status = "collected"
-        db.session.commit()
-        return jsonify(status=200,message="pickup saved successfully!")
+                try:
+                    bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                    if temp_bag["bag_weight"] == bag_obj.weight:
+                        submit_obj = destructioninventory(destruction_id=destruction_id,bag_id=temp_bag["bag_id"],status="received",latitude=latitude,
+                                                longnitude=longnitude,created_at=datetime.datetime.now(),
+                                                submitted_by=destruction_master_id)
+                        db.session.add(submit_obj)
+                        bag_obj.status = "received"
+                    else:
+                        return jsonify(status=500,message="no data to save")
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    return jsonify(status=500,message="no data to save")
+        try:
+            pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
+            pickup_obj.status = "collected"
+            db.session.commit()
+            return jsonify(status=200,message="pickup saved successfully!")
+        except:
+            db.session.rollback()
+            db.session.close()
+            return jsonify(status=500,message="no data to save")
     else:
         return jsonify(status=500,message="no data to save")
 

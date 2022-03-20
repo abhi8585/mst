@@ -2,17 +2,20 @@ from email import message
 
 # from sympy import residue
 from app import transporter
+from tabulate import tabulate
 from app.depo import blueprint
 from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
 import json
 from app.base.util import verify_pass
-from app.models import audit, bag, depotomaster, depovendor, sku, auditsku, bagtosku, audittobag, disttobag, pickup, picktobag, deviatedbag
+from app.models import audit, bag, depotomaster, depovendor, sku, auditsku, bagtosku, audittobag, disttobag, pickup, picktobag, deviatedbag, userinfo
 from app import db
 from app.models import depoinventory, deviateddepobag, depopickup
 import datetime
 
+from app import mail
 
+from flask_mail import Message
 
 # return sku data for a bag with id
 
@@ -113,6 +116,16 @@ depo_object = {
 
 }
             
+
+def send_email(html):
+    msg = Message("Bag Marked deviated by Depo Master",
+                  sender="abhi.sharma1114@gmail.com",
+                  recipients=["sharma.abhi1114@gmail.com"])
+    # msg.recipients = [""]
+    # msg.add_recipient("sharma.abhi1114@gmail.com")
+    msg.html = html
+    mail.send(msg)
+    print("mail sent")
             
 @blueprint.route('/submit_pickup',methods=['GET','POST'])
 def submit_pickup():
@@ -123,32 +136,75 @@ def submit_pickup():
     latitude = data["latitude"]
     longnitude = data["longnitude"]
     bag_data = data["bag_data"]
+    table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
+    try:
+        depo_master_obj = userinfo.query.filter_by(id=depo_master_id).first()
+        depo_master_name = depo_master_obj.name
+    except:
+        return jsonify(status=500,message="no depo master found")
+    try:
+        depo_obj = depovendor.query.filter_by(id=depo_id).first()
+        depo_name = depo_obj.vendor_name
+    except:
+        return jsonify(status=500,message="no depo found")
     if bag is not None and len(bag_data) !=0:
         for temp_bag in bag_data:
             if temp_bag["status"] == "incorrect":
-                submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
+                try:
+                    submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
                                             longnitude=longnitude,created_at=datetime.datetime.now(),
                                             submitted_by=depo_master_id)
-                deviated_data = temp_bag["deviated_data"]
-                deviated_bag_obj = deviateddepobag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
-                                               remarks=deviated_data["remarks"], created_at=datetime.datetime.now())
-                db.session.add(submit_obj)
-                db.session.add(deviated_bag_obj)
-                bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                bag_obj.status = "collected"
-                db.session.commit()
+                    deviated_data = temp_bag["deviated_data"]
+                    deviated_bag_obj = deviateddepobag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
+                                                remarks=deviated_data["remarks"], created_at=datetime.datetime.now())
+                    db.session.add(submit_obj)
+                    db.session.add(deviated_bag_obj)
+                    bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                    bag_obj.status = "collected"
+                    new_weight = deviated_data["weight"]
+                    actual_weight = bag_obj.weight
+                    table_headings.append([bag_obj.uid,actual_weight, new_weight, depo_master_name,depo_name])
+                    # content = """
+                    #             <th>{0}</th>
+                    #             <th>{1}</th>
+                    #             <th>{2}</th>
+                    #             <th>{3}</th>
+                    #             <th>{4}</th>
+                    #         """.format(bag_obj.uid,actual_weight, new_weight, depo_master_name,depo_name)
+                    # temp += content
+                    # temp = '\n'.join([temp, content])
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    return jsonify(status=500,message="no data to save")
+                
             else:
-                submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
+                try:
+                    bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                    if temp_bag["bag_weight"] != bag_obj.weight:
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="no data to save")
+                    submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
                                             longnitude=longnitude,created_at=datetime.datetime.now(),
                                             submitted_by=depo_master_id)
-                db.session.add(submit_obj)
-                bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                bag_obj.status = "collected"
-                db.session.commit()
-        pickup_obj = pickup.query.filter_by(pickup_number=pickup_number).first()
-        pickup_obj.status = "collected"
-        db.session.commit()
-        return jsonify(status=200,message="pickup saved successfully!")
+                    db.session.add(submit_obj)
+                    bag_obj.status = "collected"
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    return jsonify(status=500,message="no data to save")
+        try:        
+            pickup_obj = pickup.query.filter_by(pickup_number=pickup_number).first()
+            pickup_obj.status = "collected"
+            db.session.commit()
+            send_email(tabulate(table_headings, tablefmt='html'))
+            return jsonify(status=200,message="pickup saved successfully!")
+        except:
+            db.session.rollback()
+            db.session.close()
+            return jsonify(status=500,message="no data to save")
+            
     else:
         return jsonify(status=500,message="no data to save")
 

@@ -7,7 +7,7 @@ from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
 import json
 from app.base.util import verify_pass
-from app.models import audit, bag, sku, auditsku, bagtosku, audittobag, disttobag, pickup, picktobag, transtovendor, transportvendor, disttovendor, distvendor
+from app.models import audit, bag, sku, auditsku, bagtosku, audittobag, disttobag, pickup, picktobag, transtovendor, transportvendor, disttovendor, distvendor, userinfo
 from app.models import deviatedbag
 from app import db
 import datetime
@@ -15,23 +15,7 @@ import datetime
 from app import mail
 
 from flask_mail import Message
-
-@blueprint.route("/send_email")
-def send_email():
-
-    msg = Message("Hello",
-                  sender="abhi.sharma1114@gmail.com",
-                  recipients=["sharma.abhi1114@gmail.com"])
-    # msg.recipients = [""]
-    # msg.add_recipient("sharma.abhi1114@gmail.com")
-    msg.body = "its fooking working!"
-    mail.send(msg)
-    return 'true'
-
-
-
-
-
+from tabulate import tabulate
 
 
 # @blueprint.route('/get_dist_order',methods=['GET','POST'])
@@ -179,6 +163,21 @@ def create_pickup_number():
                 translated = translated + symbol
     print('Hacking key #%s: %s' % (key, translated))
 
+
+
+def send_email(html):
+
+    msg = Message("Bag Marked deviated by Transporter",
+                  sender="abhi.sharma1114@gmail.com",
+                  recipients=["sharma.abhi1114@gmail.com"])
+    # msg.recipients = [""]
+    # msg.add_recipient("sharma.abhi1114@gmail.com")
+    msg.html = html
+    mail.send(msg)
+    print("mail sent")
+
+
+
 # create pickup object and map it to bag
 @blueprint.route('/create_pickup',methods=["GET","POST"])
 def create_pickup():
@@ -191,44 +190,89 @@ def create_pickup():
     longnitude = data["longnitude"]
     dist_id = data["dist_id"]
     bag_data = data["bag_data"]
+    table_headings = [["Bag UID", "Actual Weight", "New Weight", "Transporter", "Distributor"]]
     # hash = create_pickup_number()
     # need to create pickup number
     # pickup_number = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 10))
+    
+    # get transporter name
+    try:
+        trans_obj = userinfo.query.filter_by(id=transporter_id).first()
+        transporter_name = trans_obj.name
+    except:
+        return jsonify(status=500, message="no transporter found")
+   
+    # get distributor name
+
+    try:
+        dist_obj = distvendor.query.filter_by(id=dist_id).first()
+        dist_name = dist_obj.vendor_name
+    except:
+        return jsonify(status=500, message="no distributor found")
+
     pickup_number = pickup.query.count() + 1
-    pickup_obj = pickup(transporter_id=transporter_id,truck_number=truck_number,latitude=latitude,longnitude=longnitude,
-                        dist_id=dist_id,pickup_number=pickup_number,status="picked",created_at=datetime.datetime.now())
-    db.session.add(pickup_obj)
-    db.session.commit()
+    pickup_number = "PCK00MND00TNT{0}".format(pickup_number)
+    try:
+        pickup_obj = pickup(transporter_id=transporter_id,truck_number=truck_number,latitude=latitude,longnitude=longnitude,
+                            dist_id=dist_id,pickup_number=pickup_number,status="picked",created_at=datetime.datetime.now())
+        db.session.add(pickup_obj)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        db.session.close()
+        return jsonify(status=500,message="pickup can not save")
     if len(bag_data) != 0:
         for bag_id in bag_data:
             if bag_id["deviated_data"] != "" and bag_id["status"] == "incorrect":
-                temp = bag_id["deviated_data"]
-                deviate_bag = deviatedbag(bag_id=bag_id["bag_id"],weight=temp["weight"],
-                                        remarks=temp["remarks"],created_at=datetime.datetime.now())
-                pick_bag_obj = picktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
-                                    status=bag_id["status"],created_at=datetime.datetime.now())
-                db.session.add(pick_bag_obj)
-                db.session.add(deviate_bag)
-                temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
-                temp_bag_obj.status = "picked"
-                temp_dist_bag = disttobag.query.filter_by(bag_id=bag_id["bag_id"]).first()
-                temp_dist_bag.status = "picked"
-                db.session.commit()
-            else:
-                # temp_bag = bag_id
-                temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
-                if temp_bag_obj.weight == bag_id["bag_weight"]:
+                try:
+                    temp = bag_id["deviated_data"]
+                    deviate_bag = deviatedbag(bag_id=bag_id["bag_id"],weight=temp["weight"],
+                                            remarks=temp["remarks"],created_at=datetime.datetime.now())
                     pick_bag_obj = picktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
-                                    status=bag_id["status"],created_at=datetime.datetime.now())
+                                        status=bag_id["status"],created_at=datetime.datetime.now())
                     db.session.add(pick_bag_obj)
+                    db.session.add(deviate_bag)
+                    temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
                     temp_bag_obj.status = "picked"
                     temp_dist_bag = disttobag.query.filter_by(bag_id=bag_id["bag_id"]).first()
                     temp_dist_bag.status = "picked"
-                    db.session.commit()
-                else:
-                    return jsonify(status=500,message="bag data mismatch!")
+                    actual_weight = temp_bag_obj.weight
+                    new_weight = bag_id["deviated_data"]["weight"]
+                    table_headings.append([temp_bag_obj.uid,actual_weight,new_weight,transporter_name,dist_name])
+                    
+
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    return jsonify(status=500,message="bag data can not be saved")
+                
+            else:
+                # temp_bag = bag_id
+                temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
+                try:
+                        if temp_bag_obj.weight == bag_id["bag_weight"]:
+                            pick_bag_obj = picktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
+                                            status=bag_id["status"],created_at=datetime.datetime.now())
+                            db.session.add(pick_bag_obj)
+                            temp_bag_obj.status = "picked"
+                            temp_dist_bag = disttobag.query.filter_by(bag_id=bag_id["bag_id"]).first()
+                            temp_dist_bag.status = "picked"
+                        
+                        else:
+                            db.session.rollback()
+                            db.session.close()
+                            return jsonify(status=500,message="bag data mismatch!")
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    return jsonify(status=500,message="bag data can not be saved")
+
+        db.session.commit()
+        send_email(tabulate(table_headings, tablefmt='html'))
         return jsonify(status=200,pickup_number = pickup_number,message="pickup saved successfully!")
     else:
+        db.session.rollback()
+        db.session.close()
         return jsonify(status=500,message="no bag data to store!")
     
     #     # temp_bag_obj.status = "picked"
@@ -320,10 +364,11 @@ def get_transport_pickup():
         for pick in pickup_obj:
             temp = {}
             bag_count = picktobag.query.filter_by(pick_id=pick.id).count()
-            temp["total_bag"] = bag_count
-            temp["pickup_number"] = pick.pickup_number
-            temp["date"] = pick.created_at
-            pickup_data.append(temp)
+            if bag_count > 0:
+                temp["total_bag"] = bag_count
+                temp["pickup_number"] = pick.pickup_number
+                temp["date"] = pick.created_at
+                pickup_data.append(temp)
     else:
         return jsonify(status=500,message="no pickups")
     if len(pickup_data) != 0:
