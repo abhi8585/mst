@@ -8,7 +8,10 @@ from app.models import destructiontomaster, destructionvendor, depopickup, devia
 from app import db
 import datetime
 
-from app.models import bag, bagtosku, auditsku, sku, destructioninventory, deviateddestructionbag
+from app.models import bag, bagtosku, auditsku, sku, destructioninventory, deviateddestructionbag, userinfo
+from flask_mail import Message
+from tabulate import tabulate
+from app import mail
 
 
 
@@ -76,6 +79,8 @@ def get_asn_number_data():
     temp_data = []
     pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
     if pickup_obj is not None:
+        if pickup_obj.status == "collected":
+            return jsonify(status=300,message="pickup already completed")
         bags_data = depopicktobag.query.filter_by(pick_id=pickup_obj.id).all()
         for results in bags_data:
             temp = {}
@@ -154,6 +159,19 @@ destruction_object = {
 
 }
 
+
+def send_email(html):
+    try:
+        msg = Message("Bag Marked deviated by Destruction Master",
+                  recipients=["sharma.abhi1114@gmail.com"])
+        msg.html = html
+        mail.send(msg)
+        print("mail sent")
+    except Exception as e:
+        print(e)
+
+    
+
 @blueprint.route('/submit_pickup',methods=['GET','POST'])
 def submit_pickup():
     data = request.get_json(force=True)
@@ -163,6 +181,27 @@ def submit_pickup():
     latitude = data["latitude"]
     longnitude = data["longnitude"]
     bag_data = data["bag_data"]
+    table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
+    try:
+        exist_pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
+        if exist_pickup_obj is not None:
+            if exist_pickup_obj.status == "collected":
+                return jsonify(status=500,message="pickup already saved!")
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="no data to save")
+    try:
+        depo_master_obj = userinfo.query.filter_by(id=destruction_master_id).first()
+        depo_master_name = depo_master_obj.name
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="no depo master found")
+    try:
+        depo_obj = destructionvendor.query.filter_by(id=destruction_id).first()
+        depo_name = depo_obj.vendor_name
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="no depo found")
     if bag is not None and len(bag_data) !=0:
         for temp_bag in bag_data:
             if temp_bag["status"] == "incorrect":
@@ -177,6 +216,7 @@ def submit_pickup():
                     db.session.add(deviated_bag_obj)
                     bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
                     bag_obj.status = "received"
+                    table_headings.append([bag_obj.uid,bag_obj.weight, deviated_data["weight"], depo_master_name,depo_name])
                     
                 except Exception as e:
                     print(e)
@@ -203,6 +243,7 @@ def submit_pickup():
             pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
             pickup_obj.status = "collected"
             db.session.commit()
+            send_email(tabulate(table_headings, tablefmt='html'))
             return jsonify(status=200,message="pickup saved successfully!")
         except Exception as e:
             print(e)

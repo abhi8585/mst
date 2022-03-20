@@ -42,6 +42,8 @@ def get_pickup_order():
     temp_data = []
     pickup_obj = pickup.query.filter_by(pickup_number=pickup_number).first()
     if pickup_obj is not None:
+        if pickup_obj.status == "collected":
+            return jsonify(status=300,message="pickup already collected!")
         bags_data = picktobag.query.filter_by(pick_id=pickup_obj.id).all()
         for results in bags_data:
             temp = {}
@@ -127,6 +129,8 @@ def send_email(html):
     mail.send(msg)
     print("mail sent")
 
+
+
             
 @blueprint.route('/submit_pickup',methods=['GET','POST'])
 def submit_pickup():
@@ -138,6 +142,14 @@ def submit_pickup():
     longnitude = data["longnitude"]
     bag_data = data["bag_data"]
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
+    try:
+        exist_pickup_obj  = pickup.query.filter_by(pickup_number=pickup_number).first()
+        if exist_pickup_obj is not None:
+            if exist_pickup_obj.status == "collected":
+                return jsonify(status=500,message="pickup already saved")
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="no depo master found")
     try:
         depo_master_obj = userinfo.query.filter_by(id=depo_master_id).first()
         depo_master_name = depo_master_obj.name

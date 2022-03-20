@@ -6,11 +6,14 @@ from flask import jsonify, render_template, redirect, request, url_for
 import json
 from app.base.util import verify_pass
 from app.models import audit, bag, sku, auditsku, bagtosku, audittobag, disttobag, pickup, picktobag, transtovendor, transportvendor, disttovendor, distvendor
-from app.models import deviatedbag
+from app.models import deviatedbag, userinfo
 
 from app.models import depotopicker, depovendor, depopickup, depoinventory, depopicktobag, deviateddepopickbag, depoinventory
 from app import db
 import datetime
+from flask_mail import Message
+from tabulate import tabulate
+from app import mail
 
 
 
@@ -84,6 +87,18 @@ pickup_object = {
     ]
 
 }
+
+def send_email(html):
+
+    try:
+        msg = Message("Bag Marked deviated by Picker",
+                  recipients=["sharma.abhi1114@gmail.com"])
+        msg.html = html
+        mail.send(msg)
+        print("mail sent")
+    except Exception as e:
+        print(e)
+
     
 
 # create depo pickup object and map it to bag
@@ -96,8 +111,23 @@ def create_pickup():
     longnitude = data["longnitude"]
     depo_id = data["depo_id"]
     bag_data = data["bag_data"]
+    table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
     pickup_number = depopickup.query.count() + 1
     asn_number = "ASN00MND00TNT{0}".format(pickup_number)
+    # get the picker name for email
+    try:
+        depo_picker_obj = userinfo.query.filter_by(id=picker_id).first()
+        depo_picker_name = depo_picker_obj.name
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="no depo picker found")
+    # get the depo name for emai
+    try:
+        depo_obj = depovendor.query.filter_by(id=depo_id).first()
+        depo_name = depo_obj.vendor_name
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="no depo found")
     try:
         pickup_obj = depopickup(picker_id=picker_id,truck_number=truck_number,latitude=latitude,longnitude=longnitude,
                             depo_id=depo_id,asn_number=asn_number,status="picked",created_at=datetime.datetime.now())
@@ -123,6 +153,10 @@ def create_pickup():
                     temp_bag_obj.status = "dispatched"
                     temp_dist_bag = depoinventory.query.filter_by(bag_id=bag_id["bag_id"]).first()
                     temp_dist_bag.status = "dispatched"
+                    actual_weight = temp_bag_obj.weight
+                    new_weight = temp["weight"]
+                    table_headings.append([temp_bag_obj.uid,actual_weight, new_weight, depo_picker_name,depo_name])
+
                 except Exception as e:
                     print(e)
                     db.session.rollback()
@@ -142,12 +176,13 @@ def create_pickup():
                     else:
                         db.session.rollback()
                         db.session.close()
-                        return jsonify(status=500,message="data can not save")
+                        return jsonify(status=300,message="bag weight mis match")
                 except Exception as e:
                     print(e)
                     db.session.rollback()
                     db.session.close()
                     return jsonify(status=500,message="data can not save")
+        send_email(tabulate(table_headings, tablefmt='html'))
         db.session.commit()
         return jsonify(status=200,pickup_number = asn_number,message="depo pickup saved successfully!")
     else:
