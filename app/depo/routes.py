@@ -202,7 +202,7 @@ def submit_pickup():
             pickup_obj = pickup.query.filter_by(pickup_number=pickup_number).first()
             pickup_obj.status = "collected"
             db.session.commit()
-            send_email(tabulate(table_headings, tablefmt='html'))
+            # send_email(tabulate(table_headings, tablefmt='html'))
             return jsonify(status=200,message="pickup saved successfully!")
         except Exception as e:
             print(e)
