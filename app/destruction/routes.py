@@ -79,7 +79,9 @@ def get_asn_number_data():
     temp_data = []
     pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
     if pickup_obj is not None:
-        if pickup_obj.status == "collected":
+        if pickup_obj.status == "collected" :
+            return jsonify(status=300,message="pickup already completed")
+        if pickup_obj.status == "submitted" :
             return jsonify(status=300,message="pickup already completed")
         bags_data = depopicktobag.query.filter_by(pick_id=pickup_obj.id).all()
         for results in bags_data:
@@ -187,6 +189,8 @@ def submit_pickup():
         exist_pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
         if exist_pickup_obj is not None:
             if exist_pickup_obj.status == "collected":
+                return jsonify(status=500,message="pickup already saved!")
+            if exist_pickup_obj.status == "submitted":
                 return jsonify(status=500,message="pickup already saved!")
     except Exception as e:
         print(e)
