@@ -118,14 +118,16 @@ depo_object = {
             
 
 def send_email(html):
+
     msg = Message("Bag Marked deviated by Depo Master",
-                  sender="abhi.sharma1114@gmail.com",
+                  sender="admin@mondeleztnt.in",
                   recipients=["sharma.abhi1114@gmail.com"])
     # msg.recipients = [""]
     # msg.add_recipient("sharma.abhi1114@gmail.com")
     msg.html = html
     mail.send(msg)
     print("mail sent")
+
             
 @blueprint.route('/submit_pickup',methods=['GET','POST'])
 def submit_pickup():
@@ -202,7 +204,7 @@ def submit_pickup():
             pickup_obj = pickup.query.filter_by(pickup_number=pickup_number).first()
             pickup_obj.status = "collected"
             db.session.commit()
-            # send_email(tabulate(table_headings, tablefmt='html'))
+            send_email(tabulate(table_headings, tablefmt='html'))
             return jsonify(status=200,message="pickup saved successfully!")
         except Exception as e:
             print(e)

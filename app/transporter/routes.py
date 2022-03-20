@@ -168,7 +168,7 @@ def create_pickup_number():
 def send_email(html):
 
     msg = Message("Bag Marked deviated by Transporter",
-                  sender="abhi.sharma1114@gmail.com",
+                  sender="admin@mondeleztnt.in",
                   recipients=["sharma.abhi1114@gmail.com"])
     # msg.recipients = [""]
     # msg.add_recipient("sharma.abhi1114@gmail.com")
@@ -273,7 +273,7 @@ def create_pickup():
                     return jsonify(status=500,message="bag data can not be saved")
 
         db.session.commit()
-        # send_email(tabulate(table_headings, tablefmt='html'))
+        send_email(tabulate(table_headings, tablefmt='html'))
         return jsonify(status=200,pickup_number = pickup_number,message="pickup saved successfully!")
     else:
         db.session.rollback()
