@@ -108,7 +108,8 @@ depo_object = {
             "status": "incorrect",
             "deviated_data" : {
                 "weight" : "15",
-                "remarks" : "weight is less"
+                "remarks" : "weight is less",
+                 "imageURL":"https://s3.ap-south-1.amazonaws.com/mondelez.in/new_user_credentials.csv"
             }
 
         }
@@ -171,7 +172,8 @@ def submit_pickup():
                                             submitted_by=depo_master_id)
                     deviated_data = temp_bag["deviated_data"]
                     deviated_bag_obj = deviateddepobag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
-                                                remarks=deviated_data["remarks"], created_at=datetime.datetime.now())
+                                                remarks=deviated_data["remarks"], created_at=datetime.datetime.now()
+                                                ,image_url=deviated_data["imageURL"])
                     db.session.add(submit_obj)
                     db.session.add(deviated_bag_obj)
                     bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()

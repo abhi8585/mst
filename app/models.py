@@ -340,6 +340,7 @@ class deviateddepobag(db.Model):
     bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
     weight = db.Column(db.String(10), nullable=False)
     remarks = db.Column(db.String(500))
+    image_url = db.Column(db.String(500))
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())
 
@@ -429,6 +430,7 @@ class deviateddestructionbag(db.Model):
     bag_id = db.Column(db.ForeignKey('bag.id'), nullable=False)
     weight = db.Column(db.String(10), nullable=False)
     remarks = db.Column(db.String(500))
+    image_url = db.Column(db.String(500))
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())
 
