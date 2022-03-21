@@ -264,7 +264,7 @@ def create_pickup():
                         else:
                             db.session.rollback()
                             db.session.close()
-                            return jsonify(status=500,message="bag data mismatch!")
+                            return jsonify(status=500,message="bag data can not be saved")
                 except Exception as e:
                     print(e)
                     db.session.rollback()

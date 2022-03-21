@@ -347,6 +347,7 @@ def submit_direct_pickup():
     bag_data = data["bag_data"]
     latitude = data["latitude"]
     longnitude = data["longnitude"]
+    truck_number = data["truck_number"]
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
     seperate_bag_data = get_seperate_bag_data(bag_data)
     try:
@@ -363,56 +364,60 @@ def submit_direct_pickup():
         return jsonify(status=500,message="no depo found")
     if len(seperate_bag_data.values()) != 0:
         for key, value in seperate_bag_data.items():
-            temp_pickup_obj = depopicktobag.query.filter_by(pick_id=key).count()
-            print(temp_pickup_obj, len(value))
-            if temp_pickup_obj == len(value):
-                for temp_bag in value:
-                    if temp_bag["status"] == "incorrect":
-                        try:
-                            submit_obj = destructioninventory(destruction_id=destruction_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
-                                                    longnitude=longnitude,created_at=datetime.datetime.now(),
-                                                    submitted_by=destruction_master_id)
-                            deviated_data = temp_bag["deviated_data"]
-                            deviated_bag_obj = deviateddestructionbag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
-                                                        remarks=deviated_data["remarks"], created_at=datetime.datetime.now()
-                                                        ,image_url=deviated_data["imageURL"])
-                            db.session.add(submit_obj)
-                            db.session.add(deviated_bag_obj)
-                            bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                            bag_obj.status = "collected"
-                            new_weight = deviated_data["weight"]
-                            actual_weight = bag_obj.weight
-                            table_headings.append([bag_obj.uid,bag_obj.weight, deviated_data["weight"], destruction_master_name,destruction_name])
-                        except Exception as e:
-                            print(e)
-                            db.session.rollback()
-                            db.session.close()
-                            return jsonify(status=500,message="no data to save")
-                        
-                    else:
-                        try:
-                            bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                            if temp_bag["bag_weight"] != bag_obj.weight:
+            temp_truck_obj = depopickup.query.filter_by(id=key).first()
+            if temp_truck_obj.truck_number == truck_number:
+                temp_pickup_obj = depopicktobag.query.filter_by(pick_id=key).count()
+                print(temp_pickup_obj, len(value))
+                if temp_pickup_obj == len(value):
+                    for temp_bag in value:
+                        if temp_bag["status"] == "incorrect":
+                            try:
+                                submit_obj = destructioninventory(destruction_id=destruction_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
+                                                        longnitude=longnitude,created_at=datetime.datetime.now(),
+                                                        submitted_by=destruction_master_id)
+                                deviated_data = temp_bag["deviated_data"]
+                                deviated_bag_obj = deviateddestructionbag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
+                                                            remarks=deviated_data["remarks"], created_at=datetime.datetime.now()
+                                                            ,image_url=deviated_data["imageURL"])
+                                db.session.add(submit_obj)
+                                db.session.add(deviated_bag_obj)
+                                bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                                bag_obj.status = "collected"
+                                new_weight = deviated_data["weight"]
+                                actual_weight = bag_obj.weight
+                                table_headings.append([bag_obj.uid,bag_obj.weight, deviated_data["weight"], destruction_master_name,destruction_name])
+                            except Exception as e:
+                                print(e)
                                 db.session.rollback()
                                 db.session.close()
                                 return jsonify(status=500,message="no data to save")
-                            submit_obj = destructioninventory(destruction_id=destruction_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
-                                                    longnitude=longnitude,created_at=datetime.datetime.now(),
-                                                    submitted_by=destruction_master_id)
-                            db.session.add(submit_obj)
-                            bag_obj.status = "collected"
-                        except Exception as e:
-                            print(e)
-                            db.session.rollback()
-                            db.session.close()
-                            return jsonify(status=500,message="no data to save")
-                
+                            
+                        else:
+                            try:
+                                bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                                if temp_bag["bag_weight"] != bag_obj.weight:
+                                    db.session.rollback()
+                                    db.session.close()
+                                    return jsonify(status=500,message="no data to save")
+                                submit_obj = destructioninventory(destruction_id=destruction_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
+                                                        longnitude=longnitude,created_at=datetime.datetime.now(),
+                                                        submitted_by=destruction_master_id)
+                                db.session.add(submit_obj)
+                                bag_obj.status = "collected"
+                            except Exception as e:
+                                print(e)
+                                db.session.rollback()
+                                db.session.close()
+                                return jsonify(status=500,message="no data to save")
+                    
+                else:
+                    return jsonify(status=500,message="bag count missing")
+                temp_pick_object = depopickup.query.filter_by(id=key).first()
+                print(temp_pick_object.id, key)
+                temp_pick_object.status = "collected"
+                send_email(tabulate(table_headings, tablefmt='html'))
             else:
-                return jsonify(status=500,message="bag count missing")
-            temp_pick_object = depopickup.query.filter_by(id=key).first()
-            print(temp_pick_object.id, key)
-            temp_pick_object.status = "collected"
-            send_email(tabulate(table_headings, tablefmt='html'))
+                return jsonify(status=500,message="truck number mismatch!")
         db.session.commit()
         return jsonify(status=200,message="bags saved successfully")
     else:
