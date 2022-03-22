@@ -71,7 +71,7 @@ def get_pickup_order():
                     temp_data.append(temp)
         return jsonify(status=200,pickup_data=temp_data,message="pickup data delievered!")
     else:
-        return jsonify(status=500,pickup_data="no data for pickup number")
+        return jsonify(status=500,pickup_data=temp_data,message="no data for pickup!")
 
 
 depo_object = {
