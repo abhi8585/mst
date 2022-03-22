@@ -314,8 +314,7 @@ def submit_asn_pickup():
                 return jsonify(status=500,message="pickup already saved!")
     except Exception as e:
         print(e)
-        print(1)
-        return jsonify(status=500,message="no data to save from 1")
+        return jsonify(status=500,message="no data to save")
     if bag is not None and len(bag_data) !=0:
         for temp_bag in bag_data:
             try:
@@ -340,13 +339,13 @@ def submit_asn_pickup():
                         else:
                             db.session.rollback()
                             db.session.close()
-                            return jsonify(status=500,message="no data to save from 2")       
+                            return jsonify(status=500,message="no data to save")       
                     except Exception as e:
                         print(e)
                         db.session.rollback()
                         db.session.close()
-                        print(2)
-                        return jsonify(status=500,message="no data to save from 3")
+                      
+                        return jsonify(status=500,message="no data to save")
                 else:
                     try:
                         prev_bag_obj = depoinventory.query.filter_by(bag_id=temp_bag["bag_id"]).first()
@@ -366,8 +365,8 @@ def submit_asn_pickup():
                         print(e)
                         db.session.rollback()
                         db.session.close()
-                        print(3)
-                        return jsonify(status=500,message="no data to save from 4")
+                        
+                        return jsonify(status=500,message="no data to save")
 
             except Exception as e:
                  print(e) 
@@ -380,11 +379,10 @@ def submit_asn_pickup():
             return jsonify(status=200,message="pickup saved successfully!")
         except Exception as e:
             print(e)
-            print(4)
             db.session.rollback()
             db.session.close()
     else:
-        return jsonify(status=500,message="no data to save from 5")
+        return jsonify(status=500,message="no data to save")
 
 
 
