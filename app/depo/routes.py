@@ -314,6 +314,7 @@ def submit_asn_pickup():
                 return jsonify(status=500,message="pickup already saved!")
     except Exception as e:
         print(e)
+        print(1)
         return jsonify(status=500,message="no data to save")
     if bag is not None and len(bag_data) !=0:
         for temp_bag in bag_data:
@@ -344,6 +345,7 @@ def submit_asn_pickup():
                         print(e)
                         db.session.rollback()
                         db.session.close()
+                        print(2)
                         return jsonify(status=500,message="no data to save")
                 else:
                     try:
@@ -364,6 +366,7 @@ def submit_asn_pickup():
                         print(e)
                         db.session.rollback()
                         db.session.close()
+                        print(3)
                         return jsonify(status=500,message="no data to save")
 
             except Exception as e:
@@ -377,6 +380,7 @@ def submit_asn_pickup():
             return jsonify(status=200,message="pickup saved successfully!")
         except Exception as e:
             print(e)
+            print(4)
             db.session.rollback()
             db.session.close()
     else:
