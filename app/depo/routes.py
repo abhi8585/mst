@@ -315,7 +315,7 @@ def submit_asn_pickup():
     except Exception as e:
         print(e)
         print(1)
-        return jsonify(status=500,message="no data to save")
+        return jsonify(status=500,message="no data to save from 1")
     if bag is not None and len(bag_data) !=0:
         for temp_bag in bag_data:
             try:
@@ -340,13 +340,13 @@ def submit_asn_pickup():
                         else:
                             db.session.rollback()
                             db.session.close()
-                            return jsonify(status=500,message="no data to save")       
+                            return jsonify(status=500,message="no data to save from 2")       
                     except Exception as e:
                         print(e)
                         db.session.rollback()
                         db.session.close()
                         print(2)
-                        return jsonify(status=500,message="no data to save")
+                        return jsonify(status=500,message="no data to save from 3")
                 else:
                     try:
                         prev_bag_obj = depoinventory.query.filter_by(bag_id=temp_bag["bag_id"]).first()
@@ -367,7 +367,7 @@ def submit_asn_pickup():
                         db.session.rollback()
                         db.session.close()
                         print(3)
-                        return jsonify(status=500,message="no data to save")
+                        return jsonify(status=500,message="no data to save from 4")
 
             except Exception as e:
                  print(e) 
@@ -384,7 +384,7 @@ def submit_asn_pickup():
             db.session.rollback()
             db.session.close()
     else:
-        return jsonify(status=500,message="no data to save")
+        return jsonify(status=500,message="no data to save from 5")
 
 
 
