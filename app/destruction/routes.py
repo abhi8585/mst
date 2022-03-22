@@ -1,4 +1,5 @@
 from email import message
+from xxlimited import new
 from app.destruction import blueprint
 from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
@@ -339,6 +340,11 @@ def get_seperate_bag_data(bag_data):
         print(e)
         return pickup_data
 
+def get_strip_truck_number(truck_number):
+    new_truck_number = truck_number.replace(" ", "").lower()
+    return new_truck_number    
+
+
 @blueprint.route('/submit_direct_pickup',methods=['GET','POST'])
 def submit_direct_pickup():
     data = request.get_json(force=True)
@@ -350,6 +356,7 @@ def submit_direct_pickup():
     truck_number = data["truck_number"]
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
     seperate_bag_data = get_seperate_bag_data(bag_data)
+    truck_number = get_strip_truck_number(truck_number)
     try:
         depo_master_obj = userinfo.query.filter_by(id=destruction_master_id).first()
         destruction_master_name = depo_master_obj.name
@@ -382,7 +389,7 @@ def submit_direct_pickup():
                                 db.session.add(submit_obj)
                                 db.session.add(deviated_bag_obj)
                                 bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                                bag_obj.status = "collected"
+                                bag_obj.status = "received"
                                 new_weight = deviated_data["weight"]
                                 actual_weight = bag_obj.weight
                                 table_headings.append([bag_obj.uid,bag_obj.weight, deviated_data["weight"], destruction_master_name,destruction_name])
@@ -403,7 +410,7 @@ def submit_direct_pickup():
                                                         longnitude=longnitude,created_at=datetime.datetime.now(),
                                                         submitted_by=destruction_master_id)
                                 db.session.add(submit_obj)
-                                bag_obj.status = "collected"
+                                bag_obj.status = "received"
                             except Exception as e:
                                 print(e)
                                 db.session.rollback()

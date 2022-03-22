@@ -69,9 +69,9 @@ def get_pickup_order():
                     temp["bag_uid"] = bag_data.uid
                     temp["bag_sku_data"] = sku_data
                     temp_data.append(temp)
-        return jsonify(status=200,pickup_data=temp_data)
+        return jsonify(status=200,pickup_data=temp_data,message="pickup data delievered!")
     else:
-        return jsonify(status=500,pickup_data=temp_data)
+        return jsonify(status=500,pickup_data="no data for pickup number")
 
 
 depo_object = {
@@ -486,6 +486,11 @@ def get_seperate_bag_data(bag_data):
         print(e)
         return pickup_data
 
+def get_strip_truck_number(truck_number):
+    new_truck_number = truck_number.replace(" ", "").lower()
+    return new_truck_number    
+
+
 @blueprint.route('/submit_direct_pickup',methods=['GET','POST'])
 def submit_direct_pickup():
     data = request.get_json(force=True)
@@ -497,6 +502,7 @@ def submit_direct_pickup():
     truck_number = data["truck_number"]
     seperate_bag_data = get_seperate_bag_data(bag_data)
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
+    truck_number =get_strip_truck_number(truck_number)
     try:
         depo_master_obj = userinfo.query.filter_by(id=depo_master_id).first()
         depo_master_name = depo_master_obj.name

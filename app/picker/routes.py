@@ -99,7 +99,10 @@ def send_email(html):
     except Exception as e:
         print(e)
 
-    
+def get_strip_truck_number(truck_number):
+    new_truck_number = truck_number.replace(" ", "").lower()
+    return new_truck_number    
+
 
 # create depo pickup object and map it to bag
 @blueprint.route('/create_pickup',methods=["GET","POST"])
@@ -114,6 +117,7 @@ def create_pickup():
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
     pickup_number = depopickup.query.count() + 1
     asn_number = "ASN00MND00TNT{0}".format(pickup_number)
+    truck_number = get_strip_truck_number(truck_number)
     # get the picker name for email
     try:
         depo_picker_obj = userinfo.query.filter_by(id=picker_id).first()

@@ -168,13 +168,16 @@ def create_pickup_number():
 def send_email(html):
 
     msg = Message("Bag Marked deviated by Transporter",
-                  recipients=["sharma.abhi1114@gmail.com"])
+                  recipients=["sharma.abhi1114@gmail.com","romil.singh@qodenext.com"])
     # msg.recipients = [""]
     # msg.add_recipient("sharma.abhi1114@gmail.com")
     msg.html = html
     mail.send(msg)
     print("mail sent")
 
+def get_strip_truck_number(truck_number):
+    new_truck_number = truck_number.replace(" ", "").lower()
+    return new_truck_number    
 
 
 # create pickup object and map it to bag
@@ -190,6 +193,7 @@ def create_pickup():
     dist_id = data["dist_id"]
     bag_data = data["bag_data"]
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Transporter", "Distributor"]]
+    truck_number = get_strip_truck_number(truck_number)
     # hash = create_pickup_number()
     # need to create pickup number
     # pickup_number = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 10))
