@@ -12,6 +12,8 @@ from flask_login import (
     logout_user
 )
 
+from app.models import transtovendor, transportvendor
+
 from app.models import auditortovendor, auditvendor, role, usertorole, userinfo, disttovendor, distvendor, sku
 from app.base.models import User
 
@@ -28,6 +30,7 @@ def get_auditor_dist(id):
         temp["id"] = vendor.id
         temp["latitude"] = vendor.latitude
         temp["longnitude"] = vendor.longnitude
+        temp["distributor_code"] = vendor.vendor_code
         vendor_data.append(temp)
     return vendor_data
 
@@ -45,7 +48,7 @@ def get_distributor():
 
 
 def get_auditor_vendor(user_id):
-    audit_vendor = auditortovendor.query.filter_by(user_id=user_id).first()
+    audit_vendor = transtovendor.query.filter_by(user_id=user_id).first()
     if audit_vendor is not None:
         vendor_name = auditvendor.query.filter_by(id=audit_vendor.auditor_id).first()
         vendor_name = vendor_name.vendor_name
@@ -54,8 +57,20 @@ def get_auditor_vendor(user_id):
         return dict(status=500,message="no vendor found",vendor_name="")
 
 
+def get_transporter_vendor(user_id):
+    transport_vendor = transtovendor.query.filter_by(user_id=user_id).first()
+    if transport_vendor is not None:
+        vendor_name = transportvendor.query.filter_by(id=transport_vendor.id).first()
+        vendor_name = vendor_name.vendor_name
+        return dict(status=200,message="no vendor found",vendor_name=vendor_name)
+    else:
+        return dict(status=500,message="no vendor found",vendor_name="")
+
+
+
 @blueprint.route('/app_login', methods=['GET', 'POST'])
 def app_login():
+    vendor_name = ""
     data = request.get_json(force=True)
     user_name, user_password = data["user_name"], data["user_password"]
     user = userinfo.query.filter_by(name=user_name).first()
@@ -67,9 +82,12 @@ def app_login():
             role_name = role.query.filter_by(id=assigned_role_id.role_id).first()
         if role_name.name == "auditor":
             vendor_name = get_auditor_vendor(user.id)
+            vendor_name = vendor_name["vendor_name"]
+        # if role_name.name == "transporter":
+        #     vendor_name = get_transporter_vendor(user.id)
             
         return jsonify(status=200,message="user authenticated successfully", user_id=user.id,
-                        user_role=role_name.name,vendor_name=vendor_name["vendor_name"])
+                        user_role=role_name.name,vendor_name="")
     return jsonify(status=500,message="user authenticated unsuccessfully")
     
 
