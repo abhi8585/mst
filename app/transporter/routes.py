@@ -346,6 +346,7 @@ def get_auditor_dist(id):
         temp["id"] = vendor.id
         temp["latitude"] = vendor.latitude
         temp["longnitude"] = vendor.longnitude
+        temp["distributor_code"] = vendor.vendor_code
         vendor_data.append(temp)
     return vendor_data
 
