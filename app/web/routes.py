@@ -1,4 +1,6 @@
 from email import message
+
+
 from app.web import blueprint
 from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
@@ -48,11 +50,11 @@ def get_distributor():
 
 
 def get_auditor_vendor(user_id):
-    audit_vendor = transtovendor.query.filter_by(user_id=user_id).first()
+    audit_vendor = auditortovendor.query.filter_by(user_id=user_id).first()
     if audit_vendor is not None:
         vendor_name = auditvendor.query.filter_by(id=audit_vendor.auditor_id).first()
         vendor_name = vendor_name.vendor_name
-        return dict(status=200,message="no vendor found",vendor_name=vendor_name)
+        return dict(status=200,message="vendor found",vendor_name=vendor_name)
     else:
         return dict(status=500,message="no vendor found",vendor_name="")
 
@@ -62,7 +64,7 @@ def get_transporter_vendor(user_id):
     if transport_vendor is not None:
         vendor_name = transportvendor.query.filter_by(id=transport_vendor.id).first()
         vendor_name = vendor_name.vendor_name
-        return dict(status=200,message="no vendor found",vendor_name=vendor_name)
+        return dict(status=200,message="vendor found",vendor_name=vendor_name)
     else:
         return dict(status=500,message="no vendor found",vendor_name="")
 
@@ -70,10 +72,10 @@ def get_transporter_vendor(user_id):
 
 @blueprint.route('/app_login', methods=['GET', 'POST'])
 def app_login():
-    vendor_name = ""
     data = request.get_json(force=True)
     user_name, user_password = data["user_name"], data["user_password"]
     user = userinfo.query.filter_by(name=user_name).first()
+    vendor_name = ""
     auditor_data = {}
     # user_password = bytes(user_password, encoding='utf8')
     if user and verify_pass(user_password, user.password):
@@ -83,11 +85,15 @@ def app_login():
         if role_name.name == "auditor":
             vendor_name = get_auditor_vendor(user.id)
             vendor_name = vendor_name["vendor_name"]
-        # if role_name.name == "transporter":
-        #     vendor_name = get_transporter_vendor(user.id)
-            
+        if role_name.name == "transporter":
+            vendor_name = get_transporter_vendor(user.id)
+            vendor_name = vendor_name["vendor_name"]
+        # if role_name.name == "depo master":
+        #     vendor_name = ""
+        # if role_name.name == "depo picker":
+        #     vendor_name = ""
         return jsonify(status=200,message="user authenticated successfully", user_id=user.id,
-                        user_role=role_name.name,vendor_name="")
+                        user_role=role_name.name,vendor_name=vendor_name)
     return jsonify(status=500,message="user authenticated unsuccessfully")
     
 
