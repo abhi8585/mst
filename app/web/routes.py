@@ -12,7 +12,7 @@ from flask_login import (
     logout_user
 )
 
-from app.models import role, usertorole, userinfo, disttovendor, distvendor, sku
+from app.models import auditortovendor, auditvendor, role, usertorole, userinfo, disttovendor, distvendor, sku
 from app.base.models import User
 
 # helper function to get the distributor data
@@ -44,6 +44,15 @@ def get_distributor():
     return jsonify(status=500,distributors=[])
 
 
+def get_auditor_vendor(user_id):
+    audit_vendor = auditortovendor.query.filter_by(user_id=user_id).first()
+    if audit_vendor is not None:
+        vendor_name = auditvendor.query.filter_by(id=audit_vendor.auditor_id).first()
+        vendor_name = vendor_name.vendor_name
+        return dict(status=200,message="no vendor found",vendor_name=vendor_name)
+    else:
+        return dict(status=500,message="no vendor found",vendor_name="")
+
 
 @blueprint.route('/app_login', methods=['GET', 'POST'])
 def app_login():
@@ -56,12 +65,11 @@ def app_login():
         assigned_role_id = usertorole.query.filter_by(user_id=user.id).first()
         if assigned_role_id:
             role_name = role.query.filter_by(id=assigned_role_id.role_id).first()
-        # if role_name.name == "auditor":
-        #     auditor_dist = get_auditor_dist(user.id)
-        #     auditor_data = {
-        #         "distributors" : auditor_dist
-        #     }
-        return jsonify(status=200,message="user authenticated successfully", user_id=user.id,user_role=role_name.name)
+        if role_name.name == "auditor":
+            vendor_name = get_auditor_vendor(user.id)
+            
+        return jsonify(status=200,message="user authenticated successfully", user_id=user.id,
+                        user_role=role_name.name,vendor_name=vendor_name["vendor_name"])
     return jsonify(status=500,message="user authenticated unsuccessfully")
     
 
