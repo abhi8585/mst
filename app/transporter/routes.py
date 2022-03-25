@@ -233,10 +233,10 @@ def create_pickup():
                 try:
                     temp = bag_id["deviated_data"]
                     deviate_bag = deviatedbag(bag_id=bag_id["bag_id"],weight=temp["weight"],
-                                            remarks=temp["remarks"],created_at=datetime.datetime.now())
-                    pick_bag_obj = picktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
-                                        status=bag_id["status"],created_at=datetime.datetime.now())
-                    db.session.add(pick_bag_obj)
+                                            remarks=temp["remarks"],created_at=datetime.datetime.now(),pick_id=pickup_obj.id)
+                    # pick_bag_obj = picktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
+                    #                     status=bag_id["status"],created_at=datetime.datetime.now())
+                    # db.session.add(pick_bag_obj)
                     db.session.add(deviate_bag)
                     temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
                     temp_bag_obj.status = "picked"
@@ -276,7 +276,11 @@ def create_pickup():
                     return jsonify(status=500,message="bag data can not be saved")
 
         db.session.commit()
-        send_email(tabulate(table_headings, tablefmt='html'))
+        try:
+            send_email(tabulate(table_headings, tablefmt='html'))
+            print("mail sent")
+        except Exception as e:
+            print(e)
         return jsonify(status=200,pickup_number = pickup_number,message="pickup saved successfully!")
     else:
         db.session.rollback()
