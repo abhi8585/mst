@@ -102,7 +102,8 @@ def get_sku():
     sku_data = sku.query.all()
     if sku_data is not None:
         sku_data = [dict(id=sku.id,name=sku.name,
-                    description=sku.description,weight=sku.weight) for sku in sku_data]
+                    description=sku.description,weight=sku.weight) for sku in sku_data
+                    if sku.id > 3]
         return jsonify(status=200,message="sku data delievered",sku_data=sku_data)
     return jsonify(status=500,message="sku data undelievered")
     
