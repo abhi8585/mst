@@ -46,7 +46,7 @@ def create_destruction():
 
 @blueprint.route('/map_destruction', methods=['GET', 'POST'])
 def map_destruction():
-    des_map_obj = destructiontomaster(vendor_id=1, user_id=16, created_at = datetime.datetime.now())
+    des_map_obj = destructiontomaster(vendor_id=2, user_id=16, created_at = datetime.datetime.now())
     db.session.add(des_map_obj)
     db.session.commit()
     return "object created"
@@ -65,6 +65,7 @@ def get_destruction():
             depo_obj = destructionvendor.query.filter_by(id=depo_master.vendor_id).first()
             temp["destruction_centre_id"] = depo_obj.id
             temp["destruction_centre_name"] = depo_obj.vendor_name
+            temp["destruction_centre_code"] = depo_obj.vendor_code
             depo_data.append(temp)
         return jsonify(status=200,depo_data=depo_data,message="depo data delieverd!")
 

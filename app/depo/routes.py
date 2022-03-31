@@ -400,6 +400,7 @@ def get_depo():
             depo_obj = depovendor.query.filter_by(id=depo_master.vendor_id).first()
             temp["depo_id"] = depo_obj.id
             temp["depo_name"] = depo_obj.vendor_name
+            temp["depo_code"] = depo_obj.vendor_code
             depo_data.append(temp)
         return jsonify(status=200,depo_data=depo_data,message="depo data delieverd!")
 

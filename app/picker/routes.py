@@ -28,6 +28,7 @@ def get_picker_depo_data(id):
         temp["id"] = vendor.id
         temp["latitude"] = vendor.latitude
         temp["longnitude"] = vendor.longnitude
+        temp["depo_code"] = vendor.vendor_code
         vendor_data.append(temp)
     return vendor_data
 
