@@ -14,7 +14,7 @@ from flask_login import (
     logout_user
 )
 
-from app.models import transtovendor, transportvendor
+from app.models import depotomaster, destructionvendor, transtovendor, transportvendor, depovendor, destructiontomaster, destructionvendor
 
 from app.models import auditortovendor, auditvendor, role, usertorole, userinfo, disttovendor, distvendor, sku
 from app.base.models import User
@@ -62,12 +62,31 @@ def get_auditor_vendor(user_id):
 def get_transporter_vendor(user_id):
     transport_vendor = transtovendor.query.filter_by(user_id=user_id).first()
     if transport_vendor is not None:
-        vendor_name = transportvendor.query.filter_by(id=transport_vendor.id).first()
+        vendor_name = transportvendor.query.filter_by(id=transport_vendor.vendor_id).first()
         vendor_name = vendor_name.vendor_name
         return dict(status=200,message="vendor found",vendor_name=vendor_name)
     else:
         return dict(status=500,message="no vendor found",vendor_name="")
 
+
+def get_depo_vendor(user_id):
+    depo_vendor = depotomaster.query.filter_by(user_id=user_id).first()
+    if depo_vendor is not None:
+        vendor_name = depovendor.query.filter_by(id=depo_vendor.vendor_id).first()
+        vendor_name = vendor_name.vendor_name
+        return dict(status=200,message="vendor found",vendor_name=vendor_name)
+    else:
+        return dict(status=500,message="no vendor found",vendor_name="")
+
+
+def get_destruction_vendor(user_id):
+    destruction_vendor = destructiontomaster.query.filter_by(user_id=user_id).first()
+    if destruction_vendor is not None:
+        vendor_name = destructionvendor.query.filter_by(id=destruction_vendor.vendor_id).first()
+        vendor_name = vendor_name.vendor_name
+        return dict(status=200,message="vendor found",vendor_name=vendor_name)
+    else:
+        return dict(status=500,message="no vendor found",vendor_name="")
 
 
 @blueprint.route('/app_login', methods=['GET', 'POST'])
@@ -88,10 +107,14 @@ def app_login():
         if role_name.name == "transporter":
             vendor_name = get_transporter_vendor(user.id)
             vendor_name = vendor_name["vendor_name"]
-        # if role_name.name == "depo master":
-        #     vendor_name = ""
+        if role_name.name == "depo master":
+            vendor_name = get_depo_vendor(user.id)
+            vendor_name = vendor_name["vendor_name"]
         # if role_name.name == "depo picker":
         #     vendor_name = ""
+        if role_name.name == "destruction master":
+            vendor_name = get_destruction_vendor(user.id)
+            vendor_name = vendor_name["vendor_name"]
         return jsonify(status=200,message="user authenticated successfully", user_id=user.id,
                         user_role=role_name.name,vendor_name=vendor_name)
     return jsonify(status=500,message="user authenticated unsuccessfully")
