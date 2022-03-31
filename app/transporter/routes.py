@@ -254,7 +254,7 @@ def create_pickup():
                     print(e)
                     db.session.rollback()
                     db.session.close()
-                    return jsonify(status=500,message="bag data can not be saved")
+                    return jsonify(status=500,message="error in saving deviated bag")
                 
             else:
                 # temp_bag = bag_id
@@ -271,12 +271,12 @@ def create_pickup():
                         else:
                             db.session.rollback()
                             db.session.close()
-                            return jsonify(status=500,message="bag data can not be saved")
+                            return jsonify(status=500,message="right bag weight mismatch")
                 except Exception as e:
                     print(e)
                     db.session.rollback()
                     db.session.close()
-                    return jsonify(status=500,message="bag data can not be saved")
+                    return jsonify(status=500,message="error in saving right bag")
 
         db.session.commit()
         try:
