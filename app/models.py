@@ -214,7 +214,8 @@ class pickup(db.Model):
     __tablename__ = 'pickup'
     id = db.Column(db.Integer, primary_key=True)
     transporter_id = db.Column(db.ForeignKey('user_info.id'), nullable=False)
-    truck_number= db.Column(db.String(25), nullable=False)
+    truck_number= db.Column(db.String(25))
+    lr_number= db.Column(db.String(25))
     latitude = db.Column(db.String(50), nullable=False)
     longnitude = db.Column(db.String(50), nullable=False)
     dist_id = db.Column(db.ForeignKey('dist_vendor.id'), nullable=False)

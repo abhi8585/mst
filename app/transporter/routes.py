@@ -187,13 +187,15 @@ def create_pickup():
     import random
     data = request.get_json(force=True)
     transporter_id = data["transporter_id"]
-    truck_number = data["truck_number"]
+    # truck_number = data["truck_number"]
+    lr_number = data["lr_number"]
     latitude = data["latitude"]
     longnitude = data["longnitude"]
     dist_id = data["dist_id"]
     bag_data = data["bag_data"]
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Transporter", "Distributor"]]
-    truck_number = get_strip_truck_number(truck_number)
+    is_deviation = False
+    # truck_number = get_strip_truck_number(truck_number)
     # hash = create_pickup_number()
     # need to create pickup number
     # pickup_number = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 10))
@@ -218,7 +220,7 @@ def create_pickup():
     pickup_number = pickup.query.count() + 1
     pickup_number = "PCK00MND00TNT{0}".format(pickup_number)
     try:
-        pickup_obj = pickup(transporter_id=transporter_id,truck_number=truck_number,latitude=latitude,longnitude=longnitude,
+        pickup_obj = pickup(transporter_id=transporter_id,lr_number=lr_number,latitude=latitude,longnitude=longnitude,
                             dist_id=dist_id,pickup_number=pickup_number,status="picked",created_at=datetime.datetime.now())
         db.session.add(pickup_obj)
         db.session.commit()
@@ -239,13 +241,14 @@ def create_pickup():
                     # db.session.add(pick_bag_obj)
                     db.session.add(deviate_bag)
                     temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
-                    temp_bag_obj.status = "picked"
+                    # temp_bag_obj.status = "picked"
                     temp_dist_bag = disttobag.query.filter_by(bag_id=bag_id["bag_id"]).first()
-                    temp_dist_bag.status = "picked"
+                    # temp_dist_bag.status = "picked"
                     actual_weight = temp_bag_obj.weight
                     new_weight = bag_id["deviated_data"]["weight"]
                     table_headings.append([temp_bag_obj.uid,actual_weight,new_weight,transporter_name,dist_name])
-                    
+                    if is_deviation == False:
+                        is_deviation = True
 
                 except Exception as e:
                     print(e)
@@ -277,8 +280,9 @@ def create_pickup():
 
         db.session.commit()
         try:
-            send_email(tabulate(table_headings, tablefmt='html'))
-            print("mail sent")
+            if is_deviation:
+                send_email(tabulate(table_headings, tablefmt='html'))
+                print("mail sent")
         except Exception as e:
             print(e)
         return jsonify(status=200,pickup_number = pickup_number,message="pickup saved successfully!")
