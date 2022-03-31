@@ -187,7 +187,7 @@ def create_pickup():
     import random
     data = request.get_json(force=True)
     transporter_id = data["transporter_id"]
-    # truck_number = data["truck_number"]
+    truck_number = data["truck_number"]
     lr_number = data["lr_number"]
     latitude = data["latitude"]
     longnitude = data["longnitude"]
@@ -195,7 +195,7 @@ def create_pickup():
     bag_data = data["bag_data"]
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Transporter", "Distributor"]]
     is_deviation = False
-    # truck_number = get_strip_truck_number(truck_number)
+    truck_number = get_strip_truck_number(truck_number)
     # hash = create_pickup_number()
     # need to create pickup number
     # pickup_number = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 10))
@@ -220,7 +220,7 @@ def create_pickup():
     pickup_number = pickup.query.count() + 1
     pickup_number = "PCK00MND00TNT{0}".format(pickup_number)
     try:
-        pickup_obj = pickup(transporter_id=transporter_id,lr_number=lr_number,latitude=latitude,longnitude=longnitude,
+        pickup_obj = pickup(transporter_id=transporter_id,truck_number=truck_number,lr_number=lr_number,latitude=latitude,longnitude=longnitude,
                             dist_id=dist_id,pickup_number=pickup_number,status="picked",created_at=datetime.datetime.now())
         db.session.add(pickup_obj)
         db.session.commit()
@@ -381,10 +381,13 @@ def get_transport_pickup():
         for pick in pickup_obj:
             temp = {}
             bag_count = picktobag.query.filter_by(pick_id=pick.id).count()
+            dist_name = distvendor.query.filter_by(id=pick.dist_id).first()
             if bag_count > 0:
                 temp["total_bag"] = bag_count
                 temp["pickup_number"] = pick.pickup_number
-                temp["date"] = pick.created_at
+                temp["date"] = pick.created_at.strftime("%Y-%m-%d")
+                temp["lr_number"] = pick.lr_number
+                temp["dist_name"] = dist_name.vendor_name
                 pickup_data.append(temp)
     else:
         return jsonify(status=500,message="no pickups")

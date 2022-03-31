@@ -386,27 +386,48 @@ def submit_asn_pickup():
 
 
 
+# if an depo master could associate with multiple depos.
+
+# @blueprint.route('/get_depo',methods=['GET','POST'])
+# def get_depo():
+#     data = request.get_json(force=True)
+#     depo_master_id = data["depo_master_id"]
+#     depo_master_data = depotomaster.query.filter_by(user_id=depo_master_id).first()
+#     depo_data = []
+#     if len(depo_master_data) != 0:
+#         for depo_master in depo_master_data:
+#             temp = {}
+#             depo_obj = depovendor.query.filter_by(id=depo_master.vendor_id).first()
+#             temp["depo_id"] = depo_obj.id
+#             temp["depo_name"] = depo_obj.vendor_name
+#             temp["depo_code"] = depo_obj.vendor_code
+#             depo_data.append(temp)
+#         return jsonify(status=200,depo_data=depo_data,message="depo data delieverd!")
+
+#     else:
+
+#         return jsonify(status=500,message="empty depo data")
 
 
+# if an depo master can be assigned to only one depo
 @blueprint.route('/get_depo',methods=['GET','POST'])
 def get_depo():
     data = request.get_json(force=True)
     depo_master_id = data["depo_master_id"]
-    depo_master_data = depotomaster.query.filter_by(user_id=depo_master_id).all()
-    depo_data = []
-    if len(depo_master_data) != 0:
-        for depo_master in depo_master_data:
-            temp = {}
-            depo_obj = depovendor.query.filter_by(id=depo_master.vendor_id).first()
-            temp["depo_id"] = depo_obj.id
-            temp["depo_name"] = depo_obj.vendor_name
-            temp["depo_code"] = depo_obj.vendor_code
-            depo_data.append(temp)
+    depo_master_data = depotomaster.query.filter_by(user_id=depo_master_id).first()
+    depo_data=[]
+    if depo_master_data is not None:
+        temp = {}
+        depo_obj = depovendor.query.filter_by(id=depo_master_data.vendor_id).first()
+        temp["depo_id"] = depo_obj.id
+        temp["depo_name"] = depo_obj.vendor_name
+        temp["depo_code"] = depo_obj.vendor_code
+        depo_data.append(temp)
         return jsonify(status=200,depo_data=depo_data,message="depo data delieverd!")
-
     else:
-
         return jsonify(status=500,message="empty depo data")
+
+
 
 
 # submit bag objects directly in depo with submit bag button
