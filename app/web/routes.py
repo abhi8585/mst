@@ -52,11 +52,13 @@ def get_distributor():
 def get_auditor_vendor(user_id):
     audit_vendor = auditortovendor.query.filter_by(user_id=user_id).first()
     if audit_vendor is not None:
-        vendor_name = auditvendor.query.filter_by(id=audit_vendor.auditor_id).first()
-        vendor_name = vendor_name.vendor_name
-        return dict(status=200,message="vendor found",vendor_name=vendor_name)
+        temp_vendor_name = auditvendor.query.filter_by(id=audit_vendor.auditor_id).first()
+        vendor_name = temp_vendor_name.vendor_name
+        user_message = "Auditor at {0}".format(vendor_name)
+        return dict(status=200,message="vendor found",vendor_name=vendor_name,user_message=user_message)
     else:
-        return dict(status=500,message="no vendor found",vendor_name="")
+        user_message=""
+        return dict(status=500,message="no vendor found",vendor_name="",user_message=user_message)
 
 
 def get_transporter_vendor(user_id):
@@ -64,9 +66,11 @@ def get_transporter_vendor(user_id):
     if transport_vendor is not None:
         vendor_name = transportvendor.query.filter_by(id=transport_vendor.vendor_id).first()
         vendor_name = vendor_name.vendor_name
-        return dict(status=200,message="vendor found",vendor_name=vendor_name)
+        user_message = "Transporter at {0}".format(vendor_name)
+        return dict(status=200,message="vendor found",vendor_name=vendor_name,user_message=user_message)
     else:
-        return dict(status=500,message="no vendor found",vendor_name="")
+        user_message = ''
+        return dict(status=500,message="no vendor found",vendor_name="",user_message=user_message)
 
 
 def get_depo_vendor(user_id):
@@ -102,21 +106,26 @@ def app_login():
         if assigned_role_id:
             role_name = role.query.filter_by(id=assigned_role_id.role_id).first()
         if role_name.name == "auditor":
-            vendor_name = get_auditor_vendor(user.id)
-            vendor_name = vendor_name["vendor_name"]
+            temp_vendor_name = get_auditor_vendor(user.id)
+            vendor_name = temp_vendor_name["vendor_name"]
+            user_message = temp_vendor_name["user_message"]
         if role_name.name == "transporter":
-            vendor_name = get_transporter_vendor(user.id)
-            vendor_name = vendor_name["vendor_name"]
+            temp_vendor_name = get_transporter_vendor(user.id)
+            vendor_name = temp_vendor_name["vendor_name"]
+            user_message = temp_vendor_name["user_message"]
         if role_name.name == "depo master":
             vendor_name = get_depo_vendor(user.id)
             vendor_name = vendor_name["vendor_name"]
+            user_message = ""
         # if role_name.name == "depo picker":
         #     vendor_name = ""
         if role_name.name == "destruction master":
             vendor_name = get_destruction_vendor(user.id)
             vendor_name = vendor_name["vendor_name"]
+            user_message = ""
         return jsonify(status=200,message="user authenticated successfully", user_id=user.id,
-                        user_role=role_name.name,vendor_name=vendor_name)
+                        user_role=role_name.name,vendor_name=vendor_name,user_name=user.name,
+                        user_message=user_message)
     return jsonify(status=500,message="user authenticated unsuccessfully")
     
 
