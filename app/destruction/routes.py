@@ -35,8 +35,8 @@ def get_sku_data(bag_id):
 
 @blueprint.route('/create_destruction', methods=['GET', 'POST'])
 def create_destruction():
-    des_obj = destructionvendor(vendor_code="des2",vendor_name="des2",address="pratap vihar",city="ghaziabad",pin_code='201009',
-                                state="uttar pradesh",latitude='12.12', longnitude='71.12',contact_person = 'abhi',
+    des_obj = destructionvendor(vendor_code="656545",vendor_name="des4",address="pratap vihar",city="ghaziabad",pin_code='201009',
+                                state="uttar pradesh",latitude='28.584600989442496', longnitude='77.38094891104419',contact_person = 'abhi',
                                 contact_number='8585945196',email='des2@gmail.com', created_at=datetime.datetime.now())
     db.session.add(des_obj)
     db.session.commit()
@@ -46,27 +46,53 @@ def create_destruction():
 
 @blueprint.route('/map_destruction', methods=['GET', 'POST'])
 def map_destruction():
-    des_map_obj = destructiontomaster(vendor_id=2, user_id=16, created_at = datetime.datetime.now())
+    des_map_obj = destructiontomaster(vendor_id=2, user_id=23, created_at = datetime.datetime.now())
     db.session.add(des_map_obj)
     db.session.commit()
     return "object created"
 
 
 
+# this get destruction is for when an destruction centre mapped to multiples
+
+# @blueprint.route('/get_destruction',methods=['GET','POST'])
+# def get_destruction():
+#     data = request.get_json(force=True)
+#     destruction_master_id = data["destruction_master_id"]
+#     depo_master_data = destructiontomaster.query.filter_by(user_id=destruction_master_id).all()
+#     depo_data = []
+#     if len(depo_master_data) != 0:
+#         for depo_master in depo_master_data:
+#             temp = {}
+#             depo_obj = destructionvendor.query.filter_by(id=depo_master.vendor_id).first()
+#             temp["destruction_centre_id"] = depo_obj.id
+#             temp["destruction_centre_name"] = depo_obj.vendor_name
+#             temp["destruction_centre_code"] = depo_obj.vendor_code
+#             depo_data.append(temp)
+#         return jsonify(status=200,depo_data=depo_data,message="depo data delieverd!")
+
+#     else:
+
+#         return jsonify(status=500,depo_data=depo_data,message="empty depo data")
+
+
+# when the destruction mapped to single destruction
+
 @blueprint.route('/get_destruction',methods=['GET','POST'])
 def get_destruction():
     data = request.get_json(force=True)
     destruction_master_id = data["destruction_master_id"]
-    depo_master_data = destructiontomaster.query.filter_by(user_id=destruction_master_id).all()
+    depo_master_data = destructiontomaster.query.filter_by(user_id=destruction_master_id).first()
     depo_data = []
-    if len(depo_master_data) != 0:
-        for depo_master in depo_master_data:
-            temp = {}
-            depo_obj = destructionvendor.query.filter_by(id=depo_master.vendor_id).first()
-            temp["destruction_centre_id"] = depo_obj.id
-            temp["destruction_centre_name"] = depo_obj.vendor_name
-            temp["destruction_centre_code"] = depo_obj.vendor_code
-            depo_data.append(temp)
+    if depo_master_data is not None:
+        temp = {}
+        depo_obj = destructionvendor.query.filter_by(id=depo_master_data.vendor_id).first()
+        temp["destruction_centre_id"] = depo_obj.id
+        temp["destruction_centre_name"] = depo_obj.vendor_name
+        temp["destruction_centre_code"] = depo_obj.vendor_code
+        temp["latitude"] = depo_obj.latitude
+        temp["longnitude"] = depo_obj.longnitude
+        depo_data.append(temp)
         return jsonify(status=200,depo_data=depo_data,message="depo data delieverd!")
 
     else:
