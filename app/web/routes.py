@@ -132,7 +132,7 @@ def app_login():
             vendor_name = temp_vendor_name["vendor_name"]
             user_message = temp_vendor_name["user_message"]
         return jsonify(status=200,message="user authenticated successfully", user_id=user.id,
-                        user_role=role_name.name,vendor_name=vendor_name,user_name=user.name,
+                        user_role=role_name.name,vendor_name=vendor_name,user_name=user.name.capitalize(),
                         user_message=user_message)
     return jsonify(status=500,message="user authenticated unsuccessfully")
     
