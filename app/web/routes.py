@@ -16,7 +16,7 @@ from flask_login import (
 
 from app.models import depotomaster, destructionvendor, transtovendor, transportvendor, depovendor, destructiontomaster, destructionvendor
 
-from app.models import auditortovendor, auditvendor, role, usertorole, userinfo, disttovendor, distvendor, sku
+from app.models import auditortovendor, auditvendor, role, usertorole, userinfo, disttovendor, distvendor, sku, bag
 from app.base.models import User
 
 # helper function to get the distributor data
@@ -73,14 +73,18 @@ def get_transporter_vendor(user_id):
         return dict(status=500,message="no vendor found",vendor_name="",user_message=user_message)
 
 
+
+
 def get_depo_vendor(user_id):
     depo_vendor = depotomaster.query.filter_by(user_id=user_id).first()
     if depo_vendor is not None:
         vendor_name = depovendor.query.filter_by(id=depo_vendor.vendor_id).first()
         vendor_name = vendor_name.vendor_name
-        return dict(status=200,message="vendor found",vendor_name=vendor_name)
+        user_message = "Warehouse Master at {0}".format(vendor_name)
+        return dict(status=200,message="vendor found",vendor_name=vendor_name, user_message=user_message)
     else:
-        return dict(status=500,message="no vendor found",vendor_name="")
+        user_message = ""
+        return dict(status=500,message="no vendor found",vendor_name="", user_message=user_message)
 
 
 def get_destruction_vendor(user_id):
@@ -88,9 +92,11 @@ def get_destruction_vendor(user_id):
     if destruction_vendor is not None:
         vendor_name = destructionvendor.query.filter_by(id=destruction_vendor.vendor_id).first()
         vendor_name = vendor_name.vendor_name
-        return dict(status=200,message="vendor found",vendor_name=vendor_name)
+        user_message = "Destruction Master at {0}".format(vendor_name)
+        return dict(status=200,message="vendor found",vendor_name=vendor_name, user_message=user_message)
     else:
-        return dict(status=500,message="no vendor found",vendor_name="")
+        user_message = ""
+        return dict(status=500,message="no vendor found",vendor_name="", user_message=user_message)
 
 
 @blueprint.route('/app_login', methods=['GET', 'POST'])
@@ -114,15 +120,17 @@ def app_login():
             vendor_name = temp_vendor_name["vendor_name"]
             user_message = temp_vendor_name["user_message"]
         if role_name.name == "depo master":
-            vendor_name = get_depo_vendor(user.id)
-            vendor_name = vendor_name["vendor_name"]
-            user_message = ""
-        # if role_name.name == "depo picker":
-        #     vendor_name = ""
+            temp_vendor_name = get_depo_vendor(user.id)
+            vendor_name = temp_vendor_name["vendor_name"]
+            user_message = temp_vendor_name["user_message"]
+        if role_name.name == "depo picker":
+            temp_vendor_name = get_transporter_vendor(user.id)
+            vendor_name = temp_vendor_name["vendor_name"]
+            user_message = temp_vendor_name["user_message"]
         if role_name.name == "destruction master":
-            vendor_name = get_destruction_vendor(user.id)
-            vendor_name = vendor_name["vendor_name"]
-            user_message = ""
+            temp_vendor_name = get_destruction_vendor(user.id)
+            vendor_name = temp_vendor_name["vendor_name"]
+            user_message = temp_vendor_name["user_message"]
         return jsonify(status=200,message="user authenticated successfully", user_id=user.id,
                         user_role=role_name.name,vendor_name=vendor_name,user_name=user.name,
                         user_message=user_message)
@@ -139,3 +147,16 @@ def get_sku():
         return jsonify(status=200,message="sku data delievered",sku_data=sku_data)
     return jsonify(status=500,message="sku data undelievered")
     
+
+@blueprint.route('/check_bag_unique', methods=['GET', 'POST'])
+def check_bag_unique():
+    data = request.get_json(force=True)
+    bag_uid = data["bag_uid"]
+    try:
+        bag_data = bag.query.filter_by(uid=bag_uid).first()
+        if bag_data is not None:
+            return jsonify(status=200,message="true")
+        else:
+            return jsonify(status=200,message="false")
+    except Exception as e:
+        return jsonify(status=500,message="something went wrong")
