@@ -403,3 +403,38 @@ def delete():
     return "data deleted"
 
 
+@blueprint.route('/create_pickup_test', methods=['GET', 'POST'])
+def create_pickup_test():
+    data = request.get_json(force=True)
+    bag_uid = data["bag_uid"]
+    test_logs = []
+
+    # start testing
+
+    temp_bag = bag.query.filter_by(uid=bag_uid).all()
+    if len(temp_bag) == 1:
+        
+        # GET BAG status
+        test_logs.append("bag status is {0}".format(temp_bag[0].status))
+        test_logs.append("bag weight is {0}".format(temp_bag[0].weight))
+        temp_pickup = picktobag.query.filter_by(bag_id=temp_bag[0].id).all()
+       
+        if len(temp_pickup) == 1:
+            temp_pickup = pickup.query.filter_by(id=temp_pickup[0].pick_id)
+            test_logs.append("bag pickup id is {0}".format(temp_pickup[0].id))
+            test_logs.append("bag lr number  is {0}".format(temp_pickup[0].lr_number))
+            test_logs.append("bag truck number  is {0}".format(temp_pickup[0].truck_number))
+        elif len(temp_pickup) == 0:
+            test_logs.append("bag was marked deviated")
+
+        
+        # getting distributor status of bag
+
+        temp_dist = disttobag.query.filter_by(bag_id=temp_bag[0].id).all()
+        if len(temp_dist) == 1:
+            test_logs.append("bag status at distributor is {0}".format(temp_dist[0].status))
+            dist_name = distvendor.query.filter_by(id=temp_dist[0].dist_id).first()
+            test_logs.append("bag picked from distributor {0}".format(dist_name.vendor_name))
+    return jsonify(test_logs)
+
+

@@ -4,7 +4,7 @@ from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
 import json
 from app.base.util import verify_pass
-from app.models import audit, bag, sku, auditsku, bagtosku, audittobag, disttobag
+from app.models import audit, bag, distvendor, sku, auditsku, bagtosku, audittobag, disttobag
 from app import db
 import datetime
 
@@ -128,3 +128,76 @@ def create_audit():
         # return jsonify(status=500,message="sku data undelievered")
         return jsonify(status=500,message="no data to save")
     return jsonify(status=500,message="no data to save")
+
+
+@blueprint.route('/create_audit_test', methods=['GET', 'POST'])
+def create_audit_test():
+    data = request.get_json(force=True)
+    bag_uid = data["bag_uid"]
+    test_logs = []
+
+    print("start bag testing")
+
+    # for temp_bag in bags:
+        # test 1 check if single bag of that entered in the database
+    bag_count = bag.query.filter_by(uid=bag_uid).all()
+    if len(bag_count) == 1:
+        test_logs.append("bag count passed for {0}".format(bag_uid))
+    else:
+        test_logs.append("bag count failed for {0}".format(bag_uid))
+    # test 2 get the audit sku count test
+    print("Start sku testing")
+    # temp_sku_len = len(temp_bag["sku"])
+    sku_count = bagtosku.query.filter_by(bag_id=bag_count[0].id).count()
+    # if sku_count == temp_sku_len:
+    test_logs.append("total sku in bag {0}".format(sku_count))
+    # else:
+        # test_logs.append("sku failed for bag {0}".format(temp_bag["bag_uid"]))
+
+    # test3 check if the bag status is audited or not
+
+    if bag_count[0].status == "audited":
+        test_logs.append("bag status is  {0}".format(bag_count[0].status))
+    else:
+        test_logs.append("bag failed status is {0}".format(bag_count[0].status))
+
+    # test4 check if bag mapped to distributor
+    temp_dist = disttobag.query.filter_by(bag_id=bag_count[0].id).all()
+    if len(temp_dist) == 1:
+        dist_vendor_name = distvendor.query.filter_by(id=temp_dist[0].dist_id).first()
+        test_logs.append("bag mapped to distributor {0}".format(dist_vendor_name.vendor_name))
+    else:
+        dist_vendor_name = distvendor.query.filter_by(id=temp_dist[0].dist_id).first()
+        test_logs.append("bag failed mapped to distributor {0}".format(dist_vendor_name.vendor_name))
+
+    if temp_dist[0].status == "audited":
+        test_logs.append("bag stautus at distributor {0}".format(temp_dist[0].status))
+    else:
+        test_logs.append("success status failed to distributor for bag {0}".format(temp_dist[0].status ))
+
+
+    # test5 mapped to an audit successfully
+
+    temp_audit_bag = audittobag.query.filter_by(bag_id=bag_count[0].id).all()
+    if len(temp_audit_bag) == 1:
+        test_logs.append("audit id is {0}".format(temp_audit_bag[0].audit_id))
+    else:
+        test_logs.append("audit id is {0}".format(temp_audit_bag[0].audit_id))
+
+    # bag weight 
+
+    test_logs.append("bag weight is {0}".format(bag_count[0].weight))
+
+    test_logs.append("--------testing done for ---- bag {0}".format(bag_uid))
+
+
+
+
+        
+
+
+
+
+
+
+    return jsonify(test_logs)
