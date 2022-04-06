@@ -77,6 +77,7 @@ def create_audit():
     try:
         start_time = time.time()
         data = request.get_json(force=True)
+        print(data)
         audit_temp = data
         auditor_id, distributor_id = data['auditor_id'], data['distributor_id']
         latitude, longnitude = data["latitude"], data["longnitude"]
@@ -108,14 +109,7 @@ def create_audit():
                                 return jsonify(status=500,message="{0} Bag weight is zero".format(audited_bag["bag_uid"]))
                         except Exception as e:
                             return jsonify(status=500,message="error while measuring bag weight!")
-                        # check if bag already exists
-                        try:
-                            temp_bag_obj = bag.query.filter_by(uid=bag_uid).first()
-                            if temp_bag_obj is not None:
-                                return jsonify(status=500,message="Bag {0} already audited".format(bag_uid))
-                        except Exception as e:
-                            print(e)
-                            return jsonify(status=500,message="error in bag exist!")
+                        # saving bag
                         bag_id = bag(uid=bag_uid,status="audited",weight=bag_weight,created_at=datetime.datetime.now())
                         db.session.add(bag_id)
                         db.session.commit()
