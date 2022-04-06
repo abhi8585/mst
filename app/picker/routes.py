@@ -247,7 +247,7 @@ def get_depo_pickup():
                 temp["total_bag"] = bag_count
                 temp["pickup_number"] = pick.asn_number
                 temp["lr_number"] = pick.lr_number
-                temp["date"] = pick.created_at
+                temp["date"] = pick.created_at.strftime("%Y-%m-%d")
                 pickup_data.append(temp)
     else:
         return jsonify(status=500,message="no pickups")
