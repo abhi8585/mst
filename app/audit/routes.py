@@ -104,7 +104,7 @@ def create_audit():
                         bag_weight = audited_bag["bag_weight"]
                         # check if bag weight is zero
                         try:
-                            if bag_weight <= 0:
+                            if bag_weight == 0:
                                 return jsonify(status=200,message="{0} bag weight is zero".format(audited_bag["bag_uid"]))
                         except Exception as e:
                             return jsonify(status=500,message="error while measuring bag weight!")
