@@ -105,14 +105,14 @@ def create_audit():
                         # check if bag weight is zero
                         try:
                             if bag_weight == 0:
-                                return jsonify(status=200,message="{0} bag weight is zero".format(audited_bag["bag_uid"]))
+                                return jsonify(status=500,message="{0} Bag weight is zero".format(audited_bag["bag_uid"]))
                         except Exception as e:
                             return jsonify(status=500,message="error while measuring bag weight!")
                         # check if bag already exists
                         try:
                             temp_bag_obj = bag.query.filter_by(uid=bag_uid).first()
                             if temp_bag_obj is not None:
-                                return jsonify(status=200,message="bag {0} already audited".format(bag_uid))
+                                return jsonify(status=500,message="Bag {0} already audited".format(bag_uid))
                         except Exception as e:
                             print(e)
                             return jsonify(status=500,message="error in bag exist!")
@@ -129,7 +129,7 @@ def create_audit():
                     try:
                         temp_sku = audited_bag["sku"]
                         if len(temp_sku) == 0:
-                            return jsonify(status=200,message="{0} bag contains zero sku".format(audited_bag["bag_uid"]))
+                            return jsonify(status=500,message="{0} Bag contains zero sku".format(audited_bag["bag_uid"]))
                         temp_sku_ids = []
                         for dup_sku in temp_sku:
                             sku_asn_number = dup_sku["sku_asn_number"]
@@ -140,7 +140,7 @@ def create_audit():
                                 if sku_id == "":
                                     try:
                                         if sku_weight == 0:
-                                            return jsonify(status=200,message="sku {0} in bag {1} weights zero".format(dup_sku["sku_name"],audited_bag["bag_uid"]))
+                                            return jsonify(status=500,message="sku {0} in bag {1} weights zero".format(dup_sku["sku_name"],audited_bag["bag_uid"]))
                                     except Exception as e:
                                         print(e)
                                         return jsonify(status=500,message="error while checking zero sku weight!")
@@ -156,7 +156,7 @@ def create_audit():
                                     try:
                                         if sku_weight == 0:
                                             temp_sku = sku.query.filter_by(id=sku_id).first()
-                                            return jsonify(status=200,message="sku {0} in bag {1} weights zero".format(temp_sku.name,audited_bag["bag_uid"]))
+                                            return jsonify(status=500,message="sku {0} in bag {1} weights zero".format(temp_sku.name,audited_bag["bag_uid"]))
                                     except Exception as e:
                                         print(e)
                                         return jsonify(status=500,message="error while checking zero sku weight!")
@@ -205,7 +205,7 @@ def create_audit():
                         print(e)
                         return jsonify(status=500,message="error while mapping bag!")
                 return jsonify(status=200,message="audit create successfully!")
-            return jsonify(status=200,message="no bags to create!")
+            return jsonify(status=500,message="no bags to create!")
         return jsonify(status=500,message="audit not created!")
     except Exception as e:
         print(e)
