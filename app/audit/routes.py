@@ -1,4 +1,6 @@
 from email import message
+
+from itsdangerous import exc
 from app.audit import blueprint
 from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
@@ -48,7 +50,14 @@ audited_object = {
                     "sku_asn_number" : "ASN0890000002",
                     "sku_id" : "2",
                     "sku_weight" : "4"
+                },
+                {
+                    "sku_asn_number" : "ASN0890000002",
+                    "sku_id" : "",
+                    "sku_weight" : "4",
+                    "sku_name" : "testingsku"
                 }
+
                 
             ]
             
@@ -60,75 +69,150 @@ audited_object = {
 }
 
 
+
 @blueprint.route('/create_audit', methods=['GET', 'POST'])
 def create_audit():
     import time
-    start_time = time.time()
-    data = request.get_json(force=True)
-    audit_temp = data
-    auditor_id, distributor_id = data['auditor_id'], data['distributor_id']
-    latitude, longnitude = data["latitude"], data["longnitude"]
-    bags = data["bags"]
+    # checking query parameters
+    try:
+        start_time = time.time()
+        data = request.get_json(force=True)
+        audit_temp = data
+        auditor_id, distributor_id = data['auditor_id'], data['distributor_id']
+        latitude, longnitude = data["latitude"], data["longnitude"]
+        bags = data["bags"]
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="something wrong with query parameter!")
     # create new audit
-    
-    audit_id = audit(dist_id=distributor_id,auditor_id=auditor_id,latitude=latitude,
+    try:
+        audit_id = audit(dist_id=distributor_id,auditor_id=auditor_id,latitude=latitude,
                     longnitude=longnitude, created_at = datetime.datetime.now(), status = "incomplete")
-    db.session.add(audit_id)
-    db.session.commit()
+        db.session.add(audit_id)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="audit cannot be created!")
     audited_bags = []
-    if audit_id is not None:
-        if bags is not None:
-            for audited_bag in bags:
-                temp = audited_bag
-                bag_uid = audited_bag["bag_uid"]
-                bag_weight = audited_bag["bag_weight"]
-                bag_id = bag(uid=bag_uid,status="audited",weight=bag_weight,created_at=datetime.datetime.now())
-                db.session.add(bag_id)
-                db.session.commit()
-                temp["bag_id"] = bag_id.id
-                temp["sku_ids"] = []
-                audited_bags.append(temp)
-            for audited_bag in audited_bags:
-                temp_sku = audited_bag["sku"]
-                temp_sku_ids = []
-                for dup_sku in temp_sku:
-                    sku_asn_number = dup_sku["sku_asn_number"]
-                    sku_weight = dup_sku["sku_weight"]
-                    sku_id = dup_sku["sku_id"]
-                    temp_sku_id = auditsku(sku_id=sku_id, asn_code=sku_asn_number, weight = sku_weight, created_at = datetime.datetime.now())
-                    db.session.add(temp_sku_id)
-                    db.session.commit()
-                    temp_sku_ids.append(temp_sku_id.id)
-                audited_bag["sku_ids"].append(temp_sku_ids)  
-                # audited_bag["sku_ids"] = temp_sku_ids
-        # print(audited_bags)
-            for audited_bag in audited_bags:
-                temp_bag_id = audited_bag["bag_id"]
-                # print(temp_bag_id)
-                # print(audited_bag["sku_ids"])
-                for sku_id in audited_bag["sku_ids"]:
-                    for id in sku_id:
-                        bag_to_sku_id = bagtosku(bag_id=temp_bag_id,sku_id=id, created_at=datetime.datetime.now())
-                        # print(temp_bag_id, bag_to_sku_id)
-                        db.session.add(bag_to_sku_id)
+    try:
+        if audit_id is not None:
+            if bags is not None and len(bags) != 0:
+                for audited_bag in bags:
+                    try:
+                        temp = audited_bag
+                        bag_uid = audited_bag["bag_uid"]
+                        bag_weight = audited_bag["bag_weight"]
+                        # check if bag weight is zero
+                        try:
+                            if bag_weight <= 0:
+                                return jsonify(status=200,message="{0} bag weight is zero".format(audited_bag["bag_uid"]))
+                        except Exception as e:
+                            return jsonify(status=500,message="error while measuring bag weight!")
+                        # check if bag already exists
+                        try:
+                            temp_bag_obj = bag.query.filter_by(uid=bag_uid).first()
+                            if temp_bag_obj is not None:
+                                return jsonify(status=200,message="bag {0} already audited".format(bag_uid))
+                        except Exception as e:
+                            print(e)
+                            return jsonify(status=500,message="error in bag exist!")
+                        bag_id = bag(uid=bag_uid,status="audited",weight=bag_weight,created_at=datetime.datetime.now())
+                        db.session.add(bag_id)
                         db.session.commit()
-                audit_to_bag_id = audittobag(bag_id=temp_bag_id,audit_id=audit_id.id,created_at=datetime.datetime.now())
-                db.session.add(audit_to_bag_id)
-                db.session.commit()
-                dist_to_bag_id = disttobag(bag_id=temp_bag_id,dist_id=distributor_id,status="audited",created_at=datetime.datetime.now())
-                db.session.add(dist_to_bag_id)
-                db.session.commit()
-            return jsonify(status=200,message="audit create successfully")
-        # raise ValueError(audited_bags)
-        # sku_data = sku.query.all()
-        # if sku_data is not None:
-        #     sku_data = [dict(id=sku.id,name=sku.name,
-        #                 description=sku.description,weight=sku.weight) for sku in sku_data]
-        #     return jsonify(status=200,message="sku data delievered",sku_data=sku_data)
-        # return jsonify(status=500,message="sku data undelievered")
-        return jsonify(status=500,message="no data to save")
-    return jsonify(status=500,message="no data to save")
+                        temp["bag_id"] = bag_id.id
+                        temp["sku_ids"] = []
+                        audited_bags.append(temp)
+                    except Exception as e:
+                        print(e)
+                        return jsonify(status=500,message="error while saving bag!")
+                for audited_bag in audited_bags:
+                    try:
+                        temp_sku = audited_bag["sku"]
+                        if len(temp_sku) == 0:
+                            return jsonify(status=200,message="{0} bag contains zero sku".format(audited_bag["bag_uid"]))
+                        temp_sku_ids = []
+                        for dup_sku in temp_sku:
+                            sku_asn_number = dup_sku["sku_asn_number"]
+                            sku_weight = dup_sku["sku_weight"]
+                            sku_id = dup_sku["sku_id"]
+                            # adding other sku from the app
+                            try:
+                                if sku_id == "":
+                                    try:
+                                        if sku_weight == 0:
+                                            return jsonify(status=200,message="sku {0} in bag {1} weights zero".format(dup_sku["sku_name"],audited_bag["bag_uid"]))
+                                    except Exception as e:
+                                        print(e)
+                                        return jsonify(status=500,message="error while checking zero sku weight!")
+                                    try:
+                                        temp_sku_id = auditsku(asn_code=sku_asn_number, weight = sku_weight,sku_name=dup_sku["sku_name"], created_at = datetime.datetime.now())
+                                        db.session.add(temp_sku_id)
+                                        db.session.commit()
+                                        temp_sku_ids.append(temp_sku_id.id)
+                                    except Exception as e:
+                                        return jsonify(status=500,message="error while saving others sku!")
+                           
+                                else:
+                                    try:
+                                        if sku_weight == 0:
+                                            temp_sku = sku.query.filter_by(id=sku_id).first()
+                                            return jsonify(status=200,message="sku {0} in bag {1} weights zero".format(temp_sku.name,audited_bag["bag_uid"]))
+                                    except Exception as e:
+                                        print(e)
+                                        return jsonify(status=500,message="error while checking zero sku weight!")
+                                    try:
+                                        temp_sku_id = auditsku(sku_id=sku_id, asn_code=sku_asn_number, weight = sku_weight, created_at = datetime.datetime.now())
+                                        db.session.add(temp_sku_id)
+                                        db.session.commit()
+                                        temp_sku_ids.append(temp_sku_id.id)
+                                    except Exception as e:
+                                        print(e)
+                                        return jsonify(status=500,message="error while saving master sku!")
 
+                            except Exception as e:
+                                print(e)
+                                return jsonify(status=500, message="error while creating sku")
+                        audited_bag["sku_ids"].append(temp_sku_ids)  
+                    except Exception as e:
+                        print(e)
+                        return jsonify(status=500,message="error while saving sku!")
+
+                    # audited_bag["sku_ids"] = temp_sku_ids
+            # print(audited_bags)
+                for audited_bag in audited_bags:
+                    try:
+                        temp_bag_id = audited_bag["bag_id"]
+                    # print(temp_bag_id)
+                    # print(audited_bag["sku_ids"])
+                        try:
+                            for sku_id in audited_bag["sku_ids"]:
+                                for id in sku_id:
+                                    bag_to_sku_id = bagtosku(bag_id=temp_bag_id,sku_id=id, created_at=datetime.datetime.now())
+                                    # print(temp_bag_id, bag_to_sku_id)
+                                    db.session.add(bag_to_sku_id)
+                                    db.session.commit()
+                        except Exception as e:
+                            print(e)
+                            return jsonify(status=500,message="error while mapping sku to bag!")
+                            
+                        audit_to_bag_id = audittobag(bag_id=temp_bag_id,audit_id=audit_id.id,created_at=datetime.datetime.now())
+                        db.session.add(audit_to_bag_id)
+                        db.session.commit()
+                        dist_to_bag_id = disttobag(bag_id=temp_bag_id,dist_id=distributor_id,status="audited",created_at=datetime.datetime.now())
+                        db.session.add(dist_to_bag_id)
+                        db.session.commit()
+                    except Exception as e:
+                        print(e)
+                        return jsonify(status=500,message="error while mapping bag!")
+                return jsonify(status=200,message="audit create successfully!")
+            return jsonify(status=200,message="no bags to create!")
+        return jsonify(status=500,message="audit not created!")
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="something went wrong!")
+
+
+# testing of an bag after audit by uid
 
 @blueprint.route('/create_audit_test', methods=['GET', 'POST'])
 def create_audit_test():

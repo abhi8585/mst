@@ -173,8 +173,9 @@ class bag(db.Model):
 class auditsku(db.Model):
     __tablename__ = 'auditsku'
     id = db.Column(db.Integer, primary_key=True)
-    sku_id = db.Column(db.ForeignKey('sku.id'), nullable=False)
-    asn_code = db.Column(db.String(50), nullable=False)
+    sku_id = db.Column(db.ForeignKey('sku.id'))
+    sku_name= db.Column(db.String(50))
+    asn_code = db.Column(db.String(50))
     weight = db.Column(db.String(10), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())
@@ -215,7 +216,7 @@ class pickup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     transporter_id = db.Column(db.ForeignKey('user_info.id'), nullable=False)
     truck_number= db.Column(db.String(25))
-    lr_number= db.Column(db.String(25))
+    lr_number= db.Column(db.String(50))
     latitude = db.Column(db.String(50), nullable=False)
     longnitude = db.Column(db.String(50), nullable=False)
     dist_id = db.Column(db.ForeignKey('dist_vendor.id'), nullable=False)
@@ -351,7 +352,8 @@ class depopickup(db.Model):
     __tablename__ = 'depo_pickup'
     id = db.Column(db.Integer, primary_key=True)
     picker_id = db.Column(db.ForeignKey('user_info.id'), nullable=False)
-    truck_number= db.Column(db.String(25), nullable=False)
+    truck_number= db.Column(db.String(50))
+    lr_number= db.Column(db.String(25))
     latitude = db.Column(db.String(50), nullable=False)
     longnitude = db.Column(db.String(50), nullable=False)
     depo_id = db.Column(db.ForeignKey('depo_vendor.id'), nullable=False)
