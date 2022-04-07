@@ -11,7 +11,7 @@ from app.models import destructiontomaster, destructionvendor, depopickup, devia
 from app import db
 import datetime
 
-from app.models import bag, bagtosku, auditsku, sku, destructioninventory, deviateddestructionbag, userinfo
+from app.models import bag, bagtosku, auditsku, sku, destructioninventory, deviateddestructionbag, userinfo, destructionvendor
 from flask_mail import Message
 from tabulate import tabulate
 from app import mail
@@ -37,9 +37,9 @@ def get_sku_data(bag_id):
 
 @blueprint.route('/create_destruction', methods=['GET', 'POST'])
 def create_destruction():
-    des_obj = destructionvendor(vendor_code="656545",vendor_name="des4",address="pratap vihar",city="ghaziabad",pin_code='201009',
-                                state="uttar pradesh",latitude='28.584600989442496', longnitude='77.38094891104419',contact_person = 'abhi',
-                                contact_number='8585945196',email='des2@gmail.com', created_at=datetime.datetime.now())
+    des_obj = destructionvendor(vendor_code="532212",vendor_name="Ultratech",address="Aditya Cement, P.O. Adityapuram, Shambhupara, ",city="Chittorgarh",pin_code='312612',
+                                state="Rajasthan",latitude='28.656139', longnitude='77.402407',contact_person = 'Aanchal',
+                                contact_number='8422915773',email='aanchal.susheen@adityabirla.com', created_at=datetime.datetime.now())
     db.session.add(des_obj)
     db.session.commit()
     return "object created"
@@ -48,7 +48,7 @@ def create_destruction():
 
 @blueprint.route('/map_destruction', methods=['GET', 'POST'])
 def map_destruction():
-    des_map_obj = destructiontomaster(vendor_id=2, user_id=23, created_at = datetime.datetime.now())
+    des_map_obj = destructiontomaster(vendor_id=2, user_id=26, created_at = datetime.datetime.now())
     db.session.add(des_map_obj)
     db.session.commit()
     return "object created"
@@ -169,9 +169,9 @@ def get_lr_number_data():
                         temp_data.append(temp)
                 return jsonify(status=200,lr_data=temp_data,message="lr number data delievered!",lr_number=lr_number)
             else:
-                return jsonify(status=200,lr_data=temp_data,message="no bag found for this pickup!",lr_number=lr_number)
+                return jsonify(status=500,lr_data=temp_data,message="no bag found for this pickup!",lr_number=lr_number)
         else:
-            return jsonify(status=200,lr_data=temp_data,message="wrong pickup number!",lr_number=lr_number)
+            return jsonify(status=500,lr_data=temp_data,message="Wrong LR number!",lr_number=lr_number)
     except Exception as e:
          return jsonify(status=500,asn_data=temp_data,message="server error!",lr_number="")
 
@@ -184,7 +184,7 @@ def get_lr_number_data():
 
 destruction_object = {
 
-    "asn_number" : "ASN00MND00TNT8",
+    "lr_number" : "ASN00MND00TNT8",
     "destruction_master_id" : "14",
     "destruction_id" : "1",
     "latitude" : "30.85",
@@ -239,41 +239,53 @@ def send_email(html):
     except Exception as e:
         print(e)
 
+
+def get_strip_lr_number(lr_number):
+    new_lr_number = lr_number.replace(" ", "").lower()
+    return new_lr_number 
     
 
-@blueprint.route('/submit_pickup',methods=['GET','POST'])
-def submit_pickup():
-    data = request.get_json(force=True)
-    asn_number = data["asn_number"]
-    destruction_master_id = data["destruction_master_id"]
-    destruction_id = data["destruction_id"]
-    latitude = data["latitude"]
-    longnitude = data["longnitude"]
-    bag_data = data["bag_data"]
-    table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
+@blueprint.route('/submit_lr_pickup',methods=['GET','POST'])
+def submit_lr_pickup():
     try:
-        exist_pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
-        if exist_pickup_obj is not None:
-            if exist_pickup_obj.status == "collected":
-                return jsonify(status=500,message="pickup already saved!")
-            if exist_pickup_obj.status == "submitted":
-                return jsonify(status=500,message="pickup already saved!")
+        data = request.get_json(force=True)
+        lr_number = data["lr_number"]
+        destruction_master_id = data["destruction_master_id"]
+        destruction_id = data["destruction_id"]
+        latitude = data["latitude"]
+        longnitude = data["longnitude"]
+        bag_data = data["bag_data"]
+        lr_number = get_strip_lr_number(lr_number)
+        table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
     except Exception as e:
         print(e)
-        return jsonify(status=500,message="no data to save")
+        return jsonify(status=500,message="Wrong Input")
+    try:
+        exist_pickup_obj = depopickup.query.filter_by(lr_number=lr_number).first()
+        if exist_pickup_obj is not None:
+            if exist_pickup_obj.status == "collected":
+                return jsonify(status=500,message="LR number already collected!")
+            if exist_pickup_obj.status == "submitted":
+                return jsonify(status=500,message="LR number already submitted!")
+        if exist_pickup_obj is None:
+            return jsonify(status=500,message="LR number not exist!")
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="lr number exist check")
     try:
         depo_master_obj = userinfo.query.filter_by(id=destruction_master_id).first()
         depo_master_name = depo_master_obj.name
     except Exception as e:
         print(e)
-        return jsonify(status=500,message="no depo master found")
+        return jsonify(status=500,message="no destruction master found")
     try:
         depo_obj = destructionvendor.query.filter_by(id=destruction_id).first()
         depo_name = depo_obj.vendor_name
     except Exception as e:
         print(e)
-        return jsonify(status=500,message="no depo found")
-    if bag is not None and len(bag_data) !=0:
+        return jsonify(status=500,message="no destruction centre found")
+    is_deviation = False
+    if bag_data is not None and len(bag_data) !=0:
         for temp_bag in bag_data:
             if temp_bag["status"] == "incorrect":
                 try:
@@ -289,12 +301,13 @@ def submit_pickup():
                     bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
                     bag_obj.status = "received"
                     table_headings.append([bag_obj.uid,bag_obj.weight, deviated_data["weight"], depo_master_name,depo_name])
-                    
+                    if is_deviation == False:
+                        is_deviation = True
                 except Exception as e:
                     print(e)
                     db.session.rollback()
                     db.session.close()
-                    return jsonify(status=500,message="no data to save")
+                    return jsonify(status=500,message="error while saving deviated bags")
             else:
                 try:
                     bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
@@ -305,25 +318,27 @@ def submit_pickup():
                         db.session.add(submit_obj)
                         bag_obj.status = "received"
                     else:
-                        return jsonify(status=500,message="no data to save")
+                        return jsonify(status=500,message="Bag {0} weight Mismatch!".format(bag_obj.uid))
                 except Exception as e:
                     print(e)
                     db.session.rollback()
                     db.session.close()
-                    return jsonify(status=500,message="no data to save")
+                    return jsonify(status=500,message="error while saving right weight bags")
         try:
-            pickup_obj = depopickup.query.filter_by(asn_number=asn_number).first()
+            pickup_obj = depopickup.query.filter_by(lr_number=lr_number).first()
             pickup_obj.status = "collected"
             db.session.commit()
-            send_email(tabulate(table_headings, tablefmt='html'))
-            return jsonify(status=200,message="pickup saved successfully!")
+            temp_des_vendor = destructionvendor.query.filter_by(id=destruction_id).first()
+            if temp_des_vendor is not None:
+                return jsonify(status=200,message="Bags Submitted at {0}!".format(temp_des_vendor.vendor_name))
+            return jsonify(status=200,message="Bags Submitted Successfully!")
         except Exception as e:
             print(e)
             db.session.rollback()
             db.session.close()
-            return jsonify(status=500,message="no data to save")
+            return jsonify(status=500,message="error while compeleting pickup!")
     else:
-        return jsonify(status=500,message="no data to save")
+        return jsonify(status=500,message="no bag data to save")
 
 # submit bag objects directly in depo with submit bag button
 
@@ -421,10 +436,11 @@ def submit_direct_pickup():
         longnitude = data["longnitude"]
     except Exception as e:
         print(e)
-        print("error in query parameters! ")
+        print("error in query parameters!")
         
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
     seperate_bag_data = get_seperate_bag_data(bag_data)
+    is_deviation = False
     # truck_number = get_strip_truck_number(truck_number)
     try:
         depo_master_obj = userinfo.query.filter_by(id=destruction_master_id).first()
@@ -460,6 +476,8 @@ def submit_direct_pickup():
                         new_weight = deviated_data["weight"]
                         actual_weight = bag_obj.weight
                         table_headings.append([bag_obj.uid,bag_obj.weight, deviated_data["weight"], destruction_master_name,destruction_name])
+                        if is_deviation == False:
+                            is_deviation = True
                     except Exception as e:
                         print(e)
                         db.session.rollback()
@@ -485,10 +503,32 @@ def submit_direct_pickup():
                         return jsonify(status=500,message="no data to save")
                     
         
-                temp_pick_object = depopickup.query.filter_by(id=key).first()
-                print(temp_pick_object.id, key)
-                temp_pick_object.status = "collected"
-                # send_email(tabulate(table_headings, tablefmt='html'))
+                try:
+                    total_pickup_obj = depopicktobag.query.filter_by(pick_id=key).all()
+                    if total_pickup_obj is not None:
+                        total_pickup_bag = len(total_pickup_obj)
+                        received_count = 0
+                        for temp_bag in total_pickup_obj:
+                            temp_bag_obj = bag.query.filter_by(id=temp_bag.bag_id).first()
+                            if temp_bag_obj.status == "received":
+                                received_count += 1
+                        bag_difference = total_pickup_bag - received_count
+                        if bag_difference == 0:
+                            temp_pick_object = depopickup.query.filter_by(id=key).first()
+                            temp_pick_object.status = "collected"
+                except Exception as e:
+                    print(e)
+                    return jsonify(status=500,message="Error in Submitting Bags!")
+
+                # temp_pick_object = depopickup.query.filter_by(id=key).first()
+                # print(temp_pick_object.id, key)
+                # temp_pick_object.status = "collected"
+                try:
+                    if is_deviation == True:
+                        send_email(tabulate(table_headings, tablefmt='html'))
+                except Exception as e:
+                    print(e)
+                    print("error in sending email")
             # else:
             #     return jsonify(status=500,message="truck number mismatch!")
         db.session.commit()
