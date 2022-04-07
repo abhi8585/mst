@@ -717,9 +717,13 @@ def submit_direct_pickup():
     bag_data = data["bag_data"]
     latitude = data["latitude"]
     longnitude = data["longnitude"]
-    seperate_bag_data = get_seperate_bag_data(bag_data)
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
     is_deviation = False
+    try:
+        seperate_bag_data = get_seperate_bag_data(bag_data)
+    except Exception as e:
+        print(e)
+        return jsonify(status=500,message="Wrong pickup data")
     try:
         depo_master_obj = userinfo.query.filter_by(id=depo_master_id).first()
         depo_master_name = depo_master_obj.name
@@ -780,18 +784,22 @@ def submit_direct_pickup():
             # else:
             #     return jsonify(status=500,message="pickup bag count mismatch")
             # get the total number of bags for pickupid
-            total_pickup_obj = picktobag.query.filter_by(pick_id=key).all()
-            if total_pickup_obj is not None:
-                total_pickup_bag = len(total_pickup_obj)
-                collected_count = 0
-                for temp_bag in total_pickup_obj:
-                    temp_bag_obj = bag.query.filter_by(id=temp_bag.bag_id).first()
-                    if temp_bag_obj.status == "collected":
-                        collected_count += 1
-                bag_difference = total_pickup_bag - collected_count
-                if bag_difference == 0:
-                    temp_pick_object = pickup.query.filter_by(id=key).first()
-                    temp_pick_object.status = "collected"
+            try:
+                total_pickup_obj = picktobag.query.filter_by(pick_id=key).all()
+                if total_pickup_obj is not None:
+                    total_pickup_bag = len(total_pickup_obj)
+                    collected_count = 0
+                    for temp_bag in total_pickup_obj:
+                        temp_bag_obj = bag.query.filter_by(id=temp_bag.bag_id).first()
+                        if temp_bag_obj.status == "collected":
+                            collected_count += 1
+                    bag_difference = total_pickup_bag - collected_count
+                    if bag_difference == 0:
+                        temp_pick_object = pickup.query.filter_by(id=key).first()
+                        temp_pick_object.status = "collected"
+            except Exception as e:
+                print(e)
+                print("error while checking pickup status")
             # print(temp_pick_object.id, key)
             
             if is_deviation:
@@ -799,7 +807,9 @@ def submit_direct_pickup():
                     send_email(tabulate(table_headings, tablefmt='html'))
                 except Exception as e:
                     print(e)
+                    print("Error in sending email")
         db.session.commit()
-        return jsonify(status=200,message="bags saved successfully")
+        
+        return jsonify(status=200,message="{0}, Bags successfully submmited!".format(depo_master_name.capitalize()))
     else:
         return jsonify(status=500,message="Bags are not picked yet!") 

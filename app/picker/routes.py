@@ -124,10 +124,13 @@ def create_pickup():
         table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
         pickup_number = depopickup.query.count() + 1
         asn_number = "ASN00MND00TNT{0}".format(pickup_number)
+        is_deviation = False
     except Exception as e:
         print(e)
         print("error while getting parameters")
         return jsonify(status=500,message="error while getting parameters")
+    # strip lr number
+    lr_number = get_strip_lr_number(lr_number)
     # get the picker name for email
     try:
         depo_picker_obj = userinfo.query.filter_by(id=picker_id).first()
@@ -145,7 +148,7 @@ def create_pickup():
     try:
         temp_lr = depopickup.query.filter_by(lr_number=lr_number).first()
         if temp_lr is not None:
-            return jsonify(status=200,message="LR number already exists!")
+            return jsonify(status=500,message="LR number already exists!")
     except Exception as e:
         return jsonify(status=500,message="Wrong LR number!")
     try:
@@ -212,7 +215,7 @@ def create_pickup():
                     else:
                         db.session.rollback()
                         db.session.close()
-                        return jsonify(status=300,message="bag weight mis match")
+                        return jsonify(status=500,message="bag weight mis match")
                 except Exception as e:
                     print(e)
                     db.session.rollback()
@@ -226,7 +229,8 @@ def create_pickup():
             print(e)
             print("error in sending email")
         db.session.commit()
-        return jsonify(status=200,pickup_number = asn_number,message="depo pickup saved successfully!")
+        
+        return jsonify(status=200,pickup_number = asn_number,message="{0}, Bags picked successfully!".format(depo_picker_name.capitalize()))
     else:
         db.session.rollback()
         db.session.close()
@@ -239,7 +243,7 @@ def get_depo_pickup():
     picker_id = data["picker_id"]
     pickup_obj = depopickup.query.filter_by(picker_id=picker_id, status="picked").all()
     pickup_data = []
-    if pickup_obj is not None:
+    if len(pickup_obj) > 0:
         for pick in pickup_obj:
             temp = {}
             bag_count = depopicktobag.query.filter_by(pick_id=pick.id).count()

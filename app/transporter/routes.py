@@ -701,7 +701,8 @@ def create_pickup():
         except Exception as e:
             print(e)
             print("error in email")
-        return jsonify(status=200,pickup_number = pickup_number,message="pickup saved successfully!")
+        temp_user = userinfo.query.filter_by(id=transporter_id).first()
+        return jsonify(status=200,pickup_number = pickup_number,message="Congratulation {0}, Bags picked up successfully!".format(temp_user.name.capitalize()))
     else:
         db.session.expunge_all()
         db.session.rollback()

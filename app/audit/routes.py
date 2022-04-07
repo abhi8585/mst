@@ -6,7 +6,7 @@ from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
 import json
 from app.base.util import verify_pass
-from app.models import audit, bag, distvendor, sku, auditsku, bagtosku, audittobag, disttobag
+from app.models import audit, bag, distvendor, sku, auditsku, bagtosku, audittobag, disttobag, userinfo
 from app import db
 import datetime
 
@@ -547,7 +547,8 @@ def create_audit():
                         except Exception as e:
                             print(e)
                         return jsonify(status=500,message="error while mapping bag!")
-                return jsonify(status=200,message="Audit created successfully!")
+                temp_user = userinfo.query.filter_by(id=auditor_id).first()
+                return jsonify(status=200,message="{0}, Audited bags saved successfully!".format(temp_user.name.capitalize()))
             return jsonify(status=500,message="no bags to create!")
         return jsonify(status=500,message="audit not created!")
     except Exception as e:

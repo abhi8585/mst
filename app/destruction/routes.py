@@ -330,8 +330,8 @@ def submit_lr_pickup():
             db.session.commit()
             temp_des_vendor = destructionvendor.query.filter_by(id=destruction_id).first()
             if temp_des_vendor is not None:
-                return jsonify(status=200,message="Bags Submitted at {0}!".format(temp_des_vendor.vendor_name))
-            return jsonify(status=200,message="Bags Submitted Successfully!")
+                return jsonify(status=200,message="{0}, Bags Submitted Successfully!".format(depo_master_name.capitalize()))
+            return jsonify(status=200,message="{0}, Bags Submitted Successfully!".format(depo_master_name.capitalize()))
         except Exception as e:
             print(e)
             db.session.rollback()
@@ -482,7 +482,7 @@ def submit_direct_pickup():
                         print(e)
                         db.session.rollback()
                         db.session.close()
-                        return jsonify(status=500,message="no data to save")
+                        return jsonify(status=500,message="error in saving deviated bags")
                     
                 else:
                     try:
@@ -500,7 +500,7 @@ def submit_direct_pickup():
                         print(e)
                         db.session.rollback()
                         db.session.close()
-                        return jsonify(status=500,message="no data to save")
+                        return jsonify(status=500,message="error in saving right bags")
                     
         
                 try:
@@ -518,7 +518,7 @@ def submit_direct_pickup():
                             temp_pick_object.status = "collected"
                 except Exception as e:
                     print(e)
-                    return jsonify(status=500,message="Error in Submitting Bags!")
+                    return jsonify(status=500,message="Error in Marking Pickup!")
 
                 # temp_pick_object = depopickup.query.filter_by(id=key).first()
                 # print(temp_pick_object.id, key)
@@ -532,6 +532,7 @@ def submit_direct_pickup():
             # else:
             #     return jsonify(status=500,message="truck number mismatch!")
         db.session.commit()
-        return jsonify(status=200,message="bags saved successfully")
+        des_vendor = destructionvendor.query.filter_by(id=destruction_id).first()
+        return jsonify(status=200,message="Bags submitted at {0}".format(des_vendor.vendor_name))
     else:
         return jsonify(status=500,message="bag count missing") 
