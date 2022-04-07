@@ -719,6 +719,7 @@ def submit_direct_pickup():
     longnitude = data["longnitude"]
     seperate_bag_data = get_seperate_bag_data(bag_data)
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
+    is_deviation = False
     try:
         depo_master_obj = userinfo.query.filter_by(id=depo_master_id).first()
         depo_master_name = depo_master_obj.name
@@ -733,58 +734,72 @@ def submit_direct_pickup():
         return jsonify(status=500,message="no depo found")
     if len(seperate_bag_data.values()) != 0:
         for key, value in seperate_bag_data.items():
-            temp_pickup_obj = picktobag.query.filter_by(pick_id=key).count()
-            print(temp_pickup_obj, len(value))
-            if temp_pickup_obj == len(value):
-                for temp_bag in value:
-                    if temp_bag["status"] == "incorrect":
-                        try:
-                            submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
-                                                    longnitude=longnitude,created_at=datetime.datetime.now(),
-                                                    submitted_by=depo_master_id)
-                            deviated_data = temp_bag["deviated_data"]
-                            deviated_bag_obj = deviateddepobag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
-                                                        remarks=deviated_data["remarks"], created_at=datetime.datetime.now()
-                                                        ,image_url=deviated_data["imageURL"])
-                            db.session.add(submit_obj)
-                            db.session.add(deviated_bag_obj)
-                            bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                            bag_obj.status = "collected"
-                            new_weight = deviated_data["weight"]
-                            actual_weight = bag_obj.weight
-                            table_headings.append([bag_obj.uid,actual_weight, new_weight, depo_master_name,depo_name])
-                        except Exception as e:
-                            print(e)
-                            db.session.rollback()
-                            db.session.close()
-                            return jsonify(status=500,message="no data to save first")
-                        
-                    else:
-                        try:
-                            bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
-                            if temp_bag["bag_weight"] != bag_obj.weight:
-                                db.session.rollback()
-                                db.session.close()
-                                return jsonify(status=500,message="right bag weight mismatch")
-                            submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
-                                                    longnitude=longnitude,created_at=datetime.datetime.now(),
-                                                    submitted_by=depo_master_id)
-                            db.session.add(submit_obj)
-                            bag_obj.status = "collected"
-                        except Exception as e:
-                            print(e)
-                            db.session.rollback()
-                            db.session.close()
-                            return jsonify(status=500,message="no data to save second")
+            for temp_bag in value:
+                if temp_bag["status"] == "incorrect":
+                    try:
+                        submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
+                                                longnitude=longnitude,created_at=datetime.datetime.now(),
+                                                submitted_by=depo_master_id)
+                        deviated_data = temp_bag["deviated_data"]
+                        deviated_bag_obj = deviateddepobag(bag_id=temp_bag["bag_id"],weight=deviated_data["weight"],
+                                                    remarks=deviated_data["remarks"], created_at=datetime.datetime.now()
+                                                    ,image_url=deviated_data["imageURL"])
+                        db.session.add(submit_obj)
+                        db.session.add(deviated_bag_obj)
+                        bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                        bag_obj.status = "collected"
+                        new_weight = deviated_data["weight"]
+                        actual_weight = bag_obj.weight
+                        table_headings.append([bag_obj.uid,actual_weight, new_weight, depo_master_name,depo_name])
+                        if is_deviation ==  False:
+                            is_deviation = True
+                    except Exception as e:
+                        print(e)
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="no data to save first")
                     
-            else:
-                return jsonify(status=500,message="pickup bag count mismatch")
-            temp_pick_object = pickup.query.filter_by(id=key).first()
-            print(temp_pick_object.id, key)
-            temp_pick_object.status = "collected"
-            send_email(tabulate(table_headings, tablefmt='html'))
+                else:
+                    try:
+                        bag_obj = bag.query.filter_by(id=temp_bag["bag_id"]).first()
+                        if temp_bag["bag_weight"] != bag_obj.weight:
+                            db.session.rollback()
+                            db.session.close()
+                            return jsonify(status=500,message="right bag weight mismatch")
+                        submit_obj = depoinventory(depo_id=depo_id,bag_id=temp_bag["bag_id"],status="collected",latitude=latitude,
+                                                longnitude=longnitude,created_at=datetime.datetime.now(),
+                                                submitted_by=depo_master_id)
+                        db.session.add(submit_obj)
+                        bag_obj.status = "collected"
+                    except Exception as e:
+                        print(e)
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="no data to save second")
+                    
+            # else:
+            #     return jsonify(status=500,message="pickup bag count mismatch")
+            # get the total number of bags for pickupid
+            total_pickup_obj = picktobag.query.filter_by(pick_id=key).all()
+            if total_pickup_obj is not None:
+                total_pickup_bag = len(total_pickup_obj)
+                collected_count = 0
+                for temp_bag in total_pickup_obj:
+                    temp_bag_obj = bag.query.filter_by(id=temp_bag.bag_id).first()
+                    if temp_bag_obj.status == "collected":
+                        collected_count += 1
+                bag_difference = total_pickup_bag - collected_count
+                if bag_difference == 0:
+                    temp_pick_object = pickup.query.filter_by(id=key).first()
+                    temp_pick_object.status = "collected"
+            # print(temp_pick_object.id, key)
             
+            if is_deviation:
+                try:
+                    send_email(tabulate(table_headings, tablefmt='html'))
+                except Exception as e:
+                    print(e)
         db.session.commit()
         return jsonify(status=200,message="bags saved successfully")
     else:
-        return jsonify(status=500,message="bag count missing") 
+        return jsonify(status=500,message="Bags are not picked yet!") 
