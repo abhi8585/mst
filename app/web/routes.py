@@ -73,8 +73,6 @@ def get_transporter_vendor(user_id):
         return dict(status=500,message="no vendor found",vendor_name="",user_message=user_message)
 
 
-
-
 def get_depo_vendor(user_id):
     depo_vendor = depotomaster.query.filter_by(user_id=user_id).first()
     if depo_vendor is not None:
@@ -143,7 +141,7 @@ def get_sku():
     if sku_data is not None:
         sku_data = [dict(id=sku.id,name=sku.name,
                     description=sku.description,weight=sku.weight) for sku in sku_data
-                    if sku.id > 3]
+                    if sku.id > 8]
         return jsonify(status=200,message="sku data delievered",sku_data=sku_data)
     return jsonify(status=500,message="sku data undelievered")
     
