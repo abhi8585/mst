@@ -526,3 +526,35 @@ def mapdepopicker():
     db.session.commit()
     return jsonify(status=200, message="picker mapped successfully")
 
+
+
+
+labels = [
+    'Audited', 'Picked', 'Collected', 'Dispathched', 'Received',
+   
+]
+
+# labels = [
+#     'JAN', 'FEB', 'MAR', 'APR',
+#     'MAY', 'JUN', 'JUL', 'AUG',
+#     'SEP', 'OCT', 'NOV', 'DEC'
+# ]
+
+values = [
+    800, 400, 200, 100, 50
+]
+
+colors = [
+    "#F7464A", "#46BFBD", "#FDB45C", "#FEDCBA",
+    "#ABCDEF", "#DDDDDD", "#ABCABC", "#4169E1",
+    "#C71585", "#FF4500", "#FEDCBA", "#46BFBD"]
+
+# sku analysis
+@blueprint.route('/skuanalysis')
+def skuanalysis():
+    bar_labels=labels
+    bar_values=values
+    return render_template('sku-analysis.html', title='Bitcoin Monthly Price in USD', max=17000, labels=bar_labels, values=bar_values, set=zip(values, labels, colors))
+
+
+
