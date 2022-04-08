@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from email import message
-from sys import audit
+# from sys import audit
 from app.analysis import blueprint
 from app.models import auditsku, audittobag, deviatedbag, picktobag, pickup, role, transportvendor, userinfo, usertorole, auditvendor, auditortovendor, distvendor, disttovendor, sku, transportvendor, transtovendor
 from .. import db
