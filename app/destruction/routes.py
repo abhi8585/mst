@@ -7,7 +7,7 @@ from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
 import json
 from app.base.util import verify_pass
-from app.models import destructiontomaster, destructionvendor, depopickup, deviateddepopickbag, depopicktobag
+from app.models import destructiontomaster, destructionvendor, depopickup, deviateddepopickbag, depopicktobag, depovendor
 from app import db
 import datetime
 
@@ -111,10 +111,10 @@ def get_asn_number_data():
     if pickup_obj is not None:
         # check if already reached to destruction centre
         if pickup_obj.status == "collected" : 
-            return jsonify(status=300,message="pickup already completed")
+            return jsonify(status=500,message="This LR number is already used!")
         # check if already reached to another depo centre
         if pickup_obj.status == "submitted" :
-            return jsonify(status=300,message="pickup already completed")
+            return jsonify(status=500,message="This LR number is already used!")
         bags_data = depopicktobag.query.filter_by(pick_id=pickup_obj.id).all()
         for results in bags_data:
             temp = {}
@@ -154,8 +154,18 @@ def get_lr_number_data():
         # check if already reached to another depo centre
             if pickup_obj.status == "submitted" :
                 return jsonify(status=300,message="pickup already completed")
+            # making pickup summary data
+            picker_id = userinfo.query.filter_by(id=pickup_obj.picker_id).first()
+            picker_name = picker_id.name
+            depo_id = depovendor.query.filter_by(id=pickup_obj.depo_id).first()
+            depo_name = depo_id.vendor_name
+            # getting bag data
             bags_data = depopicktobag.query.filter_by(pick_id=pickup_obj.id).all()
             if len(bags_data) > 0:
+                # making bag summary data
+                total_bag_count = len(bags_data)
+                total_weight_count = 0.00
+                
                 for results in bags_data:
                     temp = {}
                     if results.status == "correct":
@@ -167,13 +177,17 @@ def get_lr_number_data():
                         temp["bag_uid"] = bag_data.uid
                         temp["bag_sku_data"] = []
                         temp_data.append(temp)
-                return jsonify(status=200,lr_data=temp_data,message="lr number data delievered!",lr_number=lr_number)
+                        total_weight_count += float(bag_data.weight)
+                return jsonify(status=200,lr_data=temp_data,message="lr number data delievered!",lr_number=lr_number,
+                                total_bags=total_bag_count,total_weight=total_weight_count,picked_by=picker_name,
+                                picked_at=pickup_obj.created_at.strftime("%Y-%m-%d"),depo_name=depo_name)
             else:
                 return jsonify(status=500,lr_data=temp_data,message="no bag found for this pickup!",lr_number=lr_number)
         else:
             return jsonify(status=500,lr_data=temp_data,message="Wrong LR number!",lr_number=lr_number)
     except Exception as e:
-         return jsonify(status=500,asn_data=temp_data,message="server error!",lr_number="")
+        print(e)
+        return jsonify(status=500,asn_data=temp_data,message="server error!",lr_number="")
 
 
 # get bag data will be as same as from trasnporter
