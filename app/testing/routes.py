@@ -142,6 +142,7 @@ def create_picker_pickup():
         temp["bag_data"].append(bag_sample)
     return jsonify(temp)
         
+# create destruction strucutre
 
 @blueprint.route('/create_destruction_lr_submit',methods=['GET','POST'])
 def create_destruction_lr_submit():
