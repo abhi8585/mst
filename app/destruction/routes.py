@@ -178,6 +178,17 @@ def get_lr_number_data():
                         temp["bag_sku_data"] = []
                         temp_data.append(temp)
                         total_weight_count += float(bag_data.weight)
+                    if results.status == "incorrect":
+                        bag_data = bag.query.filter_by(id=results.bag_id).first()
+                        dev_bag_obj = deviateddepopickbag.query.filter_by(bag_id=results.bag_id).first()
+                        # sku_data = get_sku_data(bag_data.id)
+                        temp["bag_weight"] = dev_bag_obj.weight 
+                        temp["bag_id"] = bag_data.id
+                        temp["bag_status"] = results.status
+                        temp["bag_uid"] = bag_data.uid
+                        temp["bag_sku_data"] = []
+                        temp_data.append(temp)
+                        total_weight_count += float(dev_bag_obj.weight)
                 return jsonify(status=200,lr_data=temp_data,message="lr number data delievered!",lr_number=lr_number,
                                 total_bags=total_bag_count,total_weight=total_weight_count,picked_by=picker_name,
                                 picked_at=pickup_obj.created_at.strftime("%Y-%m-%d"),depo_name=depo_name)
@@ -259,11 +270,14 @@ def get_strip_lr_number(lr_number):
     return new_lr_number 
     
 
+# submit lr pickup
+
 @blueprint.route('/submit_lr_pickup',methods=['GET','POST'])
 def submit_lr_pickup():
     try:
         data = request.get_json(force=True)
         lr_number = data["lr_number"]
+        deviated_weight = data["deviated_weight"]
         destruction_master_id = data["destruction_master_id"]
         destruction_id = data["destruction_id"]
         latitude = data["latitude"]
@@ -341,6 +355,7 @@ def submit_lr_pickup():
         try:
             pickup_obj = depopickup.query.filter_by(lr_number=lr_number).first()
             pickup_obj.status = "collected"
+            pickup_obj.deviated_weight = deviated_weight
             db.session.commit()
             temp_des_vendor = destructionvendor.query.filter_by(id=destruction_id).first()
             if temp_des_vendor is not None:

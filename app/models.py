@@ -357,6 +357,7 @@ class depopickup(db.Model):
     latitude = db.Column(db.String(50), nullable=False)
     longnitude = db.Column(db.String(50), nullable=False)
     depo_id = db.Column(db.ForeignKey('depo_vendor.id'), nullable=False)
+    deviated_weight = db.Column(db.String(10))
     status = db.Column(db.String(25))
     asn_number = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)

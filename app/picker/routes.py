@@ -1,5 +1,7 @@
 from email import message
 
+from itsdangerous import exc
+
 from app import transporter
 from app.picker import blueprint
 from flask_restful import Resource, Api
@@ -109,6 +111,77 @@ def get_strip_lr_number(truck_number):
     new_lr_number = truck_number.replace(" ", "").lower()
     return new_lr_number
 
+
+# helper functiont to delete created pickup in case if any error occur while saving bag data
+def delete_pickup(pick_id):
+    try:
+        print("pickup id is {}".format(pick_id))
+        temp_pick_bag = depopicktobag.query.filter_by(pick_id=pick_id).delete()
+        temp_pickup = depopickup.query.filter_by(id=pick_id).delete()
+        db.session.expunge_all()
+        db.session.commit()
+        return dict(message=True)
+    except Exception as e:
+        print(e)
+        print("while deleting an pickup from the function")
+        return dict(message=False)
+
+
+# helper functiont to delete created bag in case if any error occur while saving right bag data
+def delete_bagpick(bag_ids):
+    if len(bag_ids) > 0:
+        try:
+            db.session.expunge_all()
+            for i in bag_ids:
+                print("bag id is {0}".format(i))
+                temp_pick_bag = picktobag.query.filter_by(bag_id=i).delete()
+                temp_bag = bag.query.filter_by(id=i).first()
+                if temp_bag is not None:
+                    if temp_bag.status == "dispatched":
+                        temp_bag.status = "collected"
+                        temp_bag.updated_at = datetime.datetime.now()
+                temp_dist_bag = depoinventory.query.filter_by(bag_id=i).first()
+                if temp_dist_bag is not None:
+                    if temp_dist_bag.status == "dispatched":
+                        temp_dist_bag.status = "collected"
+                        temp_dist_bag.updated_at = datetime.datetime.now()
+            db.session.commit()
+            return dict(message=True)
+        except Exception as e:
+            print(e)
+            print("while deleting an picktobag")
+            return dict(message=False)
+    else:
+        return dict(message=True)
+
+
+# helper functiont to delete created deviated bag in case if any error occur while saving right/deviated bag data
+def delete_deviated_bag(bag_ids):
+    if len(bag_ids) > 0:
+        try:
+            db.session.expunge_all()
+            for i in bag_ids:
+                print("deviated bag id is {0}".format(i))
+                temp_pick_bag = deviateddepopickbag.query.filter_by(bag_id=i).delete()
+                temp_bag = bag.query.filter_by(id=i).first()
+                if temp_bag is not None:
+                    if temp_bag.status == "dispatched":
+                        temp_bag.status = "collected"
+                        temp_bag.updated_at = datetime.datetime.now()
+                temp_dist_bag = depoinventory.query.filter_by(bag_id=i).first()
+                if temp_dist_bag is not None:
+                    if temp_dist_bag.status == "dispatched":
+                        temp_dist_bag.status = "collected"
+                        temp_dist_bag.updated_at = datetime.datetime.now()
+            db.session.commit()
+            return dict(message=True)
+        except Exception as e:
+            print(e)
+            print("while deleting an picktobag")
+            return dict(message=False)
+    else:
+        return dict(message=True)
+
 # create depo pickup object and map it to bag
 @blueprint.route('/create_pickup',methods=["GET","POST"])
 def create_pickup():
@@ -125,10 +198,12 @@ def create_pickup():
         pickup_number = depopickup.query.count() + 1
         asn_number = "ASN00MND00TNT{0}".format(pickup_number)
         is_deviation = False
+        prev_right_bag_ids = []
+        prev_wrong_bag_ids = []
     except Exception as e:
         print(e)
         print("error while getting parameters")
-        return jsonify(status=500,message="error while getting parameters")
+        return jsonify(status=500,message="Error while getting parameters!")
     # strip lr number
     lr_number = get_strip_lr_number(lr_number)
     # get the picker name for email
@@ -137,14 +212,14 @@ def create_pickup():
         depo_picker_name = depo_picker_obj.name
     except Exception as e:
         print(e)
-        return jsonify(status=500,message="no depo picker found")
+        return jsonify(status=500,message="No depo picker found!")
     # get the depo name for emai
     try:
         depo_obj = depovendor.query.filter_by(id=depo_id).first()
         depo_name = depo_obj.vendor_name
     except Exception as e:
         print(e)
-        return jsonify(status=500,message="no depo found")
+        return jsonify(status=500,message="No depo found!")
     try:
         temp_lr = depopickup.query.filter_by(lr_number=lr_number).first()
         if temp_lr is not None:
@@ -160,49 +235,268 @@ def create_pickup():
         print(e)
         db.session.rollback()
         db.session.close()
-        return jsonify(status=500, message="pickup can not be saved!")
+        return jsonify(status=500, message="Cannot create pickup, Please check data again!")
     if len(bag_data) != 0:
         for bag_id in bag_data:
             if bag_id["deviated_data"] != "" and bag_id["status"] == "incorrect":
                 try:
-                    temp = bag_id["deviated_data"]
-                    deviate_bag = deviateddepopickbag(bag_id=bag_id["bag_id"],weight=temp["weight"],
-                                            remarks=temp["remarks"],created_at=datetime.datetime.now())
-                    
-                    # commenting to not map deviated bag to depo pickup
-                    # pick_bag_obj = depopicktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
-                    #                     status=bag_id["status"],created_at=datetime.datetime.now())
-                    # db.session.add(pick_bag_obj)
-                    db.session.add(deviate_bag)
                     temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
-                    # no need to mark bag as dispatched beacuse its deviated bag
-                    # temp_bag_obj.status = "dispatched"
-                    # no need to mark bag as dispatched beacuse its deviated bag
-                    # temp_dist_bag = depoinventory.query.filter_by(bag_id=bag_id["bag_id"]).first()
-                    # temp_dist_bag.status = "dispatched"
-                    actual_weight = temp_bag_obj.weight
-                    new_weight = temp["weight"]
-                    table_headings.append([temp_bag_obj.uid,actual_weight, new_weight, depo_picker_name,depo_name])
-                    if is_deviation == False:
-                        is_deviation = True
+                    
+                    # check if deviated bag exists or not
+                    if temp_bag_obj is None:
+
+                        # deleting pickup
+
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id) 
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting pickup when bag is None")
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting right bags when bag is None")
+                        
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+                        
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="Bag {0} does not exist!".format(bag_id["bag_id"]))
+
+                    # check if bag already marked deviated 
+
+                    temp_deviated_bag = deviateddepopickbag.query.filter_by(bag_id=bag_id["bag_id"]).first()
+                    if temp_deviated_bag is not None:
+                        
+                        # deleting pickup
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id) 
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting pickup when bag is None")
+                        
+                        # deleting right bags
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting right bags when bag is None")
+                        
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="Bag {0} already marked as Deviated!".format(temp_bag_obj.uid))
+
+                    # check if bag is already picked
+                    if temp_bag_obj.status == "dispatched":
+                        
+                        # deleting pickup
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting pickup when bag is dispatched!")
+                       
+                        # deleting right bags
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting right bags when bag is dispatched!")
+                        
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="Bag {0} already picked!".format(temp_bag_obj.uid))
+
+                    # another check if bag is already picked
+                    temp_pickup_depo = depopicktobag.query.filter_by(bag_id=temp_bag_obj.id).first()
+                    if temp_pickup_depo is not None:
+                        
+                        # deleting pickup
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting pickup when bag is already picked!")
+                        
+                        # deleting right bags
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting right bags when bag is already picked!")
+                        
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="Bag {0} already picked!".format(temp_bag_obj.uid))
+
+                    # trying saving the deviated bags
+
+                    try:
+                        temp = bag_id["deviated_data"]
+                        deviate_bag = deviateddepopickbag(bag_id=bag_id["bag_id"],weight=temp["weight"],
+                                                remarks=temp["remarks"],created_at=datetime.datetime.now())
+                        
+                        # commenting to not map deviated bag to depo pickup
+                        pick_bag_obj = depopicktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
+                                            status=bag_id["status"],created_at=datetime.datetime.now())
+                        db.session.add(pick_bag_obj)
+                        db.session.add(deviate_bag)
+                        
+                        # no need to mark bag as dispatched beacuse its deviated bag
+                        temp_bag_obj.status = "dispatched"
+                        # no need to mark bag as dispatched beacuse its deviated bag
+                        temp_dist_bag = depoinventory.query.filter_by(bag_id=bag_id["bag_id"]).first()
+                        temp_dist_bag.status = "dispatched"
+                        actual_weight = temp_bag_obj.weight
+                        new_weight = temp["weight"]
+                        table_headings.append([temp_bag_obj.uid,actual_weight, new_weight, depo_picker_name,depo_name])
+                        prev_wrong_bag_ids.append(bag_id["bag_id"])
+                        if is_deviation == False:
+                            is_deviation = True
+                    except Exception as e:
+                        print(e)
+
+                        # deleting pickup
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id)
+                        except Exception as e:
+                            print(e)
+                            # print("error while deleting pickup when bag is already picked!")
+                        
+                        # deleting right bags
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                        
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            # print("error while deleting right bags when bag is already picked!")
+                            return jsonify(status=500,message="Cannot save Deviated bags!".format(temp_bag_obj.uid))
                 except Exception as e:
                     print(e)
+
+                    # deleting pickup
+                    try:
+                        is_delete = delete_pickup(pickup_obj.id)
+                    except Exception as e:
+                        print(e)
+                        print("error while deleting pickup")
+
+                    # deleting right bags
+                    try:
+                        is_delete = delete_bagpick(prev_right_bag_ids)
+                    except Exception as e:
+                        print(e)
+                    
+                    # deleting deviated bags
+                    try:
+                        is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                    except Exception as e:
+                        print(e)
+                            # print("error while deleting right bags when bag is already picked!")
                     db.session.rollback()
                     db.session.close()
-                    return jsonify(status=500,message="deviated bag data can not save")
+                    return jsonify(status=500,message="Deviated bag data can not save")
+            
+            # saving the right bag
+            
             else:
                 # temp_bag = bag_id
                 try:
                     temp_bag_obj = bag.query.filter_by(id=bag_id["bag_id"]).first()
+                    # check if bag exists or not
                     if temp_bag_obj is None:
-                        return jsonify(status=200,message="bag {0} does not exist".format(temp_bag_obj.uid))
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id) 
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting pickup when bag is None")
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting right bags when bag is None")
+                        
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="Bag {0} does not exist!".format(bag_id["bag_id"]))
+
                     # check if bag is already picked
                     if temp_bag_obj.status == "dispatched":
-                        return jsonify(status=200,message="bag {0} already picked".format(temp_bag_obj.uid))
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting pickup when bag is dispatched!")
+                        # deleting right bags
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting right bags when bag is dispatched!")
+
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="Bag {0} already picked!".format(temp_bag_obj.uid))
+
                     # another check if bag is already picked
                     temp_pickup_depo = depopicktobag.query.filter_by(bag_id=temp_bag_obj.id).first()
                     if temp_pickup_depo is not None:
-                        return jsonify(status=200,message="bag {0} already picked".format(temp_bag_obj.uid))
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting pickup when bag is already picked!")
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting right bags when bag is already picked!")
+
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+                        db.session.rollback()
+                        db.session.close()
+                        return jsonify(status=500,message="Bag {0} already picked!".format(temp_bag_obj.uid))
+
                     # check if right bag data weights match 
                     if temp_bag_obj.weight == bag_id["bag_weight"]:
                         pick_bag_obj = depopicktobag(bag_id=bag_id["bag_id"],pick_id=pickup_obj.id,
@@ -212,29 +506,83 @@ def create_pickup():
                         temp_dist_bag = depoinventory.query.filter_by(bag_id=bag_id["bag_id"]).first()
                         # raise ValueError(temp_dist_bag.status)
                         temp_dist_bag.status = "dispatched"
+                        prev_right_bag_ids.append(bag_id["bag_id"])
                     else:
+                        # deleting pickup
+                        try:
+                            is_delete = delete_pickup(pickup_obj.id)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting pickup when right bag weight not matching!")
+                        # deleting right bags
+                        try:
+                            is_delete = delete_bagpick(prev_right_bag_ids)
+                        except Exception as e:
+                            print(e)
+                            print("error while deleting right bags when bag data mismatch!")
+                        
+                        # deleting deviated bags
+                        try:
+                            is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+                        except Exception as e:
+                            print(e)
+
                         db.session.rollback()
                         db.session.close()
-                        return jsonify(status=500,message="bag weight mis match")
+                        return jsonify(status=500,message="Bag {0} weight not match!".format(temp_bag_obj.uid))
                 except Exception as e:
                     print(e)
                     db.session.rollback()
                     db.session.close()
-                    return jsonify(status=500,message="right bag data can not save")
+                    return jsonify(status=500,message="Cannot create pickup, Please check Non-deviated bags again!")
         try:
             if is_deviation == True:
                 # pass
                 send_email(tabulate(table_headings, tablefmt='html'))
         except Exception as e:
             print(e)
-            print("error in sending email")
-        db.session.commit()
-        
+            print("error in sending email!")
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            print("error while committing bag to pickup!")
+            # deleting pickup
+            try:
+                is_delete = delete_pickup(pickup_obj.id)
+            except Exception as e:
+                print(e)
+                print("error while deleting pickup when commiting bag to pickup")
+            # deleting right bags
+            try:
+                is_delete = delete_bagpick(prev_right_bag_ids)
+            except Exception as e:
+                print(e)
+                print("error while deleting right bags when commiting the bag to picks")
+            # deleting deviated bags
+            try:
+                is_delete = delete_deviated_bag(prev_wrong_bag_ids)
+            except Exception as e:
+                print(e)
+                
+            return jsonify(status=500,message="Cannot commit pickup data, Please reach out to Manager!")
         return jsonify(status=200,pickup_number = asn_number,message="{0}, Bags picked successfully!".format(depo_picker_name.capitalize()))
     else:
         db.session.rollback()
         db.session.close()
-        return jsonify(status=500,message="no bag data to store!")
+        # deleting pickup
+        try:
+            is_delete = delete_pickup(pickup_obj.id)
+        except Exception as e:
+            print(e)
+            print("error while deleting pickup when no bag data is available!")
+        # deleting right bags
+        try:
+            is_delete = delete_bagpick(prev_right_bag_ids)
+        except Exception as e:
+            print(e)
+            print("error while deleting right bags when no bag to pick")
+        return jsonify(status=500,message="No bags available to Pickup!")
 
 
 @blueprint.route('/get_depo_pickup', methods=['POST'])
@@ -242,6 +590,8 @@ def get_depo_pickup():
     data = request.get_json(force=True)
     picker_id = data["picker_id"]
     pickup_obj = depopickup.query.filter_by(picker_id=picker_id, status="picked").all()
+    if pickup_obj is None:
+        return jsonify(status=500,message="no pickups by you!")
     pickup_data = []
     if len(pickup_obj) > 0:
         for pick in pickup_obj:

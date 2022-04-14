@@ -235,6 +235,7 @@ def delete_deviated_bag(bag_ids):
         try:
             db.session.expunge_all()
             for i in bag_ids:
+                print("deviated bag id is {0}".format(i))
                 temp_pick_bag = deviatedbag.query.filter_by(bag_id=i).delete()
             db.session.commit()
             return dict(message=True)
@@ -408,7 +409,7 @@ def create_pickup():
                         except Exception as e:
                             print(e)
                             print("error while deleting pickup")
-                        return jsonify(status=500,message="bag {0} already picked".format(temp_bag_obj.uid))
+                        return jsonify(status=500,message="Bag {0} already".format(temp_bag_obj.uid))
                     # another check if bag is already picked
                     temp_pickup= picktobag.query.filter_by(bag_id=temp_bag_obj.id).first()
                     if temp_pickup is not None:
@@ -430,7 +431,7 @@ def create_pickup():
                         except Exception as e:
                             print(e)
                             print("error while deleting pickup")
-                        return jsonify(status=500,message="bag {0} already picked".format(temp_bag_obj.uid))
+                        return jsonify(status=500,message="Bag {0} already picked".format(temp_bag_obj.uid))
                 except Exception as e:
                     print(e)
                     print("Error while checking deviated bag status")
@@ -707,7 +708,7 @@ def create_pickup():
         db.session.expunge_all()
         db.session.rollback()
         db.session.close()
-        # delete deviated bag mapping object
+        # delete deviated bag mapping objectf
         try:
             is_delete = delete_deviated_bag(prev_wrong_bag_ids)
             
