@@ -698,10 +698,11 @@ def get_seperate_bag_data(bag_data):
             pickup_obj = picktobag.query.filter_by(bag_id=temp_bag["bag_id"]).first()
             if pickup_obj is None:
                 pass
-            if pickup_obj.pick_id not in pickup_data.keys():
-                pickup_data[pickup_obj.pick_id] = [temp_bag]
-            else:
-                pickup_data[pickup_obj.pick_id].append(temp_bag)
+            if pickup_obj is not None:
+                if pickup_obj.pick_id not in pickup_data.keys():
+                    pickup_data[pickup_obj.pick_id] = [temp_bag]
+                else:
+                    pickup_data[pickup_obj.pick_id].append(temp_bag)
         return pickup_data
     except Exception as e:
         print(e)
