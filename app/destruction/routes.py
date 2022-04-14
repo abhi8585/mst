@@ -439,11 +439,13 @@ def get_seperate_bag_data(bag_data):
     try:
         for temp_bag in temp_data:
             pickup_obj = depopicktobag.query.filter_by(bag_id=temp_bag["bag_id"]).first()
-            if pickup_obj.pick_id not in pickup_data.keys():
-                pickup_data[pickup_obj.pick_id] = [temp_bag]
-                
-            else:
-                pickup_data[pickup_obj.pick_id].append(temp_bag)
+            if pickup_obj is None:
+                pass
+            if pickup_obj is not None:
+                if pickup_obj.pick_id not in pickup_data.keys():
+                    pickup_data[pickup_obj.pick_id] = [temp_bag]
+                else:
+                    pickup_data[pickup_obj.pick_id].append(temp_bag)
         return pickup_data
     except Exception as e:
         print(e)
@@ -469,6 +471,9 @@ def submit_direct_pickup():
         
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
     seperate_bag_data = get_seperate_bag_data(bag_data)
+    print(bag_data)
+    print("below is seperated data")
+    print(seperate_bag_data)
     is_deviation = False
     # truck_number = get_strip_truck_number(truck_number)
     try:
@@ -476,18 +481,18 @@ def submit_direct_pickup():
         destruction_master_name = depo_master_obj.name
     except Exception as e:
         print(e)
-        return jsonify(status=500,message="no depo master found")
+        return jsonify(status=500,message="No Destruction master found")
     try:
         depo_obj = destructionvendor.query.filter_by(id=destruction_id).first()
         destruction_name = depo_obj.vendor_name
     except Exception as e:
         print(e)
-        return jsonify(status=500,message="no depo found")
+        return jsonify(status=500,message="No Destruction centre found")
     if len(seperate_bag_data.values()) != 0:
         for key, value in seperate_bag_data.items():
-            temp_truck_obj = depopickup.query.filter_by(id=key).first()
+            # temp_truck_obj = depopickup.query.filter_by(id=key).first()
             # if temp_truck_obj.truck_number == truck_number:
-            temp_pickup_obj = depopicktobag.query.filter_by(pick_id=key).count()
+            # temp_pickup_obj = depopicktobag.query.filter_by(pick_id=key).count()
             for temp_bag in value:
                 if temp_bag["status"] == "incorrect":
                     try:
