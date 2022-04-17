@@ -1,7 +1,7 @@
 from email import message
 from operator import sub
-from re import M
-from sys import exec_prefix
+from shutil import ExecError
+
 
 from itsdangerous import exc
 from app import transporter
@@ -10,8 +10,8 @@ from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
 import json
 from app.base.util import verify_pass
-from app.models import audit, bag, depopickup, sku, auditsku, bagtosku, audittobag, disttobag, pickup, picktobag, transtovendor, transportvendor, disttovendor, distvendor, userinfo
-from app.models import deviatedbag
+from app.models import audit, bag, depoinventory, depopickup, role,sku, auditsku, bagtosku, audittobag, disttobag, pickup, picktobag, transtovendor, transportvendor, disttovendor, distvendor, userinfo, usertorole
+from app.models import deviatedbag, depopicktobag, destructioninventory
 from app import db
 import datetime
 
@@ -103,48 +103,152 @@ def get_dist_order():
         return jsonify(status=200,order_count = dist_to_bag)
     else:
         return jsonify(status=500,order_count=0)
-    # for results in dist_to_bag:
-    #     temp_bag = {}
-    #     bag_obj = bag.query.filter_by(id=results.bag_id).first()
-    #     temp_bag["bag_id"] = bag_obj.id
-    #     temp_bag["weight"] = bag_obj.weight
-    #     temp_bag["bag_uid"] = bag_obj.uid
-    #     temp_bag["status"] = bag_obj.status
-    #     temp_bag["sku_data"] = []
-    #     sku_obj = bagtosku.query.filter_by(bag_id=bag_obj.id).all()
-    #     for item in sku_obj:
-    #         audit_sku = auditsku.query.filter_by(id=item.sku_id).first()
-    #         temp_sku = {}
-    #         sku_obj = sku.query.filter_by(id=audit_sku.sku_id).first()
-    #         temp_sku["sku_id"] = sku_obj.id
-    #         temp_sku["name"] = sku_obj.name
-    #         temp_sku["description"] = sku_obj.description
-    #         temp_sku["asn_code"] = audit_sku.asn_code
-    #         temp_sku["weight"] = audit_sku.weight
-    #         temp_bag["sku_data"].append(temp_sku)
-    #     temp_data.append(temp_bag)
-    # return jsonify(temp_data)
 
 
 @blueprint.route('/get_bag_data',methods=['POST'])
 def get_bag_data():
-    data = request.get_json(force=True)
-    bag_uid = data["bag_uid"]
-    bag_data = bag.query.filter_by(uid=bag_uid).first()
-    if bag_data is not None:
-        bag_sku = bagtosku.query.filter_by(bag_id = bag_data.id).all()
-        temp = dict(bag_weight=bag_data.weight,bag_id=bag_data.id,bag_status = bag_data.status,sku_data=[])
-    
-        for audit_sku in bag_sku:
-            audit_sku_id = auditsku.query.filter_by(id=audit_sku.sku_id).first()
-            sku_obj = sku.query.filter_by(id=audit_sku_id.sku_id).first()
-            if sku_obj is not None:
-                temp_sku = dict(audit_sku_id=audit_sku_id.id,sku_id=sku_obj.id,sku_weight=audit_sku_id.weight
-                    ,sku_asn_code=audit_sku_id.asn_code,name=sku_obj.name,description=sku_obj.description)
-                temp["sku_data"].append(temp_sku)
-        return jsonify(status=200,bag_data=temp)
+    try:
+        data = request.get_json(force=True)
+        bag_uid = data["bag_uid"]
+        user_id = data["user_id"]
+        distributor_id = data["distributor_id"]
+        depo_id = data["depo_id"]
+    except Exception as e:
+        return jsonify(status=500,message="Error in query parameters")
+    # find user role
+    temp_role_obj = usertorole.query.filter_by(user_id=user_id).first()
+    if temp_role_obj is not None:
+        temp_role_name = role.query.filter_by(id=temp_role_obj.role_id).first()
+
+    # for the transporter role
+
+        if str(temp_role_name.name) == "transporter":
+            # now check if transporter is eligble or not to pick the bag
+            bag_data = bag.query.filter_by(uid=bag_uid).first()
+            
+            # first check if the bag really mapped to the select distributor.
+            
+            if bag_data is not None:
+                dist_bag_obj = disttobag.query.filter_by(bag_id=bag_data.id).first()
+                if dist_bag_obj is not None:
+                    if str(dist_bag_obj.dist_id) != distributor_id:
+                        return jsonify(status=500,message="This bag is not available on the selected distributor!".format(bag_uid))
+                if bag_data.status != "audited":
+                    return jsonify(status=500,message="{0} is already picked!".format(bag_uid))
+                temp_bag_pick = picktobag.query.filter_by(bag_id=bag_data.id).first()
+                if temp_bag_pick is not None:
+                    return jsonify(status=500,bag_data=[],message="{0} is already picked!".format(bag_uid))
+                try:
+                    # commenting because now we dont show the sku on UI
+                    # bag_sku = bagtosku.query.filter_by(bag_id = bag_data.id).all()
+                    temp = dict(bag_weight=bag_data.weight,bag_id=bag_data.id,bag_status = bag_data.status,sku_data=[])
+                    return jsonify(status=200,bag_data=temp,message="Scanning right Bag!")
+                except Exception as e:
+                    print(e)
+                    return jsonify(status=500,message="Invalid Bag!")
+            else:
+                return jsonify(status=500,message="QR code is Invalid!")
+
+        # for depo master
+
+        if str(temp_role_name.name) == "depo master":
+            # check if bag exists
+            bag_data = bag.query.filter_by(uid=bag_uid).first()
+            if bag_data is not None:
+                temp_depo_obj = depoinventory.query.filter_by(bag_id = bag_data.id).first()
+                if temp_depo_obj is not None:
+                    return jsonify(status=500,message="{0} is already submitted at Warehouse!".format(bag_uid))
+                if str(bag_data.status) != "picked":
+                    return jsonify(status=500,message="Cannot pickup bag it's in {0} state!".format(str(bag_data.status.capitalize())))
+                if str(bag_data.status) == "collected":
+                    print("from the collection")
+                    return jsonify(status=500,message="{0} is already submitted at Warehouse!".format(bag_uid))
+                
+                # if pass all the checks make the data structure
+                try:
+                    temp = dict(bag_weight=bag_data.weight,bag_id=bag_data.id,bag_status = bag_data.status,sku_data=[])
+                    return jsonify(status=200,bag_data=temp,message="Scanning right Bag!")
+                except Exception as e:
+                    print(e)
+                    return jsonify(status=500,message="Invalid Bag!")
+            else:
+                return jsonify(status=500,message="QR code is Invalid!")
+        
+        # for the picker role
+
+        if str(temp_role_name.name) == "depo picker":
+            # now check if transporter is eligble or not to pick the bag
+            bag_data = bag.query.filter_by(uid=bag_uid).first()
+            
+            # first check if the bag really mapped to the select distributor.
+            
+            if bag_data is not None:
+                dist_bag_obj = depoinventory.query.filter_by(bag_id=bag_data.id).first()
+                if dist_bag_obj is not None:
+                    if str(dist_bag_obj.depo_id) != depo_id:
+                        return jsonify(status=500,message="This bag is not available on the selected WareHouse!".format(bag_uid))
+                
+                temp_bag_pick = depopicktobag.query.filter_by(bag_id=bag_data.id).first()
+                if temp_bag_pick is not None:
+                    return jsonify(status=500,bag_data=[],message="{0} is already picked!".format(bag_uid))
+                
+                if str(bag_data.status) != "collected":
+                    return jsonify(status=500,message="Cannot pickup bag it's in {0} state!".format(str(bag_data.status.capitalize())))
+                
+                try:
+                    # commenting because now we dont show the sku on UI
+                    # bag_sku = bagtosku.query.filter_by(bag_id = bag_data.id).all()
+                    temp = dict(bag_weight=bag_data.weight,bag_id=bag_data.id,bag_status = bag_data.status,sku_data=[])
+                    return jsonify(status=200,bag_data=temp,message="Scanning right Bag!")
+                except Exception as e:
+                    print(e)
+                    return jsonify(status=500,message="Invalid Bag!")
+            else:
+                return jsonify(status=500,message="QR code is Invalid!")
+
+
+        # for destruction master
+
+        if str(temp_role_name.name) == "destruction master":
+            # check if bag exists
+            bag_data = bag.query.filter_by(uid=bag_uid).first()
+            if bag_data is not None:
+                temp_depo_obj = destructioninventory.query.filter_by(bag_id = bag_data.id).first()
+                if temp_depo_obj is not None:
+                    return jsonify(status=500,message="{0} is already submitted at Destruction Centre!".format(bag_uid))
+                if str(bag_data.status) != "dispatched":
+                    if str(bag_data.status) == "collected":
+                        return jsonify(status=500,message="Cannot receive bag it's in Warehouse only!".format(str(bag_data.status)))
+                if str(bag_data.status) == "received":
+                    print("from the collection")
+                    return jsonify(status=500,message="{0} is already submitted at Destruction Centre!".format(bag_uid))
+
+                # if pass all the checks make the data structure
+                try:
+                    temp = dict(bag_weight=bag_data.weight,bag_id=bag_data.id,bag_status = bag_data.status,sku_data=[])
+                    return jsonify(status=200,bag_data=temp,message="Scanning right Bag!")
+                except Exception as e:
+                    print(e)
+                    return jsonify(status=500,message="Invalid Bag!")
+            else:
+                return jsonify(status=500,message="QR code is Invalid!")
     else:
-        return jsonify(status=500,bag_data=[])
+        return jsonify(status=500, message="Please scan again!")
+
+    # if bag_data is not None:
+    #     bag_sku = bagtosku.query.filter_by(bag_id = bag_data.id).all()
+    #     temp = dict(bag_weight=bag_data.weight,bag_id=bag_data.id,bag_status = bag_data.status,sku_data=[])
+    
+    #     for audit_sku in bag_sku:
+    #         audit_sku_id = auditsku.query.filter_by(id=audit_sku.sku_id).first()
+    #         sku_obj = sku.query.filter_by(id=audit_sku_id.sku_id).first()
+    #         if sku_obj is not None:
+    #             temp_sku = dict(audit_sku_id=audit_sku_id.id,sku_id=sku_obj.id,sku_weight=audit_sku_id.weight
+    #                 ,sku_asn_code=audit_sku_id.asn_code,name=sku_obj.name,description=sku_obj.description)
+    #             temp["sku_data"].append(temp_sku)
+    #     return jsonify(status=200,bag_data=temp)
+    # else:
+    #     return jsonify(status=500,bag_data=[])
 
 
 
@@ -247,6 +351,25 @@ def delete_deviated_bag(bag_ids):
         return dict(message=True)
 
 
+def get_seperate_bag_data(bag_list):
+    temp_data = bag_list
+    audit_data = {}
+    try:
+        for temp_bag in temp_data:
+            audit_obj = audittobag.query.filter_by(bag_id=temp_bag).first()
+            if audit_obj is None:
+                pass
+            if audit_obj is not None:
+                if audit_obj.audit_id not in audit_data.keys():
+                    audit_data[audit_obj.audit_id] = [temp_bag]
+                else:
+                    audit_data[audit_obj.audit_id].append(temp_bag)
+        return audit_data
+    except Exception as e:
+        print(e)
+        return audit_data
+
+
 # create pickup object and map it to bag
 @blueprint.route('/create_pickup',methods=["GET","POST"])
 def create_pickup():
@@ -302,7 +425,7 @@ def create_pickup():
     try:
         temp_lr_number = pickup.query.filter_by(lr_number=lr_number).first()
         if temp_lr_number is not None:
-            return jsonify(status=200,message="LR number already exists!")
+            return jsonify(status=500,message="LR number already exists!")
     except Exception as e:
         print(e)
         return jsonify(status=500,message="Wrong LR number!")
@@ -703,7 +826,7 @@ def create_pickup():
             print(e)
             print("error in email")
         temp_user = userinfo.query.filter_by(id=transporter_id).first()
-        return jsonify(status=200,pickup_number = pickup_number,message="Congratulation {0}, Bags picked up successfully!".format(temp_user.name.capitalize()))
+        return jsonify(status=200,pickup_number = pickup_number,message="Congratulations {0}, Bags picked up successfully!".format(temp_user.name.capitalize()))
     else:
         db.session.expunge_all()
         db.session.rollback()
