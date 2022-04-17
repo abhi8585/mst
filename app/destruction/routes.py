@@ -1,17 +1,19 @@
+from collections import UserString
 from email import message
 from xxlimited import new
 
 from itsdangerous import exc
 from app.destruction import blueprint
+from app.base.util import hash_pass
 from flask_restful import Resource, Api
 from flask import jsonify, render_template, redirect, request, url_for
 import json
 from app.base.util import verify_pass
-from app.models import destructiontomaster, destructionvendor, depopickup, deviateddepopickbag, depopicktobag, depovendor
+from app.models import audittobag, depoinventory, destructiontomaster, destructionvendor, depopickup, deviatedbag, deviateddepobag, deviateddepopickbag, depopicktobag, depovendor, disttobag, picktobag, pickup, userinfo
 from app import db
 import datetime
 
-from app.models import bag, bagtosku, auditsku, sku, destructioninventory, deviateddestructionbag, userinfo, destructionvendor
+from app.models import bag, bagtosku, auditsku, sku, destructioninventory, deviateddestructionbag, userinfo, destructionvendor, audit
 from flask_mail import Message
 from tabulate import tabulate
 from app import mail
@@ -37,9 +39,9 @@ def get_sku_data(bag_id):
 
 @blueprint.route('/create_destruction', methods=['GET', 'POST'])
 def create_destruction():
-    des_obj = destructionvendor(vendor_code="532212",vendor_name="Ultratech",address="Aditya Cement, P.O. Adityapuram, Shambhupara, ",city="Chittorgarh",pin_code='312612',
-                                state="Rajasthan",latitude='28.656139', longnitude='77.402407',contact_person = 'Aanchal',
-                                contact_number='8422915773',email='aanchal.susheen@adityabirla.com', created_at=datetime.datetime.now())
+    des_obj = destructionvendor(vendor_code="535490",vendor_name="Sunrays Compost",address="Banglore",city="Banglore",pin_code='312612',
+                                state="Banglore",latitude='28.656139', longnitude='77.402407',contact_person = 'Aanchal',
+                                contact_number='8422915773',email='aanchal.susheen@asunrayscompost.com', created_at=datetime.datetime.now())
     db.session.add(des_obj)
     db.session.commit()
     return "object created"
@@ -48,10 +50,12 @@ def create_destruction():
 
 @blueprint.route('/map_destruction', methods=['GET', 'POST'])
 def map_destruction():
-    des_map_obj = destructiontomaster(vendor_id=2, user_id=26, created_at = datetime.datetime.now())
+    des_map_obj = destructiontomaster(vendor_id=3, user_id=48, created_at = datetime.datetime.now())
     db.session.add(des_map_obj)
     db.session.commit()
     return "object created"
+
+
 
 
 
@@ -285,6 +289,8 @@ def submit_lr_pickup():
         bag_data = data["bag_data"]
         lr_number = get_strip_lr_number(lr_number)
         table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
+        print("destruction lr request")
+        print(data)
     except Exception as e:
         print(e)
         return jsonify(status=500,message="Wrong Input")
@@ -465,6 +471,8 @@ def submit_direct_pickup():
         bag_data = data["bag_data"]
         latitude = data["latitude"]
         longnitude = data["longnitude"]
+        print("destruction request")
+        print(data)
     except Exception as e:
         print(e)
         print("error in query parameters!")
@@ -570,3 +578,55 @@ def submit_direct_pickup():
         return jsonify(status=200,message="Bags submitted at {0}".format(des_vendor.vendor_name))
     else:
         return jsonify(status=500,message="bag count missing") 
+
+
+@blueprint.route('/change_psw',methods=['GET','POST'])
+def change_psw():
+    user_obj = userinfo.query.filter_by(id=29).first()
+    user_password_bytes  = hash_pass("santosh")
+    user_obj.password = "santosh"
+    db.session.commit()
+
+
+
+# delete data for depot picker
+@blueprint.route("/deletepicker",methods=['GET', 'POST'])
+def deletepicker():
+    des_obj = depopickup.query.delete()
+    des_obj = deviateddepopickbag.query.delete()
+    db.session.commit()
+    return jsonify('data deleted')
+
+
+
+# delete data for depot
+@blueprint.route("/deletedepot",methods=['GET', 'POST'])
+def deletedepot():
+    des_obj = depoinventory.query.delete()
+    des_obj = deviateddepobag.query.delete()
+    db.session.commit()
+    return jsonify('data deleted')
+
+# delete data for transport
+@blueprint.route("/deletetrans",methods=['GET', 'POST'])
+def deletetrans():
+    des_obj = picktobag.query.delete()
+    des_obj = pickup.query.delete()
+    des_obj = deviatedbag.query.delete()
+    db.session.commit()
+    return jsonify('data deleted')
+
+
+# delete data for audit
+@blueprint.route("/deleteaudit",methods=['GET', 'POST'])
+def deletetaudit():
+    # des_obj = bagtosku.query.delete()
+    # des_obj = auditsku.query.delete()
+    
+    # des_obj = sku.query.delete()
+    # des_obj = disttobag.query.delete()
+    # des_obj = audittobag.query.delete()
+    # des_obj = bag.query.delete()
+    des_obj = audit.query.delete()
+    db.session.commit()
+    return jsonify('data deleted')

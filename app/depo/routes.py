@@ -723,7 +723,8 @@ def submit_direct_pickup():
     longnitude = data["longnitude"]
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
     is_deviation = False
-    print(bag_data)
+    print("depo request")
+    print(data)
     try:
         seperate_bag_data = get_seperate_bag_data(bag_data)
         print("below is seperated data!")
