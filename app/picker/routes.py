@@ -201,7 +201,7 @@ def create_pickup():
         prev_right_bag_ids = []
         prev_wrong_bag_ids = []
         print("depo picker request")
-        print(data)
+        pprint(jsonify(data))
     except Exception as e:
         print(e)
         print("error while getting parameters")

@@ -290,7 +290,7 @@ def submit_lr_pickup():
         lr_number = get_strip_lr_number(lr_number)
         table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
         print("destruction lr request")
-        print(data)
+        print(jsonify(data))
     except Exception as e:
         print(e)
         return jsonify(status=500,message="Wrong Input")
@@ -472,7 +472,7 @@ def submit_direct_pickup():
         latitude = data["latitude"]
         longnitude = data["longnitude"]
         print("destruction request")
-        print(data)
+        print(jsonify(data))
     except Exception as e:
         print(e)
         print("error in query parameters!")

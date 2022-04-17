@@ -379,7 +379,7 @@ def create_pickup():
         try:
             data = request.get_json(force=True)
             print("below is the pickup request for transport")
-            print(data)
+            print(jsonify(data))
             if data is None:
                 return jsonify(status=200,message="no pickup data to save!")
         except Exception as e:
