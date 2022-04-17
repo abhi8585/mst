@@ -139,6 +139,8 @@ def create_audit():
     try:
         start_time = time.time()
         data = request.get_json(force=True)
+        print("below is the auditing request")
+        print(data)
         audit_temp = data
         auditor_id, distributor_id = data['auditor_id'], data['distributor_id']
         latitude, longnitude = data["latitude"], data["longnitude"]
@@ -388,6 +390,7 @@ def create_audit():
                                         return jsonify(status=500,message="error while checking zero sku weight!")
                                     try:
                                         temp_sku_id = auditsku(sku_id=sku_id, asn_code=sku_asn_number, weight = sku_weight, created_at = datetime.datetime.now())
+
                                         db.session.add(temp_sku_id)
                                         db.session.commit()
                                         prev_audit_sku_ids.append(temp_sku_id.id)
@@ -644,3 +647,8 @@ def create_audit_test():
 
 
     return jsonify(test_logs)
+
+
+    
+
+    
