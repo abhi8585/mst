@@ -281,7 +281,8 @@ def submit_lr_pickup():
     try:
         data = request.get_json(force=True)
         lr_number = data["lr_number"]
-        deviated_weight = data["deviated_weight"]
+        # deviated_weight = data["deviated_weight"]commenting this because key from UI is not integrated giving a static weight so it can work atleast
+        deviated_weight = "10.00"
         destruction_master_id = data["destruction_master_id"]
         destruction_id = data["destruction_id"]
         latitude = data["latitude"]

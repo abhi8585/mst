@@ -78,7 +78,7 @@ def get_depo_vendor(user_id):
     if depo_vendor is not None:
         vendor_name = depovendor.query.filter_by(id=depo_vendor.vendor_id).first()
         vendor_name = vendor_name.vendor_name
-        user_message = "Warehouse Master at {0}".format(vendor_name)
+        user_message = "Depot Master at {0}".format(vendor_name)
         return dict(status=200,message="vendor found",vendor_name=vendor_name, user_message=user_message)
     else:
         user_message = ""
@@ -101,6 +101,8 @@ def get_destruction_vendor(user_id):
 def app_login():
     data = request.get_json(force=True)
     user_name, user_password = data["user_name"], data["user_password"]
+    user_name = user_name.strip()
+    # raise ValueError(user_name)
     user = userinfo.query.filter_by(name=user_name).first()
     vendor_name = ""
     auditor_data = {}
