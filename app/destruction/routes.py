@@ -592,10 +592,20 @@ def change_psw():
 
 
 
+# delete data for destruction
+@blueprint.route("/deletedes",methods=['GET', 'POST'])
+def deletedes():
+    des_obj = destructioninventory.query.delete()
+    des_obj = deviateddestructionbag.query.delete()
+    db.session.commit()
+    return jsonify('data deleted')
+
+
 # delete data for depot picker
 @blueprint.route("/deletepicker",methods=['GET', 'POST'])
 def deletepicker():
     des_obj = depopickup.query.delete()
+    des_obj = depopicktobag.query.delete()
     des_obj = deviateddepopickbag.query.delete()
     db.session.commit()
     return jsonify('data deleted')
@@ -623,13 +633,13 @@ def deletetrans():
 # delete data for audit
 @blueprint.route("/deleteaudit",methods=['GET', 'POST'])
 def deletetaudit():
-    # des_obj = bagtosku.query.delete()
-    # des_obj = auditsku.query.delete()
+    des_obj = bagtosku.query.delete()
+    des_obj = auditsku.query.delete()
     
-    # des_obj = sku.query.delete()
-    # des_obj = disttobag.query.delete()
-    # des_obj = audittobag.query.delete()
-    # des_obj = bag.query.delete()
+    des_obj = sku.query.delete()
+    des_obj = disttobag.query.delete()
+    des_obj = audittobag.query.delete()
+    des_obj = bag.query.delete()
     des_obj = audit.query.delete()
     db.session.commit()
     return jsonify('data deleted')
