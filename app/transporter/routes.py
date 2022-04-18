@@ -373,13 +373,14 @@ def get_seperate_bag_data(bag_list):
 # create pickup object and map it to bag
 @blueprint.route('/create_pickup',methods=["GET","POST"])
 def create_pickup():
+    import json
     import string
     import random
     try:
         try:
             data = request.get_json(force=True)
             print("below is the pickup request for transport")
-            print(jsonify(data))
+            print(json.dumps(data))
             if data is None:
                 return jsonify(status=200,message="no pickup data to save!")
         except Exception as e:

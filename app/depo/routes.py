@@ -715,6 +715,7 @@ def get_strip_truck_number(truck_number):
 
 @blueprint.route('/submit_direct_pickup',methods=['GET','POST'])
 def submit_direct_pickup():
+    import json
     data = request.get_json(force=True)
     depo_master_id = data["depo_master_id"]
     depo_id = data["depo_id"]
@@ -724,7 +725,7 @@ def submit_direct_pickup():
     table_headings = [["Bag UID", "Actual Weight", "New Weight", "Depo Master", "Depo Name"]]
     is_deviation = False
     print("depo request")
-    print(jsonify(data))
+    print(json.dumps(data))
     try:
         seperate_bag_data = get_seperate_bag_data(bag_data)
         print("below is seperated data!")

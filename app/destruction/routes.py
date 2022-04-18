@@ -291,7 +291,8 @@ def submit_lr_pickup():
         lr_number = get_strip_lr_number(lr_number)
         table_headings = [["Bag UID", "Actual Weight", "New Weight", "Destruction Master", "Destruction Centre"]]
         print("destruction lr request")
-        print(jsonify(data))
+        import json
+        print(json.dumps(data))
     except Exception as e:
         print(e)
         return jsonify(status=500,message="Wrong Input")
@@ -465,6 +466,7 @@ def get_strip_truck_number(truck_number):
 
 @blueprint.route('/submit_direct_pickup',methods=['GET','POST'])
 def submit_direct_pickup():
+    import json
     try:
         data = request.get_json(force=True)
         destruction_master_id = data["destruction_master_id"]
@@ -473,7 +475,7 @@ def submit_direct_pickup():
         latitude = data["latitude"]
         longnitude = data["longnitude"]
         print("destruction request")
-        print(jsonify(data))
+        print(json.dumps(data))
     except Exception as e:
         print(e)
         print("error in query parameters!")

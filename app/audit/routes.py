@@ -140,7 +140,7 @@ def create_audit():
         start_time = time.time()
         data = request.get_json(force=True)
         print("below is the auditing request")
-        print(jsonify(data))
+        print(json.dumps(data))
         audit_temp = data
         auditor_id, distributor_id = data['auditor_id'], data['distributor_id']
         latitude, longnitude = data["latitude"], data["longnitude"]

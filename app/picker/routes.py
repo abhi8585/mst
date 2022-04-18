@@ -185,6 +185,7 @@ def delete_deviated_bag(bag_ids):
 # create depo pickup object and map it to bag
 @blueprint.route('/create_pickup',methods=["GET","POST"])
 def create_pickup():
+    import json
     try:
         data = request.get_json(force=True)
         picker_id = data["picker_id"]
@@ -201,7 +202,7 @@ def create_pickup():
         prev_right_bag_ids = []
         prev_wrong_bag_ids = []
         print("depo picker request")
-        pprint(jsonify(data))
+        print(json.dumps(data))
     except Exception as e:
         print(e)
         print("error while getting parameters")
