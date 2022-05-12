@@ -636,7 +636,7 @@ def deletetaudit():
     des_obj = bagtosku.query.delete()
     des_obj = auditsku.query.delete()
     
-    des_obj = sku.query.delete()
+    # des_obj = sku.query.delete()
     des_obj = disttobag.query.delete()
     des_obj = audittobag.query.delete()
     des_obj = bag.query.delete()

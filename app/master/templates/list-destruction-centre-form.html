@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Enquiries {% endblock %} 
+{% block title %} Blogs {% endblock %} 
 
 <!-- Element injected in the BODY element -->
 {% block body_class %} {% endblock body_class %} 
@@ -26,12 +26,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <!-- <h4><u>Roles</u></h4> -->
+            <!-- <h1 >Register Depo</h1> -->
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <!-- <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Enquiries</li> -->
+              <li class="breadcrumb-item active">Register Depo Vendor</li> -->
             </ol>
           </div>
         </div>
@@ -45,7 +45,9 @@
           <div class="col-12">
             <div class="card">
               <div class="card-header">
-                <a class="btn btn-primary" href="{{url_for('master_blueprint.createrole')}}">New Role</a>
+                <a class="btn btn-primary" href="{{url_for('master_blueprint.createdestruction')}}">Create Centre</a>
+                <a class="btn btn-primary" href="{{url_for('master_blueprint.listdestmaster')}}">Centre Master</a>
+                <!-- <a class="btn btn-primary" href="{{url_for('master_blueprint.listdepopicker')}}">Map Depo Picker</a> -->
                 <div class="card-tools">
                   <!-- <div class="input-group input-group-sm" style="width: 150px;">
                     
@@ -65,18 +67,22 @@
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Role Name</th>
-                      <!-- <th>CREATED AT</th> -->
-                    
+                      <th>Name</th>
+                      <th>Code</th>
+                      <th>Email</th>
+                      <!-- <th>Author</th> -->
                       
                     </tr>
                   </thead>
                   <tbody>
-                    {% for role in roles %}
+                    {% for vendor in vendors %}
                       <tr>
-                        <td><a href="">{{role.id}}</a></td>
-                        <td><a href="">{{role.name}}</a></td>
+                        <td>{{vendor.id}}</td>
+                        <td>{{vendor.vendor_name}}</a></td>
+                        <td>{{vendor.vendor_code}}</a></td>
+                        <td>{{vendor.email}}</td>
                         
+                       
                       </tr>
                     {% endfor %}
                     

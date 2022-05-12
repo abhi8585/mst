@@ -3,15 +3,17 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+from sys import audit
 from app.home import blueprint
-from flask import render_template, redirect, url_for
+from flask import jsonify, render_template, redirect, url_for
 from flask_login import login_required, current_user
 from app import login_manager
 from jinja2 import TemplateNotFound
-from app.models import userinfo, usertorole, role
+from app.models import depoinventory, disttobag, pickup, userinfo, usertorole, role
 from app.models import depovendor, depotomaster, depotopicker, bag, deviateddepobag, deviateddestructionbag,deviateddepopickbag
-from app.models import deviatedbag, role, transportvendor, userinfo, usertorole, auditvendor, auditortovendor, distvendor, disttovendor, sku, transportvendor, transtovendor
-
+from app.models import deviatedbag, role, transportvendor, userinfo, usertorole, auditvendor, auditortovendor, distvendor, disttovendor, sku, transportvendor, transtovendor, audit
+from app import db
+from sqlalchemy import and_
 
 colors = [
     "#F7464A", "#46BFBD", "#FDB45C", "#FEDCBA",
@@ -33,6 +35,13 @@ def get_bag_count():
         bag_count.append(temp_bag_count)
     return bag_count
 
+
+# helper function for regional distributor data
+
+
+
+
+
 @blueprint.route('/index')
 @login_required
 def index():
@@ -42,15 +51,56 @@ def index():
 ]
 
 
+    # arranging data for distributor regional wise
 
+    dist_data = distvendor.query.filter_by(region_name='west').all()
+    dist_table_data = []
+    for dist in dist_data:
+        temp = {}
+        temp['name'] = dist.vendor_name
+        audit_count = audit.query.filter_by(dist_id=dist.id).count()
+        temp['total_audits'] = audit_count
+        temp["audited_bags"] = db.session.query(disttobag).filter(and_(disttobag.dist_id==dist.id, disttobag.status=="audited")).count()
+        temp["picked_bags"] = db.session.query(disttobag).filter(and_(disttobag.dist_id==dist.id, disttobag.status=="picked")).count()
+        dist_table_data.append(temp)
+    # ---
+
+    # arranging data for depot regional wise
+
+    depo_data = depovendor.query.filter_by(region_name='west').all()
+    depo_table_data = []
+    for depo in depo_data:
+        temp = {}
+        temp['name'] = depo.vendor_name
+        temp["collected_bags"] = db.session.query(depoinventory).filter(and_(depoinventory.status=="collected",depoinventory.depo_id==depo.id)).count()
+        temp["dispatched_bags"] = db.session.query(depoinventory).filter(and_(depoinventory.status=="dispatched",depoinventory.depo_id==depo.id)).count()
+        depo_table_data.append(temp)
+
+
+    # ----
+
+    # arranging data for pickup distributor regional wise
+    dist_data = distvendor.query.filter_by(region_name='west').all()
+    pickup_table_data = []
+    for dist in dist_data:
+        temp = {}
+        temp["name"] = dist.vendor_name
+        temp["total_pickup"] = pickup.query.filter_by(dist_id=dist.id).count()
+        temp["picked_bags"] = db.session.query(disttobag).filter(and_(disttobag.dist_id==dist.id, disttobag.status=="picked")).count()
+        pickup_table_data.append(temp)
+
+    # ----
     bar_values= get_deviated_bag_count()
     total_deviated_bag_count = sum(bar_values)
-    pie_chart_labels = ['Audited', 'Picked', 'Collected', 'Dispathched', 'Received']
+    pie_chart_labels = ['East', 'West', 'South', 'North']
     pie_chart_bag_counts = get_bag_count()
     total_pie_chart_bag_counts = sum(pie_chart_bag_counts)
     return render_template('general-analysis.html', title='Bitcoin Monthly Price in USD', max=500, set=zip(pie_chart_bag_counts, pie_chart_labels, colors)
             ,pie_chart_bag_counts=total_pie_chart_bag_counts,bar_labels=bar_labels,bar_values=bar_values,
-            total_deviated_bag_count=total_deviated_bag_count)
+            total_deviated_bag_count=total_deviated_bag_count, dist_table_data=dist_table_data,
+            depo_table_data=depo_table_data, pickup_table_data=pickup_table_data)
+
+
 
 
 @blueprint.route('/<template>')

@@ -2,10 +2,12 @@
 """
 Copyright (c) 2021
 """
+from crypt import methods
 from datetime import date, datetime
 from email import message
 from app.master import blueprint
-from app.models import role, transportvendor, userinfo, usertorole, auditvendor, auditortovendor, distvendor, disttovendor, sku, transportvendor, transtovendor
+from app.models import destructionvendor, role, transportvendor, userinfo, usertorole, auditvendor, auditortovendor, distvendor, disttovendor, sku, transportvendor, transtovendor
+from app.models import disttobag, audit
 from .. import db
 from decouple import config
 import json, requests
@@ -16,7 +18,8 @@ import os
 from app.base.util import hash_pass
 from app.base.models import User
 # from flask_restful import Resource, Api
-from app.models import depovendor, depotomaster, depotopicker
+from app.models import depovendor, depotomaster, depotopicker, depoinventory, pickup, destructiontomaster
+from sqlalchemy import and_
 
 
 @blueprint.route('/create/role')
@@ -52,7 +55,17 @@ def listrole():
 @blueprint.route('/list/user')
 def listuser():
     users = userinfo.query.all()
-    return render_template('list-user-form.html', users=users)
+    user_data = []
+    for user in users:
+        temp = {}
+        user_role_id = usertorole.query.filter_by(user_id=user.id).first()
+        user_role_name = role.query.filter_by(id=user_role_id.role_id).first()
+        temp['id'] = user.id
+        temp['name'] = user.name
+        temp['email'] = user.email
+        temp['role_name'] = user_role_name.name
+        user_data.append(temp)
+    return render_template('list-user-form.html', users=user_data)
 
 #used to insert the user
 @blueprint.route("/insert/user",methods=['GET', 'POST'])
@@ -64,7 +77,7 @@ def insertuser():
     # user_password = request.form['user_password']
     user_role_name = request.form['user_role_name']
     # user_password = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 10))
-    user_password = 'abhishek'
+    user_password = 'eknath'
     print(user_password)
     user_password_bytes  = hash_pass(user_password)
     new_user_login = User(username=user_name,email=user_email,password=user_password)
@@ -78,7 +91,7 @@ def insertuser():
     user_role_mapping = usertorole(user_id=new_user_id, role_id=get_role_id)
     db.session.add(user_role_mapping)
     db.session.commit()
-    return json.dumps(dict(user_id='User added successfully!!'))
+    return json.dumps(dict(message='User added successfully!!'))
 
 @blueprint.route('/create/user')
 def createuser():
@@ -110,13 +123,14 @@ def insertauditvendor():
     vendor_contact_person = request.form['vendor_contract_person']
     vendor_email_id =  request.form['vendor_email_id']
     vendor_remark = request.form['vendor_remark']
+    vendor_region  = request.form['vendor_region']
     user_exist = auditvendor.query.filter_by(email=vendor_email_id).first()
     if user_exist is not None:
         return jsonify(status=500,message="vendor exist")
     new_aduit_vendor = auditvendor(vendor_code=vendor_code,vendor_name=vendor_name,address=vendor_address,city=vendor_city,
                                     pin_code=vendor_pin_code,state=vendor_state,latitude=vendor_latitude,longnitude=vendor_longnitude,
                                     contact_number=vendor_contact_number, contact_person=vendor_contact_person,email=vendor_email_id,
-                                    created_at=datetime.datetime.now())
+                                    created_at=datetime.datetime.now(),region_name=vendor_region.lower())
     db.session.add(new_aduit_vendor)
     db.session.commit()
     return jsonify(status=200,message="Vendor registered successfully!")
@@ -179,6 +193,7 @@ def mapauditor():
 @blueprint.route('/list/distvendor')
 def listdistvendor():
     vendors = distvendor.query.all()
+    # raise ValueError([vendor.vendor_name for vendor in vendors])
     return render_template("list-dist-vendor-form.html",vendors=vendors)
 
 @blueprint.route('/create/distvendor')
@@ -203,13 +218,14 @@ def insertdistvendor():
     vendor_contact_person = request.form['vendor_contract_person']
     vendor_email_id =  request.form['vendor_email_id']
     vendor_remark = request.form['vendor_remark']
+    vendor_region  = request.form['vendor_region']
     user_exist = distvendor.query.filter_by(email=vendor_email_id).first()
     if user_exist is not None:
         return jsonify(status=500,message="vendor exist")
     new_dist_vendor = distvendor(vendor_code=vendor_code,vendor_name=vendor_name,address=vendor_address,city=vendor_city,
                                     pin_code=vendor_pin_code,state=vendor_state,latitude=vendor_latitude,longnitude=vendor_longnitude,
                                     contact_number=vendor_contact_number, contact_person=vendor_contact_person,email=vendor_email_id,
-                                    created_at=datetime.datetime.now())
+                                    created_at=datetime.datetime.now(),region_name=vendor_region)
     db.session.add(new_dist_vendor)
     db.session.commit()
     return jsonify(status=200,message="Vendor registered successfully!")
@@ -316,7 +332,7 @@ def insertsku():
         db.session.add(new_sku)
         db.session.commit()
         return jsonify(status=200, message="sku inserted successfully!")
-    return jsonify(status=500, message="sku inserted unsuccessfully!")
+    return jsonify(status=500, message="SKU already inserted!")
     
 
 # transport
@@ -350,16 +366,17 @@ def inserttransvendor():
     vendor_contact_person = request.form['vendor_contract_person']
     vendor_email_id =  request.form['vendor_email_id']
     vendor_remark = request.form['vendor_remark']
+    vendor_region  = request.form['vendor_region']
     user_exist = distvendor.query.filter_by(email=vendor_email_id).first()
     if user_exist is not None:
         return jsonify(status=500,message="vendor exist")
     new_dist_vendor = transportvendor(vendor_code=vendor_code,vendor_name=vendor_name,address=vendor_address,city=vendor_city,
                                     pin_code=vendor_pin_code,state=vendor_state,latitude=vendor_latitude,longnitude=vendor_longnitude,
                                     contact_number=vendor_contact_number, contact_person=vendor_contact_person,email=vendor_email_id,
-                                    created_at=datetime.datetime.now())
+                                    created_at=datetime.datetime.now(),region_name=vendor_region)
     db.session.add(new_dist_vendor)
     db.session.commit()
-    return jsonify(status=200,message="Vendor registered successfully!")
+    return jsonify(status=200,message="Transporter registered successfully!")
 
 
 
@@ -399,9 +416,93 @@ def maptransporter():
     dist_vendor_id = transtovendor(user_id=user_id.id, vendor_id=vendor_id.id, created_at=datetime.now())
     db.session.add(dist_vendor_id)
     db.session.commit()
-    return jsonify(status=200, message="distributor mapped successfully")
+    return jsonify(status=200, message="Transporter mapped successfully")
 
 
+
+# destruction centre
+
+@blueprint.route('/list/destruction')
+def listdestruction():
+    vendors = destructionvendor.query.all()
+    return render_template("list-destruction-centre-form.html",vendors=vendors)
+
+@blueprint.route('/create/destruction')
+def createdestruction():
+    return render_template("create-destruction-vendor-form.html")
+
+
+@blueprint.route("/insert/destruction",methods=['GET', 'POST'])
+def insertdestruction():
+    import datetime
+    vendor_code = request.form['vendor_code']
+    vendor_name = request.form['vendor_name']
+    vendor_address = request.form['vendor_address']
+    vendor_city = request.form['vendor_city']
+    vendor_state = request.form['vendor_state']
+    vendor_pin_code = request.form['vendor_pin_code']
+    vendor_latitude = request.form['vendor_latitude']
+    vendor_longnitude = request.form['vendor_longnitude']
+    vendor_contact_number = request.form['vendor_contract_number']
+    vendor_contact_person = request.form['vendor_contract_person']
+    vendor_email_id =  request.form['vendor_email_id']
+    vendor_remark = request.form['vendor_remark']
+    vendor_region  = request.form['vendor_region']
+    user_exist = destructionvendor.query.filter_by(email=vendor_email_id).first()
+    if user_exist is not None:
+        return jsonify(status=500,message="Destruction centre exist")
+    new_dist_vendor = destructionvendor(vendor_code=vendor_code,vendor_name=vendor_name,address=vendor_address,city=vendor_city,
+                                    pin_code=vendor_pin_code,state=vendor_state,latitude=vendor_latitude,longnitude=vendor_longnitude,
+                                    contact_number=vendor_contact_number, contact_person=vendor_contact_person,email=vendor_email_id,
+                                    created_at=datetime.datetime.now(), region_name=vendor_region)
+    db.session.add(new_dist_vendor)
+    db.session.commit()
+    return jsonify(status=200,message="Destuction Centre registered successfully!")
+
+
+
+@blueprint.route('/list/destmaster')
+def listdestmaster():
+    depo_masters = destructiontomaster.query.all()
+    auditor_data = []
+    for master in depo_masters:
+        temp = {}
+        vendor_obj = destructionvendor.query.filter_by(id=master.vendor_id).first()
+        temp["vendor_name"] = vendor_obj.vendor_name
+        user_obj = userinfo.query.filter_by(id=master.user_id).first()
+        temp["user_name"] = user_obj.name
+        auditor_data.append(temp)
+    return render_template("list-dest-form.html",auditor_data=auditor_data)
+
+
+
+@blueprint.route('/create/destmaster')
+def createdestmaster():
+    vendors = destructionvendor.query.all()
+    role_obj = role.query.filter_by(name="destruction master").first()
+    user_role_obj = usertorole.query.filter_by(role_id=role_obj.id).all()
+    user_names = []
+    for user in user_role_obj:
+        temp = {}
+        user_obj = userinfo.query.filter_by(id=user.user_id).first()
+        temp["name"] = user_obj.name
+        temp["id"] = user_obj.id
+        user_names.append(temp)
+
+    return render_template("create-dest-master-form.html",vendors=vendors,user_names=user_names)
+
+
+@blueprint.route('/map/mapdestmaster',methods=["POST"])
+def mapdestmaster():
+    user_name = request.form['user_name']
+    vendor_name = request.form['vendor_name']
+    
+    # user_id = userinfo.query.filter_by(name=user_name).first()
+    # vendor_id = transportvendor.query.filter_by(id=vendor_name).first()
+    dist_vendor_id = destructiontomaster(user_id=user_name, vendor_id=vendor_name, created_at=datetime.now())
+    db.session.add(dist_vendor_id)
+    db.session.commit()
+    return jsonify(status=200, message="Centre Master mapped successfully!")
 # depo vendor
 
 
@@ -429,16 +530,17 @@ def insertdepovendor():
     vendor_contact_person = request.form['vendor_contract_person']
     vendor_email_id =  request.form['vendor_email_id']
     vendor_remark = request.form['vendor_remark']
+    vendor_region  = request.form['vendor_region']
     user_exist = depovendor.query.filter_by(email=vendor_email_id).first()
     if user_exist is not None:
-        return jsonify(status=500,message="vendor exist")
+        return jsonify(status=500,message="Warehouse exist")
     new_dist_vendor = depovendor(vendor_code=vendor_code,vendor_name=vendor_name,address=vendor_address,city=vendor_city,
                                     pin_code=vendor_pin_code,state=vendor_state,latitude=vendor_latitude,longnitude=vendor_longnitude,
                                     contact_number=vendor_contact_number, contact_person=vendor_contact_person,email=vendor_email_id,
-                                    created_at=datetime.datetime.now())
+                                    created_at=datetime.datetime.now(),region_name=vendor_region)
     db.session.add(new_dist_vendor)
     db.session.commit()
-    return jsonify(status=200,message="Vendor registered successfully!")
+    return jsonify(status=200,message="Warehouse registered successfully!")
 
     
 @blueprint.route('/create/depomaster')
@@ -479,7 +581,7 @@ def mapdepomaster():
     dist_vendor_id = depotomaster(user_id=user_name, vendor_id=vendor_name, created_at=datetime.now())
     db.session.add(dist_vendor_id)
     db.session.commit()
-    return jsonify(status=200, message="distributor mapped successfully")
+    return jsonify(status=200, message="WareHouse Master mapped successfully!")
 
 
 
@@ -488,7 +590,7 @@ def mapdepomaster():
 @blueprint.route('/create/depopicker')
 def createdepopicker():
     vendors = depovendor.query.all()
-    role_obj = role.query.filter_by(name="depo picker").first()
+    role_obj = role.query.filter_by(name="transporter").first()
     user_role_obj = usertorole.query.filter_by(role_id=role_obj.id).all()
     user_names = []
     for user in user_role_obj:
@@ -524,7 +626,7 @@ def mapdepopicker():
     dist_vendor_id = depotopicker(user_id=user_name, vendor_id=vendor_name, created_at=datetime.now())
     db.session.add(dist_vendor_id)
     db.session.commit()
-    return jsonify(status=200, message="picker mapped successfully")
+    return jsonify(status=200, message="Transporter mapped successfully")
 
 
 
@@ -558,3 +660,49 @@ def skuanalysis():
 
 
 
+# helper function for regional distributor data
+
+@blueprint.route('/get_dist_data', methods=["POST"])
+def get_dist_data():
+    region_name = request.form['region_name']
+    dist_data = distvendor.query.filter_by(region_name=region_name.lower()).all()
+    dist_table_data = []
+    for dist in dist_data:
+        temp = {}
+        temp['name'] = dist.vendor_name
+        audit_count = audit.query.filter_by(dist_id=dist.id).count()
+        temp['total_audits'] = audit_count
+        temp["audited_bags"] = db.session.query(disttobag).filter(and_(disttobag.dist_id==dist.id, disttobag.status=="audited")).count()
+        temp["picked_bags"] = db.session.query(disttobag).filter(and_(disttobag.dist_id==dist.id, disttobag.status=="picked")).count()
+        dist_table_data.append(temp)
+    return jsonify(dict(data=dist_table_data))
+
+# helper function for regional depo data
+
+@blueprint.route('/get_depo_data', methods=["POST"])
+def get_depo_data():
+    region_name = request.form['region_name']
+    depo_data = depovendor.query.filter_by(region_name=region_name.lower()).all()
+    depo_table_data = []
+    for depo in depo_data:
+        temp = {}
+        temp['name'] = depo.vendor_name
+        temp["collected_bags"] = db.session.query(depoinventory).filter(and_(depoinventory.status=="collected",depoinventory.depo_id==depo.id)).count()
+        temp["dispatched_bags"] = db.session.query(depoinventory).filter(and_(depoinventory.status=="dispatched",depoinventory.depo_id==depo.id)).count()
+        depo_table_data.append(temp)
+    return jsonify(dict(data=depo_table_data))
+
+# helper function for regional pickup data
+
+@blueprint.route('/get_pickup_data', methods=["POST"])
+def get_pickup_data():
+    region_name = request.form['region_name']
+    dist_data = distvendor.query.filter_by(region_name=region_name.lower()).all()
+    pickup_table_data = []
+    for dist in dist_data:
+        temp = {}
+        temp["name"] = dist.vendor_name
+        temp["total_pickup"] = pickup.query.filter_by(dist_id=dist.id).count()
+        temp["picked_bags"] = db.session.query(disttobag).filter(and_(disttobag.dist_id==dist.id, disttobag.status=="picked")).count()
+        pickup_table_data.append(temp)
+    return jsonify(dict(data=pickup_table_data))

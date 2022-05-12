@@ -120,12 +120,12 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1>Create Distributor</h1>
+          <!-- <h1>Create Distributor</h1> -->
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Create Distributor/Edit</li>
+            <!-- <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active">Create Distributor/Edit</li> -->
           </ol>
         </div>
       </div>
@@ -161,6 +161,17 @@
                   <label for="title">Vendor Name</label>
                   <input type="text" class="form-control" id="vendor_name" placeholder="Enter Address"
                     >
+                </div>
+                <div class="form-group">
+                  <label>Region</label>
+                  <select class="form-control select2" id="role" style="width: 100%;" value="">
+                    <option selected="selected">West</option>
+                    <option selected="selected">East</option>
+                    <option selected="selected">North</option>
+                    <option selected="selected">South</option>
+                 
+                    <!-- <option selected="selected">Choose Role</option> -->
+                  </select>
                 </div>
                 <div class="form-group">
                   <label for="title">Vendor Address</label>
@@ -465,19 +476,73 @@ $('.remove-preview').on('click', function() {
     // registering new audit vendor
 
     $("#submit_btn").click(function(){
+      // alert(true)
       event.preventDefault();
       let vendor_code = $("#vendor_code").val();
-      let vendor_address = $("#vendor_address").val();
-      let vendor_city = $("#vendor_city").val();
-      let vendor_pin_code = $("#vendor_pin_code").val();
-      let vendor_state = $("#vendor_state").val();
-      let vendor_latitude = $("#vendor_latitude").val();
-      let vendor_longnitude = $("#vendor_lognitude").val();
-      let vendor_contract_number = $("#vendor_contract_number").val();
-      let vendor_contract_person = $("#vendor_contract_person").val();
-      let vendor_email_id = $("#vendor_email_id").val();
-      let vendor_remark = $("#vendor_remark").val();
+      if(vendor_code.length == 0){
+        alert("Vendor code can't be empty")
+        return;
+      }
       let vendor_name = $("#vendor_name").val();
+      if(vendor_name.length == 0){
+        alert("Vendor name can't be empty")
+        return;
+      }
+      var vendor_region_name = document.getElementById("role").value;
+      if(vendor_region_name.length == 0){
+        alert("Vendor region can't be empty")
+        return;
+      }
+      let vendor_address = $("#vendor_address").val();
+      if(vendor_address.length == 0){
+        alert("Vendor address can't be empty")
+        return;
+      }
+      let vendor_city = $("#vendor_city").val();
+      if(vendor_city.length == 0){
+        alert("Vendor city can't be empty")
+        return;
+      }
+      let vendor_pin_code = $("#vendor_pin_code").val();
+      if(vendor_pin_code.length == 0){
+        alert("Vendor Pin code can't be empty")
+        return;
+      }
+      let vendor_state = $("#vendor_state").val();
+      if(vendor_address.state == 0){
+        alert("Vendor state can't be empty")
+        return;
+      }
+      let vendor_latitude = $("#vendor_latitude").val();
+      if(vendor_latitude.length == 0){
+        alert("Vendor latitude can't be empty")
+        return;
+      }
+      let vendor_longnitude = $("#vendor_lognitude").val();
+      if(vendor_longnitude.length == 0){
+        alert("Vendor longnitude can't be empty")
+        return;
+      }
+      let vendor_contract_number = $("#vendor_contract_number").val();
+      if(vendor_contract_number.length == 0){
+        alert("Vendor contract number can't be empty")
+        return;
+      }
+      let vendor_contract_person = $("#vendor_contract_person").val();
+      if(vendor_contract_person.length == 0){
+        alert("Vendor contract person can't be empty")
+        return;
+      }
+      let vendor_email_id = $("#vendor_email_id").val();
+      if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(vendor_email_id)))
+      {
+        alert("Please enter valid EmailID")
+        return
+      }
+      let vendor_remark = $("#vendor_remark").val();
+    
+
+      
       var data = new FormData();
       data.append('vendor_code', vendor_code)
       data.append("vendor_address", vendor_address)
@@ -491,7 +556,7 @@ $('.remove-preview').on('click', function() {
       data.append("vendor_email_id", vendor_email_id)
       data.append("vendor_remark", vendor_remark)
       data.append("vendor_name", vendor_name)
-      
+      data.append("vendor_region",vendor_region_name)
       $.ajax({
           type: "POST",
           enctype: "multipart/form-data",
@@ -501,10 +566,10 @@ $('.remove-preview').on('click', function() {
           data: data,
           url: '/master/insert/distvendor',
           success: function(response){
-            response = JSON.parse(response);
-            console.log(typeof(response))
+            // response = JSON.parse(response);
+            // console.log(typeof(response))
             // alert(response.message);
-            alert("Vendor registered successfully!");
+            alert(response["message"]);
           },
           complete: function(){
             $("#submit-btn").prop("disabled", false);

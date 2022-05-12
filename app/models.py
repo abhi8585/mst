@@ -82,6 +82,7 @@ class distributor(db.Model):
     contact_number = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(250), nullable=False)
     password = db.Column(db.String(250), nullable=False)
+    # vendor_code = db.Column(db.String(50))
 
 
 
@@ -99,6 +100,7 @@ class auditvendor(db.Model):
     contact_person = db.Column(db.String(50), nullable=False)
     contact_number = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(250), nullable=False)
+    region_name = db.Column(db.String(50))
     # password = db.Column(db.String(250), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())
@@ -126,6 +128,7 @@ class distvendor(db.Model):
     contact_person = db.Column(db.String(50), nullable=False)
     contact_number = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(250), nullable=False)
+    region_name = db.Column(db.String(50))
     # password = db.Column(db.String(250), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())
@@ -253,6 +256,7 @@ class transportvendor(db.Model):
     contact_person = db.Column(db.String(50), nullable=False)
     contact_number = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(250), nullable=False)
+    region_name = db.Column(db.String(50))
     # password = db.Column(db.String(250), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())
@@ -297,6 +301,7 @@ class depovendor(db.Model):
     contact_person = db.Column(db.String(50), nullable=False)
     contact_number = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(250), nullable=False)
+    region_name = db.Column(db.String(50))
     # password = db.Column(db.String(250), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())
@@ -399,6 +404,7 @@ class destructionvendor(db.Model):
     contact_person = db.Column(db.String(50), nullable=False)
     contact_number = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(250), nullable=False)
+    region_name = db.Column(db.String(50))
     # password = db.Column(db.String(250), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime())

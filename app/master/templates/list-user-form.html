@@ -26,12 +26,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 >Register User</h1>
+            <!-- <h1 >Register User</h1> -->
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Register User</li>
+              <!-- <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Register User</li> -->
             </ol>
           </div>
         </div>
@@ -47,7 +47,7 @@
               <div class="card-header">
                 <a class="btn btn-primary" href="{{url_for('master_blueprint.createuser')}}">Create User</a>
                 <div class="card-tools">
-                  <div class="input-group input-group-sm" style="width: 150px;">
+                  <!-- <div class="input-group input-group-sm" style="width: 150px;">
                     
                     <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
                     
@@ -56,7 +56,7 @@
                         <i class="fas fa-search"></i>
                       </button>
                     </div>
-                  </div>
+                  </div> -->
                 </div>
               </div>
               <!-- /.card-header -->
@@ -64,10 +64,10 @@
                 <table class="table table-head-fixed text-nowrap">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Title</th>
-                      <th>Email</th>
-                      <th>Role</th>
+                      <th>User Id</th>
+                      <th>UserName</th>
+                      <th>User Email</th>
+                      <th>User Role</th>
                       <!-- <th>Author</th> -->
                       
                     </tr>
@@ -76,8 +76,9 @@
                     {% for user in users %}
                       <tr>
                         <td>{{user.id}}</td>
-                        <td>{{user.name}}</a></td>
+                        <td>{{user.name.capitalize()}}</a></td>
                         <td>{{user.email}}</td>
+                        <td>{{user.role_name.capitalize()}}</td>
                         
                        
                       </tr>

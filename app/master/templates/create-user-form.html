@@ -113,12 +113,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Register User</h1>
+            <!-- <h1>Register User</h1> -->
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Register User/Edit</li>
+              <!-- <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Register User/Edit</li> -->
             </ol>
           </div>
         </div>
@@ -158,7 +158,7 @@
                       
                       {% for role in roles %}
                       
-                      <option selected="selected">{{role.name}}</option>
+                      <option selected="selected">{{role.name.capitalize()}}</option>
                     {% endfor %}
                       <!-- <option selected="selected">Choose Role</option> -->
                     </select>
@@ -395,6 +395,11 @@
         event.preventDefault();
         var user_name = $("#name").val();
         var user_email = $("#email").val();
+        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(user_email)))
+      {
+        alert("Please enter valid EmailID")
+        return
+      }
         // var user_password = $("#password").val();
         var user_role_name = document.getElementById("role");
         // alert(role_name.value)
@@ -409,12 +414,12 @@
           processData: false,
           contentType: false,
           cache: false,
-          data: data,
+          data: data, 
           url: '/master/insert/user',
           success: function(response){
             response = JSON.parse(response);
-            console.log(typeof(response))
-            alert(response.message);
+            // console.log(typeof(response))
+            alert(response["message"])
           },
           complete: function(){
             $("#submit-btn").prop("disabled", false);

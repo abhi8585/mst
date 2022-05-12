@@ -17,6 +17,7 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
   <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 {% endblock stylesheets %}
 
@@ -25,41 +26,27 @@
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <!-- <h1 class="m-0 text-dark">Dashboard v3</h1> -->
-          </div><!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <!-- <li class="breadcrumb-item active">Dashboard v3</li> -->
-            </ol>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
-    </div>
+
     <!-- /.content-header -->
 
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header border-0">
+            <div class="col-lg-6">
+                <div class="card">
+                  <div class="card-header border-0">
                     <div class="d-flex justify-content-between">
-                      <h3 class="card-title">Total Bags</h3>
+                      <h3 class="card-title">Audit in different regions</h3>
                       <!-- <a href="javascript:void(0);">View Report</a> -->
                       <span class="text-bold text-lg">{{pie_chart_bag_counts}}</span>
                     </div>
-                </div>
-                <div class="card-body">
+                  </div>
+                  <div class="card-body">
                     <div class="d-flex">
                         <p class="d-flex flex-column">
                         <!-- <span class="text-bold text-lg">1550</span> -->
-                        <span>Bags in different stages</span>
+                        <!-- <span>Bags in different stages</span> -->
                         </p>
                         <!-- <p class="ml-auto d-flex flex-column text-right">
                         <span class="text-success">
@@ -75,233 +62,288 @@
                     </div>
     
                   
-                </div>
-            </div>
-            <!-- /.card -->
-
-            <!-- card2 -->
-            <!-- <div class="card">
-               
-                <div class="card-body">
-                    <div class="d-flex">
-                        <p class="d-flex flex-column">
-                        
-                        <span>Bags marked deviated at different stages</span>
-                        </p>
-                     
-                    </div>
-             
-                    <div class="position-relative mb-4">
-                        <canvas id="bar-chart" width="500" height="400"></canvas>
-                    </div>
-    
-                  
-                </div>
-            </div> -->
-            <!-- card2 end -->
-
-            <div class="card">
-              <div class="card-header border-0">
-                <h3 class="card-title">Products</h3>
-                <div class="card-tools">
-                  <a href="#" class="btn btn-tool btn-sm">
-                    <i class="fas fa-download"></i>
-                  </a>
-                  <a href="#" class="btn btn-tool btn-sm">
-                    <i class="fas fa-bars"></i>
-                  </a>
-                </div>
+                  </div>
               </div>
-              <div class="card-body table-responsive p-0">
-                <table class="table table-striped table-valign-middle">
-                  <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Sales</th>
-                    <th>More</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr>
-                    <td>
-                      <img src="/static/assets/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2">
-                      Some Product
-                    </td>
-                    <td>$13 USD</td>
-                    <td>
-                      <small class="text-success mr-1">
-                        <i class="fas fa-arrow-up"></i>
-                        12%
-                      </small>
-                      12,000 Sold
-                    </td>
-                    <td>
-                      <a href="#" class="text-muted">
-                        <i class="fas fa-search"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img src="/static/assets/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2">
-                      Another Product
-                    </td>
-                    <td>$29 USD</td>
-                    <td>
-                      <small class="text-warning mr-1">
-                        <i class="fas fa-arrow-down"></i>
-                        0.5%
-                      </small>
-                      123,234 Sold
-                    </td>
-                    <td>
-                      <a href="#" class="text-muted">
-                        <i class="fas fa-search"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img src="/static/assets/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2">
-                      Amazing Product
-                    </td>
-                    <td>$1,230 USD</td>
-                    <td>
-                      <small class="text-danger mr-1">
-                        <i class="fas fa-arrow-down"></i>
-                        3%
-                      </small>
-                      198 Sold
-                    </td>
-                    <td>
-                      <a href="#" class="text-muted">
-                        <i class="fas fa-search"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img src="/static/assets/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2">
-                      Perfect Item
-                      <span class="badge bg-danger">NEW</span>
-                    </td>
-                    <td>$199 USD</td>
-                    <td>
-                      <small class="text-success mr-1">
-                        <i class="fas fa-arrow-up"></i>
-                        63%
-                      </small>
-                      87 Sold
-                    </td>
-                    <td>
-                      <a href="#" class="text-muted">
-                        <i class="fas fa-search"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <!-- /.card -->
-          </div>
-          <!-- /.col-md-6 -->
+          </div> 
           <div class="col-lg-6">
             <div class="card">
-                <!-- <div class="card-header border-0">
-                    <div class="d-flex justify-content-between">
-                      <h3 class="card-title">Total Deviated Bags</h3>
-                    
-                      <span class="text-bold text-lg"></span>
-                    </div>
-                </div> -->
+              <!-- <div class="card-header border-0">
+                  <div class="d-flex justify-content-between">
+                    <h3 class="card-title">Total Deviated Bags</h3>
+                  
+                    <span class="text-bold text-lg"></span>
+                  </div>
+              </div> -->
                 <div class="card-body">
                     <div class="d-flex">
-                        <p class="d-flex flex-column">
-                        <!-- <span class="text-bold text-lg">1550</span> -->
-                        <span>Bags marked deviated at different stages</span>
-                        </p>
-                        <!-- <p class="ml-auto d-flex flex-column text-right">
-                        <span class="text-success">
-                            <i class="fas fa-arrow-up"></i> 12.5%
-                        </span>
-                        <span class="text-muted">Since last week</span>fE
-                        </p> -->
+                      <p class="d-flex flex-column">
+                      <!-- <span class="text-bold text-lg">1550</span> -->
+                      <span>Bags marked deviated at different stages</span>
+                      </p>
+                      <!-- <p class="ml-auto d-flex flex-column text-right">
+                      <span class="text-success">
+                          <i class="fas fa-arrow-up"></i> 12.5%
+                      </span>
+                      <span class="text-muted">Since last week</span>fE
+                      </p> -->
                     </div>
-                    <!-- /.d-flex -->
+                  <!-- /.d-flex -->
 
                     <div class="position-relative mb-4">
-                        <canvas id="bar-chart" width="500" height="400"></canvas>
+                      <canvas id="bar-chart" width="500" height="400"></canvas>
                     </div>
+  
+                
+                </div>
+        </div> 
+      </div>
+    </div>
+  </div>
+      
+          <div class="content">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="card">
+                    <div class="card-header border-0">
+                      <h3 class="card-title">Audit at Distributors</h3>
+                      <div class="card-tools">
+                        <h6 class="card-title">Region</h6>
+                        <a class="btn btn-tool btn-sm">
+                          <select class="form-control region-select select2" id="role" style="width: 100%;" value="">
+                            
+                          
+                
+                            <option selected="selected">South</option>
+                            <option selected="selected">East</option>
+                            <option selected="selected">North</option>
+                            <option selected="selected">West</option>
+                          
+                            <!-- <option selected="selected">Choose Role</option> -->
+                          </select>
+                        </a>
+                        <a href="#" class="btn btn-tool btn-sm">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                      </div>
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                      <table class="table table-striped table-valign-middle">
+                        <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Audits</th>
+                          <th>Audited Bags</th>
+                          
+                        </tr>
+                        </thead>
+                        <tbody class="dist-table">
+      
+                          {% for dist_data in dist_table_data %}
+                          
+                          <tr>
+                            <td>
+                              <!-- <img src="/static/assets/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
+                              {{dist_data.name}}
+                            </td>
+                            <td>{{dist_data.total_audits}}</td>
+                            <td>
+                             
+                              {{dist_data.audited_bags}}
+                            </td>
+                           
+                          </tr>
+                          
+                          {% endfor %}
+                        
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="card">
+                  <div class="card-header border-0">
+                    <h3 class="card-title">Centeral Warehouse</h3>
+                    <div class="card-tools">
+                      <h6 class="card-title">Region</h6>
+                      <a class="btn btn-tool btn-sm">
+                        <select class="form-control depo-select select2" id="depo-name" style="width: 100%;" value="">
+                          
+                        
+              
+                          <option selected="selected">South</option>
+                          <option selected="selected">East</option>
+                          <option selected="selected">North</option>
+                          <option selected="selected">West</option>
+                        
+                          <!-- <option selected="selected">Choose Role</option> -->
+                        </select>
+                      </a>
+                      <a href="#" class="btn btn-tool btn-sm">
+                        <i class="fas fa-bars"></i>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="card-body table-responsive p-0">
+                    <table class="table table-striped table-valign-middle">
+                      <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Collected Bags</th>
+                        <th>Dispatched Bags</th>
+                      </tr>
+                      </thead>
+                      <tbody class="depo-table">
     
+                        {% for depo_data in depo_table_data %}
+                        
+                        <tr>
+                          <td>
+                            <!-- <img src="/static/assets/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
+                            {{depo_data.name}}
+                          </td>
+                          <td>{{depo_data.collected_bags}}</td>
+                          <td>
+                           
+                            {{depo_data.dispatched_bags}}
+                          </td>
+                          
+                        </tr>
+                        
+                        {% endfor %}
+                      
+                      </tbody>
+                    </table>
+                  </div>
                   
                 </div>
-            </div>
-            <!-- /.card -->
-
-            <div class="card">
-              <div class="card-header border-0">
-                <h3 class="card-title">MST Overview</h3>
-                <div class="card-tools">
-                  <a href="#" class="btn btn-sm btn-tool">
-                    <i class="fas fa-download"></i>
-                  </a>
-                  <a href="#" class="btn btn-sm btn-tool">
-                    <i class="fas fa-bars"></i>
-                  </a>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
-                  <p class="text-success text-xl">
-                    <i class="ion ion-ios-refresh-empty"></i>
-                  </p>
-                  <p class="d-flex flex-column text-right">
-                    <span class="font-weight-bold">
-                      <i class="ion ion-android-arrow-up text-success"></i> 70%
-                    </span>
-                    <span class="text-muted">Pickup RATE</span>
-                  </p>
-                </div>
-                <!-- /.d-flex -->
-                <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
-                  <p class="text-warning text-xl">
-                    <i class="ion ion-ios-cart-outline"></i>
-                  </p>
-                  <p class="d-flex flex-column text-right">
-                    <span class="font-weight-bold">
-                      <i class="ion ion-android-arrow-up text-warning"></i> 50%
-                    </span>
-                    <span class="text-muted">Depo Submission RATE</span>
-                  </p>
-                </div>
-                <!-- /.d-flex -->
-                <div class="d-flex justify-content-between align-items-center mb-0">
-                  <p class="text-danger text-xl">
-                    <i class="ion ion-ios-people-outline"></i>
-                  </p>
-                  <p class="d-flex flex-column text-right">
-                    <span class="font-weight-bold">
-                      <i class="ion ion-android-arrow-down text-danger"></i> 30%
-                    </span>
-                    <span class="text-muted">Depo Pickup RATE</span>
-                  </p>
-                </div>
-                
-                <!-- /.d-flex -->
               </div>
             </div>
           </div>
-          <!-- /.col-md-6 -->
-        </div>
-        <!-- /.row -->
-      </div>
-      <!-- /.container-fluid -->
-    </div>
-    <!-- /.content -->
-  </div>
-  <!-- /.content-wrapper -->
+
+          <div class="content">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="card">
+                    <div class="card-header border-0">
+                      <h3 class="card-title">Pickup at Distributors</h3>
+                      <div class="card-tools">
+                        <h6 class="card-title">Region</h6>
+                        <a class="btn btn-tool btn-sm">
+                          <select class="form-control pickup-table select2" id="pickup-table" style="width: 100%;" value="">
+                            
+                          
+                
+                            <option selected="selected">South</option>
+                            <option selected="selected">East</option>
+                            <option selected="selected">North</option>
+                            <option selected="selected">West</option>
+                          
+                            <!-- <option selected="selected">Choose Role</option> -->
+                          </select>
+                        </a>
+                        <a href="#" class="btn btn-tool btn-sm">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                      </div>
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                      <table class="table table-striped table-valign-middle">
+                        <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Total Pickup</th>
+                          <th>Picked Bags</th>
+                        </tr>
+                        </thead>
+                        <tbody class="trans-table">
+      
+                          {% for dist_data in pickup_table_data %}
+                          
+                          <tr>
+                            <td>
+                              <!-- <img src="/static/assets/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
+                              {{dist_data.name}}
+                            </td>
+                            <td>{{dist_data.total_pickup}}</td>
+                            <td>
+                             
+                              {{dist_data.picked_bags}}
+                            </td>
+                           
+                          </tr>
+                          
+                          {% endfor %}
+                        
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="card">
+                  <div class="card-header border-0">
+                    <h3 class="card-title">Destruction centre</h3>
+                    
+                    <div class="card-tools">
+                      <h6 class="card-title">Region</h6>
+                      <a class="btn btn-tool btn-sm">
+                        <select class="form-control depo-select select2" id="depo-name" style="width: 100%;" value="">
+                          
+                        
+              
+                          <option selected="selected">South</option>
+                          <option selected="selected">East</option>
+                          <option selected="selected">North</option>
+                          <option selected="selected">West</option>
+                        
+                          <!-- <option selected="selected">Choose Role</option> -->
+                        </select>
+                      </a>
+                      <a href="#" class="btn btn-tool btn-sm">
+                        <i class="fas fa-bars"></i>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="card-body table-responsive p-0">
+                    <table class="table table-striped table-valign-middle">
+                      <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Collected Bags</th>
+                        <th>Picked Bags</th>
+                      </tr>
+                      </thead>
+                      <tbody class="dest-table">
+    
+                        {% for depo_data in depo_table_data %}
+                        
+                        <tr>
+                          <td>
+                            <!-- <img src="/static/assets/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
+                            {{depo_data.name}}
+                          </td>
+                          <td>{{depo_data.collected_bags}}</td>
+                          <td>
+                           
+                            {{depo_data.dispatched_bags}}
+                          </td>
+                          
+                        </tr>
+                        
+                        {% endfor %}
+                      
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+            
 
   <script>
     // bar chart data
@@ -366,6 +408,169 @@
 
   </script>
 
+
+<!-- code for distributor data regional wise -->
+
+<script>
+  var data = [
+    {
+      'region' : 'north',
+      'data' : [
+        {
+          'name' : 'xyz distributor',
+          'total_audits' : '10',
+          'total_audited_bags' : '20',
+          'total_picked_bags' : '15'
+        }
+      ]
+    }
+  ]
+
+  $(document).on('change','.region-select',function(){
+    var region_name = document.getElementById("role").value;
+    var data = new FormData();
+    data.append("region_name",region_name)
+    $.ajax({
+          type: "POST",
+          enctype: "multipart/form-data",
+          processData: false,
+          contentType: false,
+          cache: false,
+          data: data,
+          url: '/master/get_dist_data',
+          success: function(response){
+            var dist_response = response
+            if(dist_response['data'].length == 0){
+              alert('No data for selected region')
+              
+            }
+            $('.dist-table').html('')
+            console.log(dist_response)
+            for (let i = 0; i < dist_response['data'].length; i++) {
+              console.log(dist_response['data'][i])
+              var temp_html = $(" <tr>\
+                  <td>\
+                "+dist_response['data'][i]['name']+" \
+                  </td>\
+                  <td>"+dist_response['data'][i]['total_audits']+" </td>\
+                  <td>"+dist_response['data'][i]['audited_bags']+" </td>\
+              </tr>")
+              $('.dist-table').append(temp_html)
+console.log(temp_html)
+            }
+
+            // alert(response.message);
+          },
+          complete: function(){
+            // alert("ajax completed")
+          }
+            });
+  });
+
+
+// code for depo table dynamic
+
+
+$(document).on('change','.depo-select',function(){
+    var region_name = document.getElementById("depo-name").value;
+    var data = new FormData();
+    data.append("region_name",region_name)
+    $.ajax({
+          type: "POST",
+          enctype: "multipart/form-data",
+          processData: false,
+          contentType: false,
+          cache: false,
+          data: data,
+          url: '/master/get_depo_data',
+          success: function(response){
+            var dist_response = response
+            console.log(dist_response)
+            if(dist_response['data'].length == 0){
+              alert('No data for selected region')
+              
+            }
+            $('.depo-table').html('')
+            console.log(dist_response)
+            for (let i = 0; i < dist_response['data'].length; i++) {
+              console.log(dist_response['data'][i])
+              var temp_html = $(" <tr>\
+                  <td>\
+                "+dist_response['data'][i]['name']+" \
+                  </td>\
+                  <td>"+dist_response['data'][i]['collected_bags']+" </td>\
+                  <td>"+dist_response['data'][i]['dispatched_bags']+" </td> \
+              </tr>")
+              $('.depo-table').append(temp_html)
+          console.log(temp_html)
+            }
+
+            // alert(response.message);
+          },
+          complete: function(){
+            // alert("ajax completed")
+          }
+            });
+  });
+
+
+// code for creating pickup table dynamic
+
+
+$(document).on('change','.pickup-table',function(){
+    var region_name = document.getElementById("pickup-table").value;
+    var data = new FormData();
+    data.append("region_name",region_name)
+    $.ajax({
+          type: "POST",
+          enctype: "multipart/form-data",
+          processData: false,
+          contentType: false,
+          cache: false,
+          data: data,
+          url: '/master/get_pickup_data',
+          success: function(response){
+            var dist_response = response
+            console.log(dist_response)
+            if(dist_response['data'].length == 0){
+              alert('No data for selected region')
+              
+            }
+            $('.trans-table').html('')
+            console.log(dist_response)
+            for (let i = 0; i < dist_response['data'].length; i++) {
+              console.log(dist_response['data'][i])
+              var temp_html = $(" <tr>\
+                  <td>\
+                "+dist_response['data'][i]['name']+" \
+                  </td>\
+                  <td>"+dist_response['data'][i]['total_pickup']+" </td>\
+                  <td>"+dist_response['data'][i]['picked_bags']+" </td> \
+              </tr>")
+              $('.trans-table').append(temp_html)
+          console.log(temp_html)
+            }
+
+            // alert(response.message);
+          },
+          complete: function(){
+            // alert("ajax completed")
+          }
+            });
+  });
+
+
+
+
+//   $('.region-select').on('change', function() {
+//     alert(this.value)
+// })
+
+// $("select.country").change(function(){
+//   var selectedCountry = $(this).children("option:selected").val();
+//   alert("You have selected the country - " + selectedCountry);
+// });
+</script>
 
 {% endblock content %}
 

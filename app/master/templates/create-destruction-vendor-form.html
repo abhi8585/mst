@@ -120,7 +120,7 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <!-- <h1>Create Auditor</h1> -->
+          <!-- <h1>Create Depo Vendor</h1> -->
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
@@ -147,7 +147,7 @@
           <!-- general form elements -->
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title">Register new Auditor</h3>
+              <h3 class="card-title">Register new Centre</h3>
             </div>
             <!-- /.card-header -->
             <!-- form start -->
@@ -454,7 +454,23 @@ $('.remove-preview').on('click', function() {
       }
     });
 
+    // $(document).ready(function(){
+    //   console.log('ready');
+    // $.ajax({
+    //   'url': '/pack/get/blogcategory',
+    //   'method': 'GET',
+    //   'success': function(res){
+    //     res = JSON.parse(res);
+    //     console.log(res);
+    //     res.categories.map((category, index) => {
+    //       $("#category").append(`<option value='${category['id']}'>${category['name']}</option>`);
+    //     })
 
+    //     {% if enquiry_detail and enquiry_detail.category %}
+    //       $("#category").select2().val({{enquiry_detail.category}}).trigger("change");
+    //     {% endif %}
+    //   }
+    // })});
 
 
     // registering new audit vendor
@@ -548,11 +564,12 @@ $('.remove-preview').on('click', function() {
           contentType: false,
           cache: false,
           data: data,
-          url: '/master/insert/auditvendor',
+          url: '/master/insert/destruction',
           success: function(response){
-            // var response = JSON.parse(response);
+            // response = JSON.parse(response);
             // console.log(typeof(response))
             alert(response["message"]);
+            // alert("Vendor registered successfully!");
           },
           complete: function(){
             $("#submit-btn").prop("disabled", false);

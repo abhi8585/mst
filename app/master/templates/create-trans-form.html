@@ -419,9 +419,9 @@
           data: data,
           url: '/master/map/transporter',
           success: function(response){
-            response = JSON.parse(response);
-            console.log(typeof(response))
-            alert(response.message);
+            // response = JSON.parse(response);
+            // console.log(typeof(response))
+            alert(response["message"]);
           },
           complete: function(){
             $("#submit-btn").prop("disabled", false);

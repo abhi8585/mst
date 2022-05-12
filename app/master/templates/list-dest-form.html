@@ -26,12 +26,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <!-- <h4><u>Roles</u></h4> -->
+            <!-- <h1>Depo Master</h1> -->
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <!-- <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Enquiries</li> -->
+              <li class="breadcrumb-item active">Depo Master</li> -->
             </ol>
           </div>
         </div>
@@ -45,7 +45,7 @@
           <div class="col-12">
             <div class="card">
               <div class="card-header">
-                <a class="btn btn-primary" href="{{url_for('master_blueprint.createrole')}}">New Role</a>
+                <a class="btn btn-primary" href="{{url_for('master_blueprint.createdestmaster')}}">Centre Master</a>
                 <div class="card-tools">
                   <!-- <div class="input-group input-group-sm" style="width: 150px;">
                     
@@ -64,18 +64,18 @@
                 <table class="table table-head-fixed text-nowrap">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Role Name</th>
+                      <th>Centre Master</th>
+                      <th>Destruction Centre</th>
                       <!-- <th>CREATED AT</th> -->
                     
                       
                     </tr>
                   </thead>
                   <tbody>
-                    {% for role in roles %}
+                    {% for auditor in auditor_data %}
                       <tr>
-                        <td><a href="">{{role.id}}</a></td>
-                        <td><a href="">{{role.name}}</a></td>
+                        <td><a href="">{{auditor.user_name}}</a></td>
+                        <td><a href="">{{auditor.vendor_name}}</a></td>
                         
                       </tr>
                     {% endfor %}
