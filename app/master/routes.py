@@ -18,7 +18,7 @@ import os
 from app.base.util import hash_pass
 from app.base.models import User
 # from flask_restful import Resource, Api
-from app.models import depovendor, depotomaster, depotopicker, depoinventory, pickup, destructiontomaster
+from app.models import depovendor, depotomaster, depotopicker, depoinventory, pickup, destructiontomaster, destructioninventory
 from sqlalchemy import and_
 
 
@@ -706,3 +706,21 @@ def get_pickup_data():
         temp["picked_bags"] = db.session.query(disttobag).filter(and_(disttobag.dist_id==dist.id, disttobag.status=="picked")).count()
         pickup_table_data.append(temp)
     return jsonify(dict(data=pickup_table_data))
+
+
+# helper function for regional destruction data
+
+@blueprint.route('/get_dest_data', methods=["POST"])
+def get_dest_data():
+    region_name = request.form['region_name']
+    dest_data = destructionvendor.query.filter_by(region_name=region_name).all()
+    dest_table_data = []
+    for dest in dest_data:
+        temp = {}
+        temp['name'] = dest.vendor_name
+        temp["collected_bags"] = db.session.query(destructioninventory).filter(and_(destructioninventory.status=="received",destructioninventory.destruction_id==dest.id)).count()
+        dest_table_data.append(temp)
+    return jsonify(dict(data=dest_table_data))
+
+
+    

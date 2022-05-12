@@ -9,7 +9,7 @@ from flask import jsonify, render_template, redirect, url_for
 from flask_login import login_required, current_user
 from app import login_manager
 from jinja2 import TemplateNotFound
-from app.models import depoinventory, disttobag, pickup, userinfo, usertorole, role
+from app.models import depoinventory, destructioninventory, destructionvendor, disttobag, pickup, userinfo, usertorole, role
 from app.models import depovendor, depotomaster, depotopicker, bag, deviateddepobag, deviateddestructionbag,deviateddepopickbag
 from app.models import deviatedbag, role, transportvendor, userinfo, usertorole, auditvendor, auditortovendor, distvendor, disttovendor, sku, transportvendor, transtovendor, audit
 from app import db
@@ -38,7 +38,17 @@ def get_bag_count():
 
 # helper function for regional distributor data
 
-
+def get_audit_region():
+    audit_count = []
+    audit_region = ['west','east','north','south']
+    for region in audit_region:
+        region_count = 0
+        dist_data = distvendor.query.filter_by(region_name=region).all()
+        for dist in dist_data:
+            audit_count_obj = audit.query.filter_by(dist_id=dist.id).count()
+            region_count += audit_count_obj
+        audit_count.append(region_count)
+    return audit_count
 
 
 
@@ -90,15 +100,28 @@ def index():
         pickup_table_data.append(temp)
 
     # ----
+
+    # arranging data for destruction centre region wise
+    
+    dest_data = destructionvendor.query.filter_by(region_name='west').all()
+    dest_table_data = []
+    for dest in dest_data:
+        temp = {}
+        temp['name'] = dest.vendor_name
+        temp["collected_bags"] = db.session.query(destructioninventory).filter(and_(destructioninventory.status=="received",destructioninventory.destruction_id==dest.id)).count()
+        dest_table_data.append(temp)
+    
+    # ----
     bar_values= get_deviated_bag_count()
     total_deviated_bag_count = sum(bar_values)
-    pie_chart_labels = ['East', 'West', 'South', 'North']
-    pie_chart_bag_counts = get_bag_count()
+    pie_chart_labels = ['West', 'East', 'South', 'North']
+    pie_chart_bag_counts = get_audit_region()
+    # raise ValueError(pie_chart_bag_counts)
     total_pie_chart_bag_counts = sum(pie_chart_bag_counts)
     return render_template('general-analysis.html', title='Bitcoin Monthly Price in USD', max=500, set=zip(pie_chart_bag_counts, pie_chart_labels, colors)
             ,pie_chart_bag_counts=total_pie_chart_bag_counts,bar_labels=bar_labels,bar_values=bar_values,
             total_deviated_bag_count=total_deviated_bag_count, dist_table_data=dist_table_data,
-            depo_table_data=depo_table_data, pickup_table_data=pickup_table_data)
+            depo_table_data=depo_table_data, pickup_table_data=pickup_table_data,dest_table_data=dest_table_data)
 
 
 

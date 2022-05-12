@@ -37,7 +37,7 @@
                 <div class="card">
                   <div class="card-header border-0">
                     <div class="d-flex justify-content-between">
-                      <h3 class="card-title">Audit in different regions</h3>
+                      <h3 class="card-title"><strong>Audit in different regions</strong></h3>
                       <!-- <a href="javascript:void(0);">View Report</a> -->
                       <span class="text-bold text-lg">{{pie_chart_bag_counts}}</span>
                     </div>
@@ -78,7 +78,7 @@
                     <div class="d-flex">
                       <p class="d-flex flex-column">
                       <!-- <span class="text-bold text-lg">1550</span> -->
-                      <span>Bags marked deviated at different stages</span>
+                      <span><strong>Bags marked deviated at different stages</strong></span>
                       </p>
                       <!-- <p class="ml-auto d-flex flex-column text-right">
                       <span class="text-success">
@@ -106,7 +106,7 @@
                 <div class="col-lg-6">
                   <div class="card">
                     <div class="card-header border-0">
-                      <h3 class="card-title">Audit at Distributors</h3>
+                      <h3 class="card-title"><strong>Audit at Distributors</strong></h3>
                       <div class="card-tools">
                         <h6 class="card-title">Region</h6>
                         <a class="btn btn-tool btn-sm">
@@ -164,7 +164,7 @@
               <div class="col-lg-6">
                 <div class="card">
                   <div class="card-header border-0">
-                    <h3 class="card-title">Centeral Warehouse</h3>
+                    <h3 class="card-title"><strong>Centeral Warehouse</strong></h3>
                     <div class="card-tools">
                       <h6 class="card-title">Region</h6>
                       <a class="btn btn-tool btn-sm">
@@ -228,7 +228,7 @@
                 <div class="col-lg-6">
                   <div class="card">
                     <div class="card-header border-0">
-                      <h3 class="card-title">Pickup at Distributors</h3>
+                      <h3 class="card-title"><strong>Pickup at Distributors</strong></h3>
                       <div class="card-tools">
                         <h6 class="card-title">Region</h6>
                         <a class="btn btn-tool btn-sm">
@@ -285,12 +285,12 @@
               <div class="col-lg-6">
                 <div class="card">
                   <div class="card-header border-0">
-                    <h3 class="card-title">Destruction centre</h3>
+                    <h3 class="card-title"><strong>Destruction centre</strong></h3>
                     
                     <div class="card-tools">
                       <h6 class="card-title">Region</h6>
                       <a class="btn btn-tool btn-sm">
-                        <select class="form-control depo-select select2" id="depo-name" style="width: 100%;" value="">
+                        <select class="form-control dest-select select2" id="dest-table" style="width: 100%;" value="">
                           
                         
               
@@ -313,12 +313,12 @@
                       <tr>
                         <th>Name</th>
                         <th>Collected Bags</th>
-                        <th>Picked Bags</th>
+                      
                       </tr>
                       </thead>
-                      <tbody class="dest-table">
+                      <tbody class="destruction-table">
     
-                        {% for depo_data in depo_table_data %}
+                        {% for depo_data in dest_table_data %}
                         
                         <tr>
                           <td>
@@ -326,10 +326,7 @@
                             {{depo_data.name}}
                           </td>
                           <td>{{depo_data.collected_bags}}</td>
-                          <td>
-                           
-                            {{depo_data.dispatched_bags}}
-                          </td>
+                          
                           
                         </tr>
                         
@@ -557,6 +554,57 @@ $(document).on('change','.pickup-table',function(){
             // alert("ajax completed")
           }
             });
+
+
+
+  });
+
+
+  // code for creating destrucntion table dynamic
+
+
+  $(document).on('change','.dest-select',function(){
+    var region_name = document.getElementById("dest-table").value;
+    var data = new FormData();
+    data.append("region_name",region_name)
+    $.ajax({
+          type: "POST",
+          enctype: "multipart/form-data",
+          processData: false,
+          contentType: false,
+          cache: false,
+          data: data,
+          url: '/master/get_dest_data',
+          success: function(response){
+            var dist_response = response
+            console.log(dist_response)
+            if(dist_response['data'].length == 0){
+              alert('No data for selected region')
+              
+            }
+            $('.destruction-table').html('')
+            console.log(dist_response)
+            for (let i = 0; i < dist_response['data'].length; i++) {
+              console.log(dist_response['data'][i])
+              var temp_html = $(" <tr>\
+                  <td>\
+                "+dist_response['data'][i]['name']+" \
+                  </td>\
+                  <td>"+dist_response['data'][i]['collected_bags']+" </td>\
+              </tr>")
+              $('.destruction-table').append(temp_html)
+          console.log(temp_html)
+            }
+
+            // alert(response.message);
+          },
+          complete: function(){
+            // alert("ajax completed")
+          }
+            });
+
+
+
   });
 
 
