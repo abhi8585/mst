@@ -822,3 +822,5 @@ def submit_direct_pickup():
         return jsonify(status=200,message="{0}, Bags successfully submitted!".format(depo_master_name.capitalize()))
     else:
         return jsonify(status=500,message="Bags are not picked yet!") 
+
+

@@ -24,7 +24,7 @@ def register_extensions(app):
     mail.init_app(app)
 
 def register_blueprints(app):
-    for module_name in ('base', 'home', 'master','Users','web','audit','transporter','depo','picker','services','destruction','analysis','testing'):
+    for module_name in ('base', 'home', 'master','Users','web','audit','transporter','depo','picker','services','destruction','analysis','testing','delivery'):
         module = import_module('app.{}.routes'.format(module_name))
         app.register_blueprint(module.blueprint)
 
